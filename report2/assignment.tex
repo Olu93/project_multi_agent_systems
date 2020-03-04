@@ -1,0 +1,132 @@
+%%% Template originaly created by Karol Kozioł (mail@karol-koziol.net) and modified for ShareLaTeX use
+
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+\renewcommand\familydefault{\sfdefault}
+\usepackage{tgheros}
+% \usepackage[defaultmono]{droidmono}
+
+\usepackage{amsmath,amssymb,amsthm,textcomp}
+\usepackage{enumerate}
+\usepackage{multicol}
+\usepackage{tikz}
+
+\usepackage{geometry}
+\geometry{left=15mm,right=15mm,%
+bindingoffset=5mm, top=15mm, bottom=25mm}
+
+
+\linespread{1.3}
+
+\newcommand{\linia}{\rule{\linewidth}{0.5pt}}
+
+% custom theorems if needed
+\newtheoremstyle{mytheor}
+{1ex}{1ex}{\normalfont}{0pt}{\scshape}{.}{1ex}
+{{\thmname{#1 }}{\thmnumber{#2}}{\thmnote{ (#3)}}}
+
+\theoremstyle{mytheor}
+\newtheorem{defi}{Definition}
+
+% my own titles
+\makeatletter
+\renewcommand{\maketitle}{
+\begin{center}
+\vspace{2ex}
+{\huge \textsc{\@title}}
+\vspace{1ex}
+\\
+\begin{center}
+\@author
+\end{center}
+\end{center}
+}
+\makeatother
+%%%
+
+% custom footers and headers
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{}
+\chead{}
+\rhead{}
+% \lfoot{Assignment \textnumero{} 1}
+% \cfoot{}
+\cfoot{Page \thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+%
+
+% code listing settings
+\usepackage{listings}
+\lstset{
+language=Python,
+basicstyle=\ttfamily\small,
+aboveskip={1.0\baselineskip},
+belowskip={1.0\baselineskip},
+columns=fixed,
+extendedchars=true,
+breaklines=true,
+tabsize=4,
+prebreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+frame=lines,
+showtabs=false,
+showspaces=false,
+showstringspaces=false,
+keywordstyle=\color[rgb]{0.627,0.126,0.941},
+commentstyle=\color[rgb]{0.133,0.545,0.133},
+stringstyle=\color[rgb]{01,0,0},
+numbers=left,
+numberstyle=\small,
+stepnumber=1,
+numbersep=10pt,
+captionpos=t,
+escapeinside={\%*}{*)}
+}
+
+%%%----------%%%----------%%%----------%%%----------%%%
+\frenchspacing
+%%% ---- CUSTOM SETTINGS BY OLU --- %%%
+\setlength\parindent{0pt}
+
+\begin{document}
+
+\title{Multi-Agent Systems Report 2}
+
+\author{Samuel Meyer (5648122) \and Sorin Dragan (6884393) \and Markos Polos (6943721) \and Olusanmi Hundogan (6883273)}
+
+\maketitle
+
+% \bibliographystyle{plain}
+% {\footnotesize\bibliography{references}}
+\section{PEAS}
+Create a PEAS description of the negotiating agent that you need to design and implement in this assignment. 
+\subsection{Performance measure}
+We propose an external performance metric that should not be dependent on the internal workings of the agent, as it will provide an objective evaluation method. One primary performance metric would be comparing the utility of the agent with that of the RandomBidder and seeing if it outperforms it. Considering a random approach is one of the most basic strategies, the designed agent should at the very least perform better than such a strategy. After this step, we propose a general performing metric based on the general ranking position of our agent in a tournament in which all other most popular agents, \textcolor{red}{which are described in paper X or available in Genius}, will compete. 
+The ranking will be based on the \textcolor{red}{average/sum/wins} against all other competing agents.
+We also consider having a performance metric per component, for example, the Acceptance Strategy component or the Bidding Strategy component. We will manage that by comparing the mean utility gained using our strategy with the mean utility gained using already existing ones in Genius. We will do this comparison during negotiations with several other agents. Finally, we are going to pick the components that result in the highest mean utility.
+
+\subsection{Environment} %IF SPACE LEFT OVER IN THE END, MAKE THIS SECTION INTO BULLET POINTS
+In the following we will discuss the agent environment per several characteristics defined by Russel and Norvig.\textcolor{red}{[REF]}. 
+
+\textbf{Fully vs Partially observable:} The first characteristic to describe the environment refers to the observability (partial or full) of the environment. Our agent will not now the exact preferences of other agents. Because agents are not regarded as part of the environment, all the useful information is available to the agent. Therefore, we can refer to the environment as fully observable.
+\textbf{Single- vs Multiagent:} Every negotiation setting will require at least two agents interacting with each other. As our task environment requires negotiations, it must be regarded as a multiagent setting.
+\textcolor{red}{\textbf{Competitive vs Cooperative}
+-NOTE: Definitely non-cooperative. But, Purely competitive or Competitive & Cooperation to reach best mutual agreement}
+\textbf{Deterministic vs Stochastic:}
+As established above, the only uncertainty that arises from the environment comes from the other agents with which we interact. As they are not part of the environment, it can be assumed to be deterministic. 
+\textbf{Episodic vs. Sequential:} This environment not only provides information of the current situation but also bidding behaviors of the past. As an agent can form a bidding strategy based on the bidding history, the environment can be determined as sequential. 
+\textbf{Static vs. Dynamic:} The environment changes only when an agent places a bid. Hence, the environment is static.
+\textbf{Discrete vs. Continuous:} This characteristic depends on how the bids will be placed at every negotiation setting. If the bids are placed in rounds, the environment will be discrete and if they are placed in real time the environment will be continuous.
+\textbf{}
+\subsection{Actuators}
+The agent can either agree on a bid or make a counteroffer. Therefore, the only two possible actions are \textbf{bid} and \textbf{accept}.
+
+\subsection{Sensors}
+The agent can perceive the \textbf{bids} of the other agents at each step, as we established that the game is played sequentially. We further assume that the sensors are going to give us perfectly correct information about the bids. 
+\end{document}
