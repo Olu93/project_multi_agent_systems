@@ -1,4 +1,3 @@
 {
-    "java.trace.server": "verbose",
-    "java.home": "C:\\Program Files\\Java\\jdk-8"
+    "java.trace.server": "verbose"
 }
