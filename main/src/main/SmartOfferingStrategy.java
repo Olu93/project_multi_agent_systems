@@ -12,8 +12,10 @@ import genius.core.boaframework.OfferingStrategy;
 public class SmartOfferingStrategy extends OfferingStrategy {
 	private Bid opponentBestBid;
 
-    public Bid getOpponentBidPrediction() {
-		return negotiationSession.getDomain().getRandomBid(new Random());
+    public BidDetails getOpponentBidPrediction() {
+        Bid predictedBid = negotiationSession.getDomain().getRandomBid(new Random());
+        Double utility = negotiationSession.getUtilitySpace().getUtility(predictedBid);
+		return new BidDetails(predictedBid, utility);
 	}
 	
 	public void setOpponentBestBid(Bid bestBid) {
@@ -28,8 +30,7 @@ public class SmartOfferingStrategy extends OfferingStrategy {
     
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
-        return "SmartOfferingStrategy";
+        return SmartComponentNames.SMART_BIDDING_STRATEGY.name();
     }
 
     @Override
