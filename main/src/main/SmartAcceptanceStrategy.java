@@ -17,7 +17,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 
 	@Override
 	public Actions determineAcceptability() {
-		final Boolean isSmartOffering = SmartComponentNames.SMART_BIDDING_STRATEGY.name().equalsIgnoreCase(offeringStrategy.getName());
+		final Boolean isSmartOffering = SmartComponentNames.SMART_BIDDING_STRATEGY.toString().equalsIgnoreCase(offeringStrategy.getName());
 		final UserModel userModel = negotiationSession.getUserModel();
 		final boolean isUncertain = userModel == null;
 		final BidDetails agentNextBid = offeringStrategy.getNextBid();
@@ -68,7 +68,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return "Smart Acceptance Strategy: This strategy employs a number of smart heuristics for acceptance";
+		return SmartComponentNames.SMART_ACCEPTANCE_STRATEGY.toString();
 	}
 
 }

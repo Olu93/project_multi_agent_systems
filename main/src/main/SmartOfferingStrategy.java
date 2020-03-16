@@ -30,7 +30,7 @@ public class SmartOfferingStrategy extends OfferingStrategy {
     
     @Override
     public String getName() {
-        return SmartComponentNames.SMART_BIDDING_STRATEGY.name();
+        return SmartComponentNames.SMART_BIDDING_STRATEGY.toString();
     }
 
     @Override

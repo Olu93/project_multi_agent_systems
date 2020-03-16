@@ -13,7 +13,7 @@ public class SmartOpponentModel extends OpponentModel {
 
 	@Override
 	public String getName() {
-		return "SmartOpponentModel";
+		return SmartComponentNames.SMART_OPPONENT_MODEL.toString();
 	}
 
 }
