@@ -1,4 +1,0 @@
-sep=;
-Run time (s);Round;Exception;deadline;Agreement;Discounted;#agreeing;min.util.;max.util.;Dist. to Pareto;Dist. to Nash;Social Welfare;Agent 1;Agent 2;Utility 1;Utility 2;Disc. Util. 1;Disc. Util. 2;Perceived. Util. 1;Perceived. Util. 2;Profile 1;Profile 2
-;3;Session genius.core.session.Session@7d20d0b failed: Failed to execute protocol: Execution failed of SmartAgent@0:java.lang.NullPointerException: null:[/home/olu/workspace/project_multi_agent_systems/main/bin/main/SmartAgent.class, agents.anac.y2015.pokerface.PokerFace];60rounds;No;;0;;;;;;SmartAgent;PokerFace;0.0;0.0;0.0;0.0;;;party2_utility;party1_utility_u10
-0.030;2;;60rounds;Yes;No;2;0.61411;0.85959;0.14730;0.18411;1.47370;PokerFace@2;SmartAgent@3;0.8595877376398615;0.6141141911382005;0.8595877376398615;0.6141141911382005;0.8595877376398615;0.2875347866419295;party2_utility.xml;party1_utility_u10.xml
