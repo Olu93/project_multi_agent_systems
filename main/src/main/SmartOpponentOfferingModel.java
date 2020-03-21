@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.apache.commons.math3.util.Pair;
+
 import genius.core.Bid;
 import genius.core.BidHistory;
 import genius.core.bidding.BidDetails;
@@ -78,18 +80,12 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
     private Matrix converHistoryToMatrix(final BidHistory bidHistory) {
         final List<Bid> lBids = bidHistory.getHistory().parallelStream().map(bd -> bd.getBid())
-                .collect(Collectors.toList());
+            .collect(Collectors.toList());
+        
+        // Reduction 1
         // final HashMap<Issue, Matrix> oneHotMatrix = new HashMap<>();
         // Integer noOfValues = null;
         // List<Integer> issueValues = null;
-
-        Map<Issue,List<Integer>> valuesByIssue = this.domainIssues.stream()
-            .map(issue -> new SimpleEntry<Issue,List<Integer>>(issue, extractAllValuesForIssue(lBids, issue)))
-            .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-
-        Map<Issue,Matrix> oneHotEncodedMatrixByIssue = this.domainIssues.stream()
-            .map(issue -> new SimpleEntry<Issue,Matrix>(issue,dummyEncode(issue.getNumberOfValues(), valuesByIssue.get(issue))))
-            .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)); 
 
         // for (final IssueDiscrete issue : this.domainIssues) {
         //     issueValues = lBids.stream().map(bid -> bid.getValue(issue))
@@ -99,7 +95,20 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         //     oneHotMatrix.put(issue, dummyEncode(noOfValues, issueValues));
         // }
 
+        // Reduction 2
+        // Map<Issue,List<Integer>> valuesByIssue = this.domainIssues.stream()
+        //     .map(issue -> new SimpleEntry<Issue,List<Integer>>(issue, extractAllValuesForIssue(lBids, issue)))
+        //     .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
 
+        // Map<Issue,Matrix> oneHotEncodedMatrixByIssue = this.domainIssues.stream()
+        //     .map(issue -> new SimpleEntry<Issue,Matrix>(issue,dummyEncode(issue.getNumberOfValues(), valuesByIssue.get(issue))))
+        //     .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)); 
+
+        final Map<Issue,Matrix> oneHotEncodedMatrixByIssue = this.domainIssues.stream()
+            .map(issue -> new SimpleEntry<IssueDiscrete,List<Integer>>(issue, extractAllValuesForIssue(lBids, issue)))
+            .map(entry -> new SimpleEntry<IssueDiscrete,Matrix>(entry.getKey(), dummyEncode(entry.getKey(), entry.getValue())))
+            .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)); 
+        
         final List<List<Double>> tmp = IntStream.range(0, lBids.size()).mapToObj(i -> extractFullRow(i, oneHotEncodedMatrixByIssue)).collect(Collectors.toList());
         final double[][] preFullMatrix = tmp.stream().map(arr -> arr.toArray()).toArray(double[][]::new);
         final Matrix fullMatrix = new Matrix(preFullMatrix);
@@ -107,8 +116,9 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         return fullMatrix;
     }
 
-    private Matrix dummyEncode(final Integer columnNumber, final List<Integer> issueValues) {
-        final Matrix containerMatrix = new Matrix(issueValues.size(), columnNumber);
+    private Matrix dummyEncode(final IssueDiscrete issue, final List<Integer> issueValues) {
+        final Matrix containerMatrix = new Matrix(issueValues.size(), issue.getNumberOfValues());
+        
         for (int row = 0; row < issueValues.size(); row++) {
             containerMatrix.set(row,issueValues.get(row), 1);
         }
