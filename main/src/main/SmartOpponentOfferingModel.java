@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -66,7 +68,12 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         BidHistory slicedX = new BidHistory(tmp.subList(0, tmp.size()-1));
         BidHistory newX = new BidHistory(tmp.subList(tmp.size()-1, tmp.size()));
 
-        List<Integer> sizes = this.domainIssues.stream().map(issue -> issue.getNumberOfValues()).collect(Collectors.toList());
+        AtomicInteger ai = new AtomicInteger();
+        List<Integer> sizes = this.domainIssues.stream()
+            .map(issue -> issue.getNumberOfValues())
+            .map(ai::addAndGet)
+            .collect(Collectors.toList());
+        sizes.add(0, 0);
 
         Matrix observedX = converHistoryToMatrix(slicedX);
         Matrix observedY = converHistoryToMatrix(shiftedOpponentBidHistory); // TODO: Consider doing gaussian regression per issue.
@@ -74,8 +81,10 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         
         Matrix[] prediction = predictGaussianProcess(observedX, observedY, unObservedX);
 
-        Map<IssueDiscrete, Matrix> splittedPredictions = IntStream.range(0, sizes.size())
-            .mapToObj(idx -> new SimpleEntry<IssueDiscrete,Matrix>(this.domainIssues.get(idx), prediction[0].getMatrix(0, prediction[0].getRowDimension(), sizes.get(idx), sizes.get(idx+1))))
+        System.out.println("Predictions: "+Arrays.toString(prediction[0].getRowPackedCopy()));
+
+        Map<IssueDiscrete, Matrix> splittedPredictions = IntStream.range(0, sizes.size()-1)
+            .mapToObj(idx -> new SimpleEntry<IssueDiscrete,Matrix>(this.domainIssues.get(idx), prediction[0].getMatrix(0, prediction[0].getRowDimension()-1, sizes.get(idx), sizes.get(idx)-1)))
             .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)); 
 
         Map<IssueDiscrete, List<Integer>> tmpList = splittedPredictions.entrySet().stream()
@@ -84,6 +93,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
         Bid nextBid = constructBid(tmpList);
         BidDetails result = new BidDetails(nextBid, negotiationSession.getUtilitySpace().getUtility(nextBid)); // TODO: Deal with preference uncertainty!
+        System.out.println(nextBid.toStringCSV());
         return result;
     }
 
@@ -135,7 +145,12 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
     private List<Integer> simplifiedClosestIssueValues(IssueDiscrete issue, Matrix issuePredictions){
         List<Integer> highestIndexPerRow = Stream.of(issuePredictions.getArrayCopy())
-            .mapToInt(row -> IntStream.range(0, row.length).boxed().reduce((a,b)->row[a]<row[b]? b: a).get()).boxed().collect(Collectors.toList());
+            .mapToInt(row -> IntStream.range(0, row.length)
+                .boxed()
+                .reduce((a,b)->row[a]<row[b]? b: a)
+                .orElse(0))
+            .boxed()
+            .collect(Collectors.toList());
         // TODO: Calculate cosine distance and take the lowest between each row in allpossible issues and dummyEncodedIssues.
         
         return highestIndexPerRow;
@@ -173,16 +188,21 @@ public class SmartOpponentOfferingModel extends OMStrategy {
             .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)); 
         
         final List<List<Double>> tmp = IntStream.range(0, lBids.size()).mapToObj(i -> extractFullRow(i, oneHotEncodedMatrixByIssue)).collect(Collectors.toList());
-        final double[][] preFullMatrix = tmp.stream().map(arr -> arr.toArray()).toArray(double[][]::new);
+        final double[][] preFullMatrix = tmp.stream()
+            .map(arr -> arr.stream().mapToDouble(Double::doubleValue).toArray())
+            .collect(Collectors.toList())
+            .stream()
+            .toArray(double[][]::new);
         final Matrix fullMatrix = new Matrix(preFullMatrix);
-
+        
         return fullMatrix;
     }
 
     private Matrix dummyEncode(final IssueDiscrete issue, final List<Integer> issueValues) {
         final Matrix containerMatrix = new Matrix(issueValues.size(), issue.getNumberOfValues());
-        
+        // System.out.println("============> " + issue.getName());
         for (int row = 0; row < issueValues.size(); row++) {
+            // System.out.println(row + ": "+ issueValues.get(row) + " - "+ issue.getStringValue(issueValues.get(row)));
             containerMatrix.set(row,issueValues.get(row), 1);
         }
         
@@ -204,11 +224,12 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
     private Matrix[] predictGaussianProcess(Matrix observedX, Matrix observedY, Matrix unObservedX){
         Matrix K = computeCovarianceMatrix(observedX, observedY);
+        Matrix K_stable = K.plus(Matrix.identity(K.getRowDimension(), K.getColumnDimension()).times(0.00001));
         Matrix K_star = computeCovarianceMatrix(unObservedX, observedX);
         Matrix K_star_star = computeCovarianceMatrix(unObservedX, unObservedX);
 
-        Matrix predictedY = K_star.times(K.inverse()).times(observedY);
-        Matrix variances = K_star_star.minus(K_star.times(K.inverse()).times(K_star.transpose()));
+        Matrix predictedY = K_star.times(K_stable.inverse()).times(observedY);
+        Matrix variances = K_star_star.minus(K_star.times(K_stable.inverse()).times(K_star.transpose()));
         Matrix[] results = {predictedY, variances};
         return results;
     }
@@ -217,8 +238,8 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         // Double distance = euclidianDistance(A, B);
         Integer rowLenA = A.getRowDimension();
         Integer rowLenB = B.getRowDimension();
-        Integer colLenA = A.getColumnDimension();
-        Integer colLenB = B.getColumnDimension();
+        Integer colLenA = A.getColumnDimension()-1;
+        Integer colLenB = B.getColumnDimension()-1;
         Matrix covMatrix = new Matrix(rowLenA, rowLenB);
         for (Integer i = 0; i < rowLenA; i++) {
             for (Integer j = 0; j < rowLenB; j++) {
