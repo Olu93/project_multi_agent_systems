@@ -11,7 +11,7 @@
 				classPath="genius.core.protocol.StackedAlternatingOffersProtocol"
 				protocolName="Stacked Alternating Offers Protocol for Multi-Lateral Negotiation (SAOPMN)" />
 			<partyRepItems>
-				<party classPath="/home/olu/workspace/project_multi_agent_systems/main/bin/main/SmartAgent.class">
+				<party classPath="../main/bin/main/SmartAgent.class">
 					<properties />
 				</party>
 				<party classPath="agents.anac.y2015.pokerface.PokerFace">

@@ -1,0 +1,57 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Main<main>",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "main"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-GaussianProcess<main>",
+            "request": "launch",
+            "mainClass": "agents.anac.y2015.Phoenix.GP.GaussianProcess",
+            "projectName": "main"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Application<main>",
+            "request": "launch",
+            "mainClass": "genius.Application",
+            "projectName": "main"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Runner<main>",
+            "request": "launch",
+            "mainClass": "genius.cli.Runner",
+            "projectName": "main"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-CommandLineRunner<main>",
+            "request": "launch",
+            "mainClass": "genius.core.misc.CommandLineRunner",
+            "projectName": "main"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-RunSession<main>",
+            "request": "launch",
+            "mainClass": "misc.RunSession",
+            "projectName": "main",
+            "args": "lib\\run.xml logs\\last_run.csv"
+        }
+    ]
+}

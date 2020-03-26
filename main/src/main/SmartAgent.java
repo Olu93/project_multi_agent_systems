@@ -13,6 +13,7 @@ import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
 import genius.core.parties.NegotiationInfo;
+import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
 
 /**
  * SmartAgent
@@ -34,9 +35,9 @@ public class SmartAgent extends BoaParty{
 	{
 		// The choice for each component is made here
 		AcceptanceStrategy 	ac  = new SmartAcceptanceStrategy();
-		OfferingStrategy 	os  = new TimeDependent_Offering();
+		OfferingStrategy 	os  = new NiceTitForTat_Offering();
 		OpponentModel 		om  = new HardHeadedFrequencyModel();
-		OMStrategy			oms = new BestBid();
+		OMStrategy			oms = new SmartOpponentOfferingModel();
 		
 		// All component parameters can be set below.
 		Map<String, Double> noparams = Collections.emptyMap();
