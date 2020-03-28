@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import agents.anac.y2019.harddealer.HardDealer_AS;
 import bilateralexamples.boacomponents.BestBid;
 import bilateralexamples.boacomponents.HardHeadedFrequencyModel;
 import bilateralexamples.boacomponents.TimeDependent_Offering;
@@ -13,6 +14,9 @@ import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
 import genius.core.parties.NegotiationInfo;
+import negotiator.boaframework.acceptanceconditions.anac2010.AC_IAMHaggler2010;
+import negotiator.boaframework.acceptanceconditions.anac2011.AC_HardHeaded;
+import negotiator.boaframework.acceptanceconditions.anac2012.AC_BRAMAgent2;
 import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
 
 /**
@@ -34,9 +38,9 @@ public class SmartAgent extends BoaParty{
 	public void init(NegotiationInfo info) 
 	{
 		// The choice for each component is made here
-		AcceptanceStrategy 	ac  = new SmartAcceptanceStrategy();
+		AcceptanceStrategy 	ac  = new AC_HardHeaded();
 		OfferingStrategy 	os  = new NiceTitForTat_Offering();
-		OpponentModel 		om  = new HardHeadedFrequencyModel();
+		OpponentModel 		om  = new FreqOpponentPrefModel();
 		OMStrategy			oms = new SmartOpponentOfferingModel();
 		
 		// All component parameters can be set below.

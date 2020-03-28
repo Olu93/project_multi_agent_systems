@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -63,52 +64,72 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
     @Override
     public BidDetails getBid(final List<BidDetails> bidsInRange) {
-        if(this.opponentBiddingHistory.size() == 0) return null;
+        System.out.println("");
+        if(this.opponentBiddingHistory.size() < 2){
+            Bid randBid = negotiationSession.getDomain().getRandomBid(new Random());
+            BidDetails result = new BidDetails(randBid, negotiationSession.getUtilitySpace().getUtility(randBid)); // TODO: Deal with preference uncertainty!    
+            return result;
+        };
         System.out.println("Starting the prediction process");
         List<BidDetails> tmp =  this.opponentBiddingHistory.getHistory();
         BidHistory shiftedOpponentBidHistory = new BidHistory(tmp.subList(1, tmp.size()));
         BidHistory slicedX = new BidHistory(tmp.subList(0, tmp.size()-1));
         BidHistory newX = new BidHistory(tmp.subList(tmp.size()-1, tmp.size()));
-
+        
         AtomicInteger ai = new AtomicInteger();
         List<Integer> sizes = this.domainIssues.stream()
             .map(issue -> issue.getNumberOfValues())
             .map(ai::addAndGet)
             .collect(Collectors.toList());
         sizes.add(0, 0);
-
+        
         Matrix observedX = converHistoryToMatrix(slicedX);
         Matrix observedY = converHistoryToMatrix(shiftedOpponentBidHistory); // TODO: Consider doing gaussian regression per issue.
         Matrix unObservedX = converHistoryToMatrix(newX);
         
+        // System.out.println("Observed X:");
+        // printMatrix(observedX);
+        // System.out.println("Observed Y:");
+        // printMatrix(observedY);
+        // System.out.println("Not Observed:");
+        // printMatrix(unObservedX);
         Matrix[] prediction = predictGaussianProcess(observedX, observedY, unObservedX);
+        
+        // System.out.println("X: "+Arrays.toString(observedX.getArray()));
+        // System.out.println("Y: "+Arrays.toString(observedY.getArray()));
+        // System.out.println("X_star: "+Arrays.toString(unObservedX.getArray()));
 
-        System.out.println("Predictions: "+Arrays.toString(prediction[0].getRowPackedCopy()));
-
+        
         Map<IssueDiscrete, Matrix> splittedPredictions = IntStream.range(0, sizes.size()-1)
-            .mapToObj(idx -> new SimpleEntry<IssueDiscrete,Matrix>(this.domainIssues.get(idx), prediction[0].getMatrix(0, prediction[0].getRowDimension()-1, sizes.get(idx), sizes.get(idx)-1)))
-            .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)); 
-
+        .mapToObj(idx -> new SimpleEntry<IssueDiscrete,Matrix>(this.domainIssues.get(idx), prediction[0].getMatrix(0, prediction[0].getRowDimension()-1, sizes.get(idx), sizes.get(idx+1)-1)))
+        .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)); 
+        // System.out.println("DSFHDGHFGJHDFHGFAGDGRF");
+        // printMatrix(splittedPredictions.get(this.domainIssues.get(0)));
         Map<IssueDiscrete, List<Integer>> tmpList = splittedPredictions.entrySet().stream()
-            .map(e -> new SimpleEntry<IssueDiscrete,List>(e.getKey(), simplifiedClosestIssueValues(e.getKey(), e.getValue())))
-            .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-
+        .map(e -> new SimpleEntry<IssueDiscrete,List>(e.getKey(), simplifiedClosestIssueValues(e.getKey(), e.getValue())))
+        .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+        
         Bid nextBid = constructBid(tmpList);
         BidDetails result = new BidDetails(nextBid, negotiationSession.getUtilitySpace().getUtility(nextBid)); // TODO: Deal with preference uncertainty!
-        System.out.println(nextBid.toStringCSV());
+        System.out.println("Previous opponent bid vs Prediction next bid");
+        BidDetails prnt = tmp.get(tmp.size() - 1);
+        System.out.println(prnt.getBid());
+        printMatrix(converHistoryToMatrix(new BidHistory(Arrays.asList(prnt))));;
+        System.out.println(nextBid);
+        System.out.println("Predictions: "+Arrays.toString(prediction[0].getRowPackedCopy()));
         return result;
     }
-
+    
     private Bid constructBid(Map<IssueDiscrete, List<Integer>> tmpList) {
         HashMap<Integer,Value> issueValues = (HashMap<Integer,Value>) tmpList.entrySet()
-            .stream()
-            .map(e ->  new SimpleEntry<IssueDiscrete, Integer>(e.getKey(), e.getValue().get(0)))
-            .map(e -> new SimpleEntry<Integer, Value>(e.getKey().getNumber(), e.getKey().getValue(e.getValue())))
-            .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));        // new ValueDiscrete(name)
+        .stream()
+        .map(e ->  new SimpleEntry<IssueDiscrete, Integer>(e.getKey(), e.getValue().get(0)))
+        .map(e -> new SimpleEntry<Integer, Value>(e.getKey().getNumber(), e.getKey().getValue(e.getValue())))
+        .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));        // new ValueDiscrete(name)
         Bid result = new Bid(negotiationSession.getDomain(),issueValues);
         return result;
     }
-
+    
     @Override
     public boolean canUpdateOM() {
         // TODO Auto-generated method stub
@@ -146,11 +167,14 @@ public class SmartOpponentOfferingModel extends OMStrategy {
     }
 
     private List<Integer> simplifiedClosestIssueValues(IssueDiscrete issue, Matrix issuePredictions){
-        List<Integer> highestIndexPerRow = Stream.of(issuePredictions.getArrayCopy())
-            .mapToInt(row -> IntStream.range(0, row.length)
+        double[][] tmp = issuePredictions.getArrayCopy();
+        // printMatrix(issuePredictions);
+        List<Integer> highestIndexPerRow = Stream.of(tmp)
+            .mapToInt(row -> IntStream.range(0, row.length-1)
+                // .peek(e -> System.out.println("Filtered value: " + e))
                 .boxed()
                 .reduce((a,b)->row[a]<row[b]? b: a)
-                .orElse(0))
+                .orElse(42))
             .boxed()
             .collect(Collectors.toList());
         // TODO: Calculate cosine distance and take the lowest between each row in allpossible issues and dummyEncodedIssues.
@@ -159,7 +183,9 @@ public class SmartOpponentOfferingModel extends OMStrategy {
     }
 
     private Matrix converHistoryToMatrix(final BidHistory bidHistory) {
-        final List<Bid> lBids = bidHistory.getHistory().stream().map(bd -> bd.getBid())
+        final List<Bid> lBids = bidHistory.getHistory()
+            .stream()
+            .map(bd -> bd.getBid())
             .collect(Collectors.toList());
         
         // Reduction 1
@@ -274,6 +300,12 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         double distance = aSquared.plus(bSquared).minus(interaction).get(0, 0);
         // double[][] distance = aSquared.plus(bSquared).minus(interaction).getArray();
         return distance;
+    }
+
+    static void printMatrix(Matrix m){
+        for (double[] row : Arrays.asList(m.getArrayCopy())) {
+            System.out.println(Arrays.toString(row));
+        }
     }
 
 }

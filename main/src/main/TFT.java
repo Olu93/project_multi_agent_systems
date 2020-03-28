@@ -1,4 +1,4 @@
-package group10_strategy;
+package main;
 
 import genius.core.Bid;
 import genius.core.BidHistory;
@@ -391,8 +391,8 @@ public class TFT extends OfferingStrategy {
 //        return negotiationSession.getUtilitySpace().getUtility(bid);
 //    }
 //
-//    @Override
-//    public String getName() {
-//        return "Copy Tit for Tat";
-//    }
+   @Override
+   public String getName() {
+       return "Copy Tit for Tat";
+   }
 }

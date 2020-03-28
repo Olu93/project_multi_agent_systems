@@ -14,13 +14,13 @@
 				<party classPath="../main/bin/main/SmartAgent.class">
 					<properties />
 				</party>
-				<party classPath="agents.anac.y2015.pokerface.PokerFace">
+				<party classPath="agents.anac.y2011.Nice_Tit_for_Tat.NiceTitForTat">
 					<properties />
 				</party>
 			</partyRepItems>
 			<partyProfileItems>
-				<item url="file:etc/templates/partydomain/party2_utility.xml" />
-				<item url="file:etc/templates/partydomain/party1_utility_u10.xml" />
+				<item url="file:etc/templates/partydomain/party1_utility.xml" />
+				<item url="file:etc/templates/partydomain/party4_utility.xml" />
 			</partyProfileItems>
 			<repeats>1</repeats>
 			<numberOfPartiesPerSession>2</numberOfPartiesPerSession>
