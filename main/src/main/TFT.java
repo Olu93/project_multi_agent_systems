@@ -1,21 +1,13 @@
 package group10_strategy;
 
-import genius.core.Bid;
-import genius.core.BidHistory;
-import genius.core.BidIterator;
-import genius.core.analysis.BidPoint;
-import genius.core.analysis.BidSpace;
 import genius.core.bidding.BidDetails;
-import genius.core.boaframework.*;
+import genius.core.boaframework.NegotiationSession;
+import genius.core.boaframework.OMStrategy;
+import genius.core.boaframework.OfferingStrategy;
+import genius.core.boaframework.OpponentModel;
 import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
-import negotiator.boaframework.opponentmodel.DefaultModel;
-import negotiator.boaframework.opponentmodel.ScalableBayesianModel;
-import negotiator.boaframework.sharedagentstate.anac2011.NiceTitForTatSAS;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 public class TFT extends OfferingStrategy {
 
@@ -37,6 +29,11 @@ public class TFT extends OfferingStrategy {
 //        double myUtilityOfOpponentLastBid = getUtility(opponentLastBid);
         // Tit for Tat
         return ntft.determineNextBid();
+    }
+
+    @Override
+    public String getName() {
+        return "Copy Tit for Tat";
     }
 
 
@@ -391,8 +388,4 @@ public class TFT extends OfferingStrategy {
 //        return negotiationSession.getUtilitySpace().getUtility(bid);
 //    }
 //
-//    @Override
-//    public String getName() {
-//        return "Copy Tit for Tat";
-//    }
 }
