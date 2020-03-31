@@ -2,21 +2,33 @@ package main;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import genius.core.BidHistory;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.AcceptanceStrategy;
 import genius.core.boaframework.Actions;
+import genius.core.boaframework.NegotiationSession;
 import genius.core.uncertainty.OutcomeComparison;
 import genius.core.uncertainty.UserModel;
 
 public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 
 	private final ArrayList<BidDetails> bestBidProposals = new ArrayList<BidDetails>();
+	private UncertaintyUtilityEstimator uncertaintyEstimator;
 
 	@Override
+	protected void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
+		super.init(negotiationSession, parameters);
+	}
+	
+	@Override
 	public Actions determineAcceptability() {
+		System.out.println("PRRRRIIIIIIIIIIIIINT");
+		this.uncertaintyEstimator = new UncertaintyUtilityEstimator(negotiationSession); // TODO: Way to inefficient!!!
+
+
 		final Boolean isSmartOffering = SmartComponentNames.SMART_BIDDING_STRATEGY.toString().equalsIgnoreCase(offeringStrategy.getName());
 		final UserModel userModel = negotiationSession.getUserModel();
 		final boolean isUncertain = userModel == null;

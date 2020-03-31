@@ -37,8 +37,10 @@ public class Example {
         // if table is not optimal re-iterate
         while(!quit){
             Simplex.ERROR err = simplex.compute();
+            System.out.println("---Compute---: "+err);
 
             if(err == Simplex.ERROR.IS_OPTIMAL){
+                System.out.println("---Continue---");
                 simplex.print();
                 quit = true;
             }
