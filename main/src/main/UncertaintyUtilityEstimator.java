@@ -100,7 +100,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
 
     private Matrix getFinalSimplex(Matrix comparisons) {
         Integer rowLength = comparisons.getRowDimension() - 1;
-        Integer colLength = rowLength + comparisons.getColumnDimension() - 1;
+        Integer colLength = rowLength + comparisons.getColumnDimension();
         Integer splitAt = comparisons.getColumnDimension() - 1;
         Matrix slackVars = Matrix.identity(rowLength, rowLength);
         Matrix emptyMatrix = new Matrix(rowLength + 1, colLength + 1);
