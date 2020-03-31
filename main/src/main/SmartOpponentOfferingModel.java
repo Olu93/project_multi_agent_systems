@@ -35,6 +35,7 @@ import genius.core.issue.ValueDiscrete;
 import genius.core.issue.ValueInteger;
 import genius.core.misc.Range;
 import math.Matrix;
+import misc.Utils;
 
 /**
  * SmartOpponentOfferingModel
@@ -114,7 +115,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         System.out.println("Previous opponent bid vs Prediction next bid");
         BidDetails prnt = tmp.get(tmp.size() - 1);
         System.out.println(prnt.getBid());
-        printMatrix(converHistoryToMatrix(new BidHistory(Arrays.asList(prnt))));;
+        Utils.printMatrix(converHistoryToMatrix(new BidHistory(Arrays.asList(prnt))));;
         System.out.println(nextBid);
         System.out.println("Predictions: "+Arrays.toString(prediction[0].getRowPackedCopy()));
         return result;
@@ -302,10 +303,6 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         return distance;
     }
 
-    static void printMatrix(Matrix m){
-        for (double[] row : Arrays.asList(m.getArrayCopy())) {
-            System.out.println(Arrays.toString(row));
-        }
-    }
+
 
 }
