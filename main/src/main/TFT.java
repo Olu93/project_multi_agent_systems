@@ -1,4 +1,4 @@
-package group10_strategy;
+package main;
 
 import genius.core.Bid;
 import genius.core.BidHistory;
@@ -38,6 +38,12 @@ public class TFT extends OfferingStrategy {
         // Tit for Tat
         return ntft.determineNextBid();
     }
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 
 //    public double getUtility(Bid bid) {
