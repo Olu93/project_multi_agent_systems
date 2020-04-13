@@ -1,17 +1,25 @@
 package main;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.rmi.CORBA.Util;
+
+import genius.core.Bid;
 import genius.core.BidHistory;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.AcceptanceStrategy;
 import genius.core.boaframework.Actions;
 import genius.core.boaframework.NegotiationSession;
+import genius.core.uncertainty.ExperimentalUserModel;
 import genius.core.uncertainty.OutcomeComparison;
 import genius.core.uncertainty.UserModel;
+import math.Matrix;
+import misc.Utils;
 
 public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 
@@ -22,20 +30,37 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 	protected void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
 		super.init(negotiationSession, parameters);
 	}
-	
+
 	@Override
 	public Actions determineAcceptability() {
-		System.out.println("PRRRRIIIIIIIIIIIIINT");
+
 		this.uncertaintyEstimator = new UncertaintyUtilityEstimator(negotiationSession); // TODO: Way to inefficient!!!
 
-
-		final Boolean isSmartOffering = SmartComponentNames.SMART_BIDDING_STRATEGY.toString().equalsIgnoreCase(offeringStrategy.getName());
+		final Boolean isSmartOffering = SmartComponentNames.SMART_BIDDING_STRATEGY.toString()
+				.equalsIgnoreCase(offeringStrategy.getName());
 		final UserModel userModel = negotiationSession.getUserModel();
+		ExperimentalUserModel userModelExperimental = (ExperimentalUserModel) userModel;
 		final boolean isUncertain = userModel == null;
 		final BidDetails agentNextBid = offeringStrategy.getNextBid();
 		final BidDetails opponentBid = negotiationSession.getOpponentBidHistory().getLastBidDetails();
 		// TODO: Uncertainty makes it unclear whether that really is the best bid.
 		final BidHistory opponentHistory = negotiationSession.getOpponentBidHistory();
+
+		System.out.println("PRRRRIIIIIIIIIIIIINT");
+
+		Matrix oneHotEncodedRankings = Utils.getDummyEncoding(negotiationSession.getIssues(),
+				userModel.getBidRanking().getBidOrder());
+
+		System.out.println("Encoded ranking");
+		Utils.printMatrix(oneHotEncodedRankings);
+		System.out.println("Weights");
+		Utils.printMatrix(this.uncertaintyEstimator.getWeights());
+		System.out.println("Results");
+		Utils.printMatrix(oneHotEncodedRankings.times(this.uncertaintyEstimator.getWeights().transpose()));
+		for (Bid rankedBid : userModel.getBidRanking().getBidOrder()) {
+			System.out.println("True Utility: " + rankedBid);
+			System.out.println("        Util: " + userModelExperimental.getRealUtility(rankedBid));
+		}
 
 		// opponentHistory.getHistory().removeIf(bid -> bestBidProposals.contains(bid));
 		// <= Leads to permanent history change!!!
@@ -66,7 +91,8 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 				System.out.println("Opponent bid is best bid so far!");
 				final BidDetails opponentNextBid = ((SmartOfferingStrategy) offeringStrategy)
 						.getOpponentBidPrediction();
-				if (isUncertain ? opponentBid.getMyUndiscountedUtil() < opponentNextBid.getMyUndiscountedUtil() : new OutcomeComparison(opponentBid, opponentNextBid).getComparisonResult() > 0) {
+				if (isUncertain ? opponentBid.getMyUndiscountedUtil() < opponentNextBid.getMyUndiscountedUtil()
+						: new OutcomeComparison(opponentBid, opponentNextBid).getComparisonResult() > 0) {
 					System.out.println("Opponent is going to bid better in the next!");
 					return Actions.Reject;
 				}
@@ -75,7 +101,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 			return Actions.Accept;
 		}
 		return Actions.Reject;
-	}	
+	}
 
 	@Override
 	public String getName() {

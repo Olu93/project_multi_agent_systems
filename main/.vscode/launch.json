@@ -52,6 +52,22 @@
             "mainClass": "misc.RunSession",
             "projectName": "main",
             "args": "lib\\run.xml logs\\last_run.csv"
+        },
+        {
+            "type": "java",
+            "name": "Run Laptop",
+            "request": "launch",
+            "mainClass": "misc.RunSession",
+            "projectName": "main",
+            "args": "lib\\laptop.xml logs\\last_run.csv"
+        },
+        {
+            "type": "java",
+            "name": "Run Test",
+            "request": "launch",
+            "mainClass": "misc.RunSession",
+            "projectName": "main",
+            "args": "lib\\test.xml logs\\last_run.csv"
         }
     ]
 }

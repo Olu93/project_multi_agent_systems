@@ -211,17 +211,21 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         //     .map(issue -> new SimpleEntry<Issue,Matrix>(issue,dummyEncode(issue.getNumberOfValues(), valuesByIssue.get(issue))))
         //     .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)); 
 
-        final Map<Issue,Matrix> oneHotEncodedMatrixByIssue = this.domainIssues.stream() // Order might be lost
+        final Map<Issue,Matrix> oneHotEncodedMatrixByIssue = this.domainIssues.stream() 
             .map(issue -> new SimpleEntry<IssueDiscrete,List<Integer>>(issue, extractAllValuesForIssue(lBids, issue)))
             .map(entry -> new SimpleEntry<IssueDiscrete,Matrix>(entry.getKey(), dummyEncode(entry.getKey(), entry.getValue())))
             .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)); 
         
-        final List<List<Double>> tmp = IntStream.range(0, lBids.size()).mapToObj(i -> extractFullRow(i, oneHotEncodedMatrixByIssue)).collect(Collectors.toList());
+        final List<List<Double>> tmp = IntStream.range(0, lBids.size())
+            .mapToObj(i -> extractFullRow(i, oneHotEncodedMatrixByIssue))
+            .collect(Collectors.toList());
+
         final double[][] preFullMatrix = tmp.stream()
             .map(arr -> arr.stream().mapToDouble(Double::doubleValue).toArray())
             .collect(Collectors.toList())
             .stream()
             .toArray(double[][]::new);
+            
         final Matrix fullMatrix = new Matrix(preFullMatrix);
         
         return fullMatrix;
