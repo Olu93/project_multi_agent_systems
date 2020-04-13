@@ -18,67 +18,72 @@ import math.Matrix;
  */
 public class Utils {
 
-    public static void printMatrix(Matrix m){
+    public static void printMatrix(Matrix m) {
         for (double[] row : Arrays.asList(m.getArrayCopy())) {
-            System.out.println(Arrays.toString(row));
+            writeRow(row);
         }
     }
 
-    public static void printMatrix(double[][] m){
+    public static void printMatrix(double[][] m) {
         for (double[] row : m) {
-            System.out.println(Arrays.toString(row));
+            writeRow(row);
         }
+    }
+
+    private static void writeRow(double[] row) {
+        for (double ds : row) {
+            double ss = (Math.round(ds*100));
+            System.out.print((ds < 0 ? ss/100 : " " + ss/100) + "\t");
+        }
+        System.out.print("\n");
     }
 
     public static Matrix getDummyEncoding(List<Issue> domainIssues, List<Bid> lBids) {
-        final Map<Issue,Matrix> oneHotEncodedMatrixByIssue = domainIssues.stream()
-            .map(issue -> (IssueDiscrete) issue)
-            .map(issue -> new SimpleEntry<IssueDiscrete,List<Integer>>(issue, extractAllValuesForIssue(lBids, issue)))
-            .map(entry -> new SimpleEntry<IssueDiscrete,Matrix>(entry.getKey(), dummyEncode(entry.getKey(), entry.getValue())))
-            .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue)); 
-        
+        final Map<Issue, Matrix> oneHotEncodedMatrixByIssue = domainIssues.stream().map(issue -> (IssueDiscrete) issue)
+                .map(issue -> new SimpleEntry<IssueDiscrete, List<Integer>>(issue,
+                        extractAllValuesForIssue(lBids, issue)))
+                .map(entry -> new SimpleEntry<IssueDiscrete, Matrix>(entry.getKey(),
+                        dummyEncode(entry.getKey(), entry.getValue())))
+                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+
         final List<List<Double>> tmp = IntStream.range(0, lBids.size())
-            .mapToObj(i -> extractFullRow(domainIssues, i, oneHotEncodedMatrixByIssue))
-            .collect(Collectors.toList());
+                .mapToObj(i -> extractFullRow(domainIssues, i, oneHotEncodedMatrixByIssue))
+                .collect(Collectors.toList());
 
         final double[][] preFullMatrix = tmp.stream()
-            .map(arr -> arr.stream().mapToDouble(Double::doubleValue).toArray())
-            .collect(Collectors.toList())
-            .stream()
-            .toArray(double[][]::new);
-            
+                .map(arr -> arr.stream().mapToDouble(Double::doubleValue).toArray()).collect(Collectors.toList())
+                .stream().toArray(double[][]::new);
+
         final Matrix fullMatrix = new Matrix(preFullMatrix);
-        return fullMatrix; 
+        return fullMatrix;
     }
 
     private static Matrix dummyEncode(final IssueDiscrete issue, final List<Integer> issueValues) {
         final Matrix containerMatrix = new Matrix(issueValues.size(), issue.getNumberOfValues());
         // System.out.println("============> " + issue.getName());
         for (int row = 0; row < issueValues.size(); row++) {
-            // System.out.println(row + ": "+ issueValues.get(row) + " - "+ issue.getStringValue(issueValues.get(row)));
-            containerMatrix.set(row,issueValues.get(row), 1);
+            // System.out.println(row + ": "+ issueValues.get(row) + " - "+
+            // issue.getStringValue(issueValues.get(row)));
+            containerMatrix.set(row, issueValues.get(row), 1);
         }
-        
+
         return containerMatrix;
     }
 
-    private static List<Integer> extractAllValuesForIssue(List<Bid> lBids, IssueDiscrete issue){
+    private static List<Integer> extractAllValuesForIssue(List<Bid> lBids, IssueDiscrete issue) {
         return lBids.stream().map(bid -> (ValueDiscrete) bid.getValue(issue))
-            .mapToInt(value -> issue.getValueIndex(value))
-            .boxed()
-            .collect(Collectors.toList());
+                .mapToInt(value -> issue.getValueIndex(value)).boxed().collect(Collectors.toList());
     }
 
-    private static List<Double> extractFullRow(List<Issue> domainIssues, final Integer row, final Map<Issue, Matrix> oneHotMatrix) {
-        return domainIssues.stream()
-        .map(issue -> oneHotMatrix.get(issue).getArray()[row])
-        .flatMapToDouble(Arrays::stream).boxed().collect(Collectors.toList());
+    private static List<Double> extractFullRow(List<Issue> domainIssues, final Integer row,
+            final Map<Issue, Matrix> oneHotMatrix) {
+        return domainIssues.stream().map(issue -> oneHotMatrix.get(issue).getArray()[row])
+                .flatMapToDouble(Arrays::stream).boxed().collect(Collectors.toList());
     }
 
-    public static Matrix getRow(Matrix m, Integer startRow, Integer endRow){
+    public static Matrix getRow(Matrix m, Integer startRow, Integer endRow) {
         Integer numCol = m.getColumnDimension();
         return m.getMatrix(startRow, endRow, 0, numCol);
     }
-
 
 }
