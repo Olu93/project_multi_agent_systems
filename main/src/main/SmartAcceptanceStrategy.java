@@ -37,7 +37,9 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 
 	@Override
 	public Actions determineAcceptability() {
-
+		// TODO: time based epsilon function
+		// TODO: Use only utility function. Uncertainty estimation is handled elsewhere
+		
 		// this.uncertaintyEstimator = new UncertaintyUtilityEstimator(negotiationSession); // TODO: Way to inefficient!!!
 
 		final Boolean isSmartOffering = offeringStrategy instanceof SmartOfferingStrategy;
