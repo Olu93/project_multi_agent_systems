@@ -57,13 +57,22 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 		Utils.printMatrix(this.uncertaintyEstimator.getWeights());
 		Matrix prediction = oneHotEncodedRankings.times(this.uncertaintyEstimator.getWeights().transpose());
 		int i = 0;
+		List<Double> statsBuiltin = new ArrayList<Double>();
+		List<Double> statsPredict = new ArrayList<Double>();
 		for (Bid rankedBid : userModel.getBidRanking().getBidOrder()) {
-			System.out.println("=======Bid: " + rankedBid);
-			System.out.println("Wrong Util: " + negotiationSession.getUtilitySpace().getUtility(rankedBid));
-			System.out.println("Pred  Util: " + prediction.get(i,0));
-			System.out.println("True  Util: " + userModelExperimental.getRealUtility(rankedBid));
+			double realUtility = userModelExperimental.getRealUtility(rankedBid);
+			double builtInDiff = Math.abs(negotiationSession.getUtilitySpace().getUtility(rankedBid)-realUtility);
+			double predDiff = Math.abs(prediction.get(i,0)-realUtility);
+			statsBuiltin.add(builtInDiff);
+			statsPredict.add(predDiff);
+			System.out.println("===> Bid: " + rankedBid);
+			System.out.println("True  							Util: " + realUtility);
+			System.out.println("Built-in 	distance to real utility: " + builtInDiff);
+			System.out.println("Prediction 	distance to real utility: " + predDiff);
 			i++;
 		}
+		System.out.println("Avg Distance of built in utility estimator: "+ statsBuiltin.stream().mapToDouble(a -> a).average().getAsDouble());
+		System.out.println("Avg Distance of prediction utility estimator: "+ statsPredict.stream().mapToDouble(a -> a).average().getAsDouble());
 
 		// opponentHistory.getHistory().removeIf(bid -> bestBidProposals.contains(bid));
 		// <= Leads to permanent history change!!!

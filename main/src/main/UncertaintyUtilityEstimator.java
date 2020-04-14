@@ -53,13 +53,14 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     private Simplex simplex;
     private final Long numberOfUnknowns; // Count of every individual issue value
     private static final Double EPSILON = 1.0E-8;
+    private Matrix oneHotBids;
 
     public UncertaintyUtilityEstimator(final NegotiationSession session) {
         this.session = session;
         this.rankings = session.getUserModel().getBidRanking();
         this.numberOfUnknowns = this.session.getIssues().stream()
                 .mapToLong(issue -> ((IssueDiscrete) issue).getNumberOfValues()).sum();
-
+        this.oneHotBids = Utils.getDummyEncoding(session.getIssues(), rankings.getBidOrder());
         System.out.println("Number of unknowns: " + numberOfUnknowns);
         this.weightsMatrix = this.init();
     }
@@ -176,44 +177,51 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         List<Bid> hardConstraints = Arrays.asList(rankings.getMaximalBid(), rankings.getMinimalBid());
 
 
-        final Integer rowLength = comparisons.getRowDimension() - 1;
-        final Integer colLength = rowLength + comparisons.getColumnDimension();
+        final Integer endOfPairwiseComparisonIdx = comparisons.getRowDimension() - 1;
+        final Integer lastColComparisonIdx = endOfPairwiseComparisonIdx + comparisons.getColumnDimension();
         final Integer splitAt = comparisons.getColumnDimension() - 1;
-        // final Matrix slackVars = Matrix.identity(rowLength, rowLength).times(-1);
-        final Matrix slackVars = Matrix.identity(rowLength, rowLength);
-        final Matrix emptyMatrix = new Matrix(rowLength + hardConstraints.size() + 1, colLength + 1);
+        
+        final Integer lastRowRankingsIdx = this.oneHotBids.getRowDimension() - 1;
+        final Integer lastColRankingsIdx = this.oneHotBids.getColumnDimension() - 1;
+        
+        int startOfMinUtilitiesIdx = endOfPairwiseComparisonIdx;
+        int endOfMinUtilitiesIdx = endOfPairwiseComparisonIdx + lastRowRankingsIdx - 1;
+        int startOfMaxUtilitiesIdx = endOfMinUtilitiesIdx+1;
+        int endOfMaxUtilitiesIdx = endOfPairwiseComparisonIdx + lastRowRankingsIdx*2 - 1;
+        int thirdToLastIdx = endOfMaxUtilitiesIdx+1;
+        int secondToLastIdx = thirdToLastIdx +1;
+
+        final Matrix slackVars = Matrix.identity(endOfPairwiseComparisonIdx, endOfPairwiseComparisonIdx);
+        final Matrix emptyMatrix = new Matrix(endOfPairwiseComparisonIdx + lastRowRankingsIdx*2 + hardConstraints.size() + 1, lastColComparisonIdx + 1);
         int finalColIdx = emptyMatrix.getColumnDimension()-1;
 
-        for (int i = 0; i < rowLength; i++) {
-            for (int j = 0; j < colLength; j++) {
+        for (int i = 0; i < startOfMinUtilitiesIdx; i++) {
+            for (int j = 0; j < lastColComparisonIdx; j++) {
                 emptyMatrix.set(i, j, j > splitAt ? slackVars.get(i, j - splitAt - 1) : comparisons.get(i, j));
             }
         }
-        // System.out.println("Almost done");
-        // Utils.printMatrix(emptyMatrix);
+        emptyMatrix.setMatrix(startOfMinUtilitiesIdx, endOfMinUtilitiesIdx, 0, lastColRankingsIdx, oneHotBids);
+        for (int i = startOfMinUtilitiesIdx; i < startOfMaxUtilitiesIdx; i++) {
+            emptyMatrix.set(i, lastColComparisonIdx, rankings.getLowUtility());
+        }
+
+        emptyMatrix.setMatrix(startOfMaxUtilitiesIdx, endOfMaxUtilitiesIdx, 0, lastColRankingsIdx, oneHotBids);
+        for (int i = startOfMaxUtilitiesIdx; i < thirdToLastIdx; i++) {
+            emptyMatrix.set(i, lastColComparisonIdx, rankings.getHighUtility());
+        }
+        System.out.println("Almost done");
+        Utils.printMatrix(emptyMatrix);
         Matrix dummyEncodedHardConstraints = Utils.getDummyEncoding(this.session.getIssues(), hardConstraints);
 
-        // double[] positivesOnly = Arrays.stream(emptyMatrix.getMatrix(new int[]{0}, 0, finalColIdx - 1).copy().getRowPackedCopy())
-        //     .map(val -> val > 0 ? val : 0)
-        //     .toArray();// remove negatives
-        // Matrix maxBidConstraint = new Matrix(positivesOnly, 1);
-        // emptyMatrix.timesEquals(-1);
-        int[] range = IntStream.range(rowLength, rowLength+hardConstraints.size()).toArray();
+        int[] range = IntStream.range(thirdToLastIdx, thirdToLastIdx +hardConstraints.size()).toArray();
         emptyMatrix.setMatrix(range, 0, dummyEncodedHardConstraints.getColumnDimension() - 1, dummyEncodedHardConstraints);
-        emptyMatrix.set(rowLength, finalColIdx, rankings.getHighUtility());
+        emptyMatrix.set(thirdToLastIdx, finalColIdx, rankings.getHighUtility());
         if (range.length>1) {
-            emptyMatrix.set(rowLength+1, finalColIdx, rankings.getLowUtility());
+            emptyMatrix.set(secondToLastIdx , finalColIdx, rankings.getLowUtility());
         }
-        // emptyMatrix.set(rowLength, finalColIdx, 1);
-        
-        // System.out.println("Almost Almost done");
-        // Utils.printMatrix(emptyMatrix);
-        
-        // emptyMatrix.set(0, splitAt, 0);
-        // emptyMatrix.set(emptyMatrix.getRowDimension()-1,
-        // emptyMatrix.getColumnDimension()-1, rankings.getLowUtility()));
-        for (int i = 0; i < colLength; i++) {
-            emptyMatrix.set(rowLength+hardConstraints.size(), i, i > splitAt ? 1 : 0);
+
+        for (int i = 0; i < lastColComparisonIdx; i++) {
+            emptyMatrix.set(thirdToLastIdx + hardConstraints.size(), i, i > splitAt ? 1 : 0);
         }
         System.out.println("Done");
         Utils.printMatrix(emptyMatrix);
@@ -270,195 +278,29 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         return new Matrix(x, 1);
     }
 
-    private Matrix computeSimplex3(Matrix convenience) {
-        convenience = convenience.transpose();
-        Integer lastRowIdx = convenience.getRowDimension()-1;
-        Integer lastColIdx = convenience.getColumnDimension()-1;
-        Integer numberOfUnknowns = this.numberOfUnknowns.intValue();
-        double[][] A = convenience.getMatrix(0, numberOfUnknowns-1, 0, lastColIdx-1).getArrayCopy();
-        System.out.println("Input for two-phase:");
-        Utils.printMatrix(A);
-        double[] b = convenience.getMatrix(0, numberOfUnknowns-1, lastColIdx, lastColIdx).getRowPackedCopy(); 
-        double[] c = convenience.getMatrix(lastRowIdx, lastRowIdx, 0, lastColIdx-1).getRowPackedCopy(); 
-        
-        TwoPhaseSimplex lp;
-        try {
-            lp = new TwoPhaseSimplex(A, b, c);
-        }
-        catch (ArithmeticException e) { 
-            System.out.println(e);
-            return null;
-        }
-        System.out.println("value = " + lp.value());
-        double[] x = lp.primal();
-        return new Matrix(x, 1);
-    }
-
-    private Matrix computeSimplex4(Matrix convenience){
-        Integer lastRowIdx = convenience.getRowDimension()-1;
-        Integer lastColIdx = convenience.getColumnDimension()-1;
-        Integer numberOfUnknowns = this.numberOfUnknowns.intValue();
-        double[][] A = convenience.getMatrix(0, lastRowIdx-3, 0, numberOfUnknowns-1).getArrayCopy();
-        double[][] B = convenience.getMatrix(lastRowIdx-2, lastRowIdx-1, 0, numberOfUnknowns-1).getArrayCopy();
-        System.out.println("Input A for two-phase:");
-        Utils.printMatrix(A);
-        System.out.println("Input B for two-phase:");
-        Utils.printMatrix(B);
-        System.out.println("Input b for two-phase:");
-        double[] b = convenience.getMatrix(0, lastRowIdx-1, lastColIdx, lastColIdx).getRowPackedCopy(); 
-        System.out.println(b);
-        System.out.println("Input c for two-phase:");
-        double[] c = convenience.getMatrix(lastRowIdx, lastRowIdx, 0, numberOfUnknowns-1).getRowPackedCopy(); 
-        System.out.println(c);
-
-        LinearObjectiveFunction oFunc = new LinearObjectiveFunction(c, 0);
-    	Collection<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
-        int i = 0;
-        for (double[] row : A) {
-            constraints.add(new LinearConstraint(row, Relationship.GEQ, b[i]));
-            i++;
-        }
-        
-        for (double[] row : B) {
-            constraints.add(new LinearConstraint(row, Relationship.EQ, b[i]));
-            i++;
-        }
-
-    	SimplexSolver solver = new SimplexSolver();
-    	PointValuePair solution = solver.optimize(new MaxIter(100), oFunc, new LinearConstraintSet(constraints), GoalType.MINIMIZE, new NonNegativeConstraint(true));
-    	System.out.println(Arrays.toString(solution.getPoint()) + " : " + solution.getSecond());
-        
-        return convenience;
-    }
-
-    private Matrix computeSimplex5(Matrix convenience){
-        Integer lastRowIdx = convenience.getRowDimension()-1;
-        Integer lastColIdx = convenience.getColumnDimension()-1;
-        Integer numberOfUnknowns = this.numberOfUnknowns.intValue();
-        double[][] A = convenience.getMatrix(0, lastRowIdx-3, 0, lastColIdx-1).getArrayCopy();
-        double[][] B = convenience.getMatrix(lastRowIdx-2, lastRowIdx-1, 0, lastColIdx-1).getArrayCopy();
-        System.out.println("Input A for two-phase:");
-        Utils.printMatrix(A);
-        System.out.println("Input B for two-phase:");
-        Utils.printMatrix(B);
-        System.out.println("Input b for two-phase:");
-        double[] b = convenience.getMatrix(0, lastRowIdx-1, lastColIdx, lastColIdx).getRowPackedCopy(); 
-        System.out.println(b);
-        System.out.println("Input c for two-phase:");
-        double[] c = convenience.getMatrix(lastRowIdx, lastRowIdx, 0, lastColIdx-1).getRowPackedCopy(); 
-        System.out.println(c);
-
-        LinearObjectiveFunction oFunc = new LinearObjectiveFunction(c, 0);
-    	Collection<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
-        int i = 0;
-        for (double[] row : A) {
-            constraints.add(new LinearConstraint(row, Relationship.GEQ, b[i]));
-            i++;
-        }
-        
-        for (double[] row : B) {
-            constraints.add(new LinearConstraint(row, Relationship.EQ, b[i]));
-            i++;
-        }
-
-    	SimplexSolver solver = new SimplexSolver();
-    	PointValuePair solution = solver.optimize(new MaxIter(100), oFunc, new LinearConstraintSet(constraints), GoalType.MINIMIZE, new NonNegativeConstraint(true));
-    	System.out.println(Arrays.toString(solution.getPoint()) + " : " + solution.getSecond());
-        
-        return convenience;
-    }
-
-    private Matrix computeSimplex6(Matrix convenience){
-        Integer lastRowIdx = convenience.getRowDimension()-1;
-        Integer lastColIdx = convenience.getColumnDimension()-1;
-        Integer numberOfUnknowns = this.numberOfUnknowns.intValue();
-        double[][] A = convenience.getMatrix(0, lastRowIdx-3, 0, lastColIdx-1).getArrayCopy();
-        double[][] B = convenience.getMatrix(lastRowIdx-2, lastRowIdx-1, 0, lastColIdx-1).getArrayCopy();
-        System.out.println("Input A for two-phase:");
-        Utils.printMatrix(A);
-        System.out.println("Input B for two-phase:");
-        Utils.printMatrix(B);
-        System.out.println("Input b for two-phase:");
-
-        double[] b = convenience.getMatrix(0, lastRowIdx-1, lastColIdx, lastColIdx).getRowPackedCopy(); 
-        System.out.println(Arrays.toString(b));
-        System.out.println("Input c for two-phase:");
-        double[] c = convenience.getMatrix(lastRowIdx, lastRowIdx, 0, lastColIdx-1).getRowPackedCopy(); 
-        System.out.println(Arrays.toString(c));
-
-        LinearObjectiveFunction oFunc = new LinearObjectiveFunction(c, 0);
-    	Collection<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
-        int i = 0;
-        for (double[] row : A) {
-            constraints.add(new LinearConstraint(row, Relationship.GEQ, b[i]));
-            i++;
-        }
-        
-        for (double[] row : B) {
-            constraints.add(new LinearConstraint(row, Relationship.EQ, b[i]));
-            i++;
-        }
-
-    	SimplexSolver solver = new SimplexSolver();
-    	PointValuePair solution = solver.optimize(new MaxIter(100), oFunc, new LinearConstraintSet(constraints), GoalType.MINIMIZE, new NonNegativeConstraint(true));
-    	System.out.println(Arrays.toString(solution.getPoint()) + " : " + solution.getSecond());
-        
-        return convenience;
-    }
-
-    private Matrix computeSimplex7(Matrix convenience){
-        Integer lastRowIdx = convenience.getRowDimension()-1;
-        Integer lastColIdx = convenience.getColumnDimension()-1;
-        Integer numberOfUnknowns = this.numberOfUnknowns.intValue();
-        double[][] A = convenience.getMatrix(0, lastRowIdx-3, 0, lastColIdx-1).getArrayCopy();
-        double[][] B = convenience.getMatrix(lastRowIdx-2, lastRowIdx-1, 0, lastColIdx-1).getArrayCopy();
-        System.out.println("Input A for two-phase:");
-        Utils.printMatrix(A);
-        System.out.println("Input B for two-phase:");
-        Utils.printMatrix(B);
-        System.out.println("Input b for two-phase:");
-        double[] b = convenience.getMatrix(0, lastRowIdx-1, lastColIdx, lastColIdx).getRowPackedCopy(); 
-        b = Arrays.stream(b).boxed().mapToDouble(val -> val > 0 ? val : this.rankings.getLowUtility()).toArray();
-        System.out.println(Arrays.toString(b));
-        System.out.println("Input c for two-phase:");
-        double[] c = convenience.getMatrix(lastRowIdx, lastRowIdx, 0, lastColIdx-1).getRowPackedCopy(); 
-        System.out.println(Arrays.toString(c));
-
-        LinearObjectiveFunction oFunc = new LinearObjectiveFunction(c, 0);
-    	Collection<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
-        int i = 0;
-        for (double[] row : A) {
-            constraints.add(new LinearConstraint(row, Relationship.GEQ, b[i]));
-            i++;
-        }
-        
-        for (double[] row : B) {
-            constraints.add(new LinearConstraint(row, Relationship.EQ, b[i]));
-            i++;
-        }
-
-    	SimplexSolver solver = new SimplexSolver();
-    	PointValuePair solution = solver.optimize(new MaxIter(100), oFunc, new LinearConstraintSet(constraints), GoalType.MINIMIZE, new NonNegativeConstraint(true));
-    	System.out.println(Arrays.toString(solution.getPoint()) + " : " + solution.getSecond());
-        
-        return new Matrix(Arrays.copyOfRange(solution.getPoint(), 0, numberOfUnknowns), 1);
-    }
-
     private Matrix computeSimplex8(Matrix convenience){
         Integer lastRowIdx = convenience.getRowDimension()-1;
         Integer lastColIdx = convenience.getColumnDimension()-1;
+        Integer lastRowRankingsIdx = this.oneHotBids.getRowDimension() - 1;
+        Integer lastColRankingsIdx = this.oneHotBids.getRowDimension() - 1;
         Integer numberOfUnknowns = this.numberOfUnknowns.intValue();
-        double[][] A = convenience.getMatrix(0, lastRowIdx-3, 0, lastColIdx-1).getArrayCopy();
-        double[][] B = convenience.getMatrix(lastRowIdx-2, lastRowIdx-1, 0, lastColIdx-1).getArrayCopy();
-        System.out.println("Input A for two-phase:");
-        Utils.printMatrix(A);
-        System.out.println("Input B for two-phase:");
-        Utils.printMatrix(B);
+        double[][] inputComparisonPart = convenience.getMatrix(0, lastRowIdx-lastRowRankingsIdx*2-3, 0, lastColIdx-1).getArrayCopy();
+        double[][] inputMinumumUtilityPart = convenience.getMatrix(lastRowIdx-lastRowRankingsIdx*2-2, lastRowIdx-lastRowRankingsIdx-3, 0, lastColIdx-1).getArrayCopy();
+        double[][] inputMaximumUtilityPart = convenience.getMatrix(lastRowIdx-lastRowRankingsIdx-2, lastRowIdx-3, 0, lastColIdx-1).getArrayCopy();
+        double[][] inputEqualityPart = convenience.getMatrix(lastRowIdx-2, lastRowIdx-1, 0, lastColIdx-1).getArrayCopy();
+        System.out.println("========");
+        Utils.printMatrix(inputComparisonPart);
+        System.out.println("========");
+        Utils.printMatrix(inputMinumumUtilityPart);
+        System.out.println("========");
+        Utils.printMatrix(inputMaximumUtilityPart);
+        System.out.println("========");
+        Utils.printMatrix(inputEqualityPart);
         System.out.println("Input b for two-phase:");
         double[] b = convenience.getMatrix(0, lastRowIdx-1, lastColIdx, lastColIdx).getRowPackedCopy(); 
         b = Arrays.stream(b).boxed()
             // .map(val -> val > 0 ? val : rankings.getLowUtility())
-            .map(val -> Utils.round(val, 2))
+            .map(val -> Utils.round(val, 3))
             .mapToDouble(val -> val)
             .toArray();
         System.out.println(Arrays.toString(b));
@@ -470,13 +312,22 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     	Collection<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
         int i = 0;
         System.out.println("Constraints");
-        for (double[] row : A) {
+        for (double[] row : inputComparisonPart) {
             constraints.add(new LinearConstraint(row, Relationship.GEQ, b[i]));
             System.out.println(Arrays.toString(row)+" >= "+b[i]);
             i++;
         }
-        
-        for (double[] row : B) {
+        for (double[] row : inputMinumumUtilityPart) {
+            constraints.add(new LinearConstraint(row, Relationship.GEQ, b[i]));
+            System.out.println(Arrays.toString(row)+" >= "+b[i]);
+            i++;
+        }
+        for (double[] row : inputMaximumUtilityPart) {
+            constraints.add(new LinearConstraint(row, Relationship.LEQ, b[i]));
+            System.out.println(Arrays.toString(row)+" <= "+b[i]);
+            i++;
+        }
+        for (double[] row : inputEqualityPart) {
             constraints.add(new LinearConstraint(row, Relationship.EQ, b[i]));
             System.out.println(Arrays.toString(row)+"  = "+b[i]);
             i++;
