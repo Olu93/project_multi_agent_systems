@@ -91,8 +91,8 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
 
         // computeSimplex4(simplexMatrix);    
         // computeSimplex5(simplexMatrix);    
-        computeSimplex7(simplexMatrix);    
-        return computeSimplex2(simplexMatrix);
+           
+        return computeSimplex7(simplexMatrix); 
     }
 
     private Integer getIndex(final IssueDiscrete issue, final ValueDiscrete value) {
@@ -441,7 +441,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     	PointValuePair solution = solver.optimize(new MaxIter(100), oFunc, new LinearConstraintSet(constraints), GoalType.MINIMIZE, new NonNegativeConstraint(true));
     	System.out.println(Arrays.toString(solution.getPoint()) + " : " + solution.getSecond());
         
-        return convenience;
+        return new Matrix(Arrays.copyOfRange(solution.getPoint(), 0, numberOfUnknowns), 1);
     }
 
     @Override

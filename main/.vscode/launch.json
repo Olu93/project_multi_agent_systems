@@ -47,7 +47,7 @@
         },
         {
             "type": "java",
-            "name": "Debug (Launch)-RunSession<main>",
+            "name": "Run Party",
             "request": "launch",
             "mainClass": "misc.RunSession",
             "projectName": "main",
