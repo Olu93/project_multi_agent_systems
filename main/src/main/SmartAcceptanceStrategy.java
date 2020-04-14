@@ -55,11 +55,14 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 		Utils.printMatrix(oneHotEncodedRankings);
 		System.out.println("Weights");
 		Utils.printMatrix(this.uncertaintyEstimator.getWeights());
-		System.out.println("Results");
-		Utils.printMatrix(oneHotEncodedRankings.times(this.uncertaintyEstimator.getWeights().transpose()));
+		Matrix prediction = oneHotEncodedRankings.times(this.uncertaintyEstimator.getWeights().transpose());
+		int i = 0;
 		for (Bid rankedBid : userModel.getBidRanking().getBidOrder()) {
-			System.out.println("True Utility: " + rankedBid);
-			System.out.println("        Util: " + userModelExperimental.getRealUtility(rankedBid));
+			System.out.println("=======Bid: " + rankedBid);
+			System.out.println("Wrong Util: " + negotiationSession.getUtilitySpace().getUtility(rankedBid));
+			System.out.println("Pred  Util: " + prediction.get(i,0));
+			System.out.println("True  Util: " + userModelExperimental.getRealUtility(rankedBid));
+			i++;
 		}
 
 		// opponentHistory.getHistory().removeIf(bid -> bestBidProposals.contains(bid));
