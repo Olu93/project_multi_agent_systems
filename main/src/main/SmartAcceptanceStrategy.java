@@ -26,20 +26,22 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 	private final ArrayList<BidDetails> bestBidProposals = new ArrayList<BidDetails>();
 	private UncertaintyUtilityEstimator uncertaintyEstimator;
 
+
 	@Override
 	protected void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
 		super.init(negotiationSession, parameters);
+		if(this.helper == null){
+			this.helper = new SmartAgentState(negotiationSession);
+		}
 	}
 
 	@Override
 	public Actions determineAcceptability() {
 
-		this.uncertaintyEstimator = new UncertaintyUtilityEstimator(negotiationSession); // TODO: Way to inefficient!!!
+		// this.uncertaintyEstimator = new UncertaintyUtilityEstimator(negotiationSession); // TODO: Way to inefficient!!!
 
-		final Boolean isSmartOffering = SmartComponentNames.SMART_BIDDING_STRATEGY.toString()
-				.equalsIgnoreCase(offeringStrategy.getName());
+		final Boolean isSmartOffering = offeringStrategy instanceof SmartOfferingStrategy;
 		final UserModel userModel = negotiationSession.getUserModel();
-		ExperimentalUserModel userModelExperimental = (ExperimentalUserModel) userModel;
 		final boolean isUncertain = userModel == null;
 		final BidDetails agentNextBid = offeringStrategy.getNextBid();
 		final BidDetails opponentBid = negotiationSession.getOpponentBidHistory().getLastBidDetails();
@@ -48,32 +50,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 
 		System.out.println("PRRRRIIIIIIIIIIIIINT");
 
-		Matrix oneHotEncodedRankings = Utils.getDummyEncoding(negotiationSession.getIssues(),
-				userModel.getBidRanking().getBidOrder());
-
-		System.out.println("Encoded ranking");
-		Utils.printMatrix(oneHotEncodedRankings);
-		System.out.println("Weights");
-		Utils.printMatrix(this.uncertaintyEstimator.getWeights());
-		Matrix prediction = oneHotEncodedRankings.times(this.uncertaintyEstimator.getWeights().transpose());
-		int i = 0;
-		List<Double> statsBuiltin = new ArrayList<Double>();
-		List<Double> statsPredict = new ArrayList<Double>();
-		for (Bid rankedBid : userModel.getBidRanking().getBidOrder()) {
-			double realUtility = userModelExperimental.getRealUtility(rankedBid);
-			double builtInDiff = Math.abs(negotiationSession.getUtilitySpace().getUtility(rankedBid)-realUtility);
-			double predDiff = Math.abs(prediction.get(i,0)-realUtility);
-			statsBuiltin.add(builtInDiff);
-			statsPredict.add(predDiff);
-			System.out.println("===> Bid: " + rankedBid);
-			System.out.println("True  							Util: " + realUtility);
-			System.out.println("Built-in 	distance to real utility: " + builtInDiff);
-			System.out.println("Prediction 	distance to real utility: " + predDiff);
-			i++;
-		}
-		System.out.println("Avg Distance of built in utility estimator: "+ statsBuiltin.stream().mapToDouble(a -> a).average().getAsDouble());
-		System.out.println("Avg Distance of prediction utility estimator: "+ statsPredict.stream().mapToDouble(a -> a).average().getAsDouble());
-
+		
 		// opponentHistory.getHistory().removeIf(bid -> bestBidProposals.contains(bid));
 		// <= Leads to permanent history change!!!
 		final List<BidDetails> candidateBids = opponentHistory.getHistory().parallelStream()
