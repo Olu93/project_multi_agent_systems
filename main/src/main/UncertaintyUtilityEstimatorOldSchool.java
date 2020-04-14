@@ -191,34 +191,21 @@ public class UncertaintyUtilityEstimatorOldSchool extends AdditiveUtilitySpace {
         int finalColIdx = emptyMatrix.getColumnDimension() - 1;
 
         emptyMatrix.setMatrix(0, endOfPairwiseComparisonIdx, 0, splitAt, comparisons);
-        System.out.println("Almost comparison");
-        Utils.printMatrix(emptyMatrix);
-
         emptyMatrix.setMatrix(0, endOfPairwiseComparisonIdx, splitAt + 1, finalColIdx - 1, slackVars);
-        System.out.println("Almost slack");
-        Utils.printMatrix(emptyMatrix);
 
         emptyMatrix.setMatrix(startOfMinUtilitiesIdx, endOfMinUtilitiesIdx, 0, lastColRankingsIdx, oneHotBids);
-
         for (int i = startOfMinUtilitiesIdx; i < startOfMaxUtilitiesIdx; i++) {
             emptyMatrix.set(i, lastColComparisonIdx, rankings.getLowUtility());
         }
-        System.out.println("Almost onehotbids");
-        Utils.printMatrix(emptyMatrix);
-
-        // System.out.println("Almost done");
-        // Utils.printMatrix(emptyMatrix);
-
         emptyMatrix.setMatrix(startOfMaxUtilitiesIdx, endOfMaxUtilitiesIdx, 0, lastColRankingsIdx, oneHotBids);
         for (int i = startOfMaxUtilitiesIdx; i < thirdToLastIdx; i++) {
             emptyMatrix.set(i, lastColComparisonIdx, rankings.getHighUtility());
         }
+        System.out.println("Added all the additional constraints");
+        Utils.printMatrix(emptyMatrix);
 
         List<Map<IssueDiscrete, Integer>> tmp = getMatrixOfValues2(hardConstraints);
         Matrix dummyEncodedHardConstraints = convertBidToMatrix(tmp);
-
-        System.out.println("Almost done");
-        Utils.printMatrix(emptyMatrix);
 
         int[] range = { thirdToLastIdx, secondToLastIdx };
         emptyMatrix.setMatrix(range, 0, dummyEncodedHardConstraints.getColumnDimension() - 1,
