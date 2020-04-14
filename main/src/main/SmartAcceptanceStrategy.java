@@ -17,14 +17,18 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 
 	@Override
 	public Actions determineAcceptability() {
+		final BidDetails opponentBid = negotiationSession.getOpponentBidHistory().getLastBidDetails();
+		// TODO: Uncertainty makes it unclear whether that really is the best bid.
+		return determineAcceptabilityBid(opponentBid);
+	}
+	
+	public Actions determineAcceptabilityBid(BidDetails opponentBid) {
 		final Boolean isSmartOffering = SmartComponentNames.SMART_BIDDING_STRATEGY.toString().equalsIgnoreCase(offeringStrategy.getName());
 		final UserModel userModel = negotiationSession.getUserModel();
 		final boolean isUncertain = userModel == null;
 		final BidDetails agentNextBid = offeringStrategy.getNextBid();
-		final BidDetails opponentBid = negotiationSession.getOpponentBidHistory().getLastBidDetails();
-		// TODO: Uncertainty makes it unclear whether that really is the best bid.
+		
 		final BidHistory opponentHistory = negotiationSession.getOpponentBidHistory();
-
 		// opponentHistory.getHistory().removeIf(bid -> bestBidProposals.contains(bid));
 		// <= Leads to permanent history change!!!
 		final List<BidDetails> candidateBids = opponentHistory.getHistory().parallelStream()
@@ -62,8 +66,8 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 			}
 			return Actions.Accept;
 		}
-		return Actions.Reject;
-	}	
+		return Actions.Reject;	
+	}
 
 	@Override
 	public String getName() {

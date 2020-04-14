@@ -66,7 +66,11 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         if(this.opponentBiddingHistory.size() == 0) return null;
         System.out.println("Starting the prediction process");
         List<BidDetails> tmp =  this.opponentBiddingHistory.getHistory();
-        BidHistory shiftedOpponentBidHistory = new BidHistory(tmp.subList(1, tmp.size()));
+        return getBidbyHistory(tmp);
+    }
+    
+    public BidDetails getBidbyHistory(List<BidDetails> tmp) {
+    	BidHistory shiftedOpponentBidHistory = new BidHistory(tmp.subList(1, tmp.size()));
         BidHistory slicedX = new BidHistory(tmp.subList(0, tmp.size()-1));
         BidHistory newX = new BidHistory(tmp.subList(tmp.size()-1, tmp.size()));
 

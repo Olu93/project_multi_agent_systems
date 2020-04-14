@@ -21,14 +21,17 @@ import genius.core.boaframework.OfferingStrategy;
 import genius.core.misc.Range;
 
 public class MCTSStrategy extends OfferingStrategy{
-	AcceptanceStrategy ac;
-	OMStrategy om;
+	SmartAcceptanceStrategy ac;
+	SmartOpponentOfferingModel om;
+	BinarySearchStrategy bs;
+	GameTree tree;
 	
 	public MCTSStrategy() {;}
 	
 	public MCTSStrategy(AcceptanceStrategy acceptanceStrategy, OMStrategy opponentBidModel) {
-		ac = acceptanceStrategy;
-		om = opponentBidModel;
+		ac = (SmartAcceptanceStrategy) acceptanceStrategy;
+		om = (SmartOpponentOfferingModel) opponentBidModel;
+		tree = new GameTree();
 	}
 
 	@Override
@@ -39,33 +42,31 @@ public class MCTSStrategy extends OfferingStrategy{
 	@Override
 	public BidDetails determineNextBid() {
 		// TODO Auto-generated method stub
+		enhanceTree(tree.getRoot());
 		return null;
 	}
-	
-	private List<BidDetails> getBidinRange(double lowerBound, double upperBound) {
 
-        List<BidDetails> bidsInRange = new ArrayList<BidDetails>();
-        BidIterator myBidIterator = new BidIterator(negotiationSession.getUtilitySpace().getDomain());
-        while (myBidIterator.hasNext()) {
-            Bid b = myBidIterator.next();
-            try {
-                double util = negotiationSession.getUtilitySpace().getUtility(b);
-                if (util >= lowerBound && util <= upperBound) {
-                    bidsInRange.add(new BidDetails(b, util));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return bidsInRange;
-    }
-
-	public Bid simulateNextBid() {
-		GameTree tree = new GameTree();
-		Node root = tree.getRoot();
+	public BidDetails enhanceTree(Node node) {
 		
-		return null;
+		for (int i=0; i<100; i++) {
+			Node selectedNode = selectNode(node);
+			if (selectedNode.getNoVisits() >= selectedNode.getChildren().size()) {
+				expandNode(selectedNode);
+			}
+			Node exploredNode = selectedNode;
+			if (exploredNode.getChildren().size() > 0) {
+				exploredNode = selectedNode.getRandomChild();
+			}
+			try {
+				rolloutSimBackprop(exploredNode);
+			} catch (Exception e) {
+				System.out.println("Something went wrong in the rollout");
+				e.printStackTrace();
+			}
+		}
+		
+		Node bestChoiceNode = node.getBestChild();
+        return bestChoiceNode.getBid();
 	}
 	
 	//	node selection
@@ -105,18 +106,24 @@ public class MCTSStrategy extends OfferingStrategy{
 		node.getChildren().add(newNode);	
 	}
 	
+	// rollout and backpropagation
 	private void rolloutSimBackprop(Node node) throws Exception {
+		bs = new BinarySearchStrategy();
 		Node iterNodeCopy = node;
-		// I need: method that would decide if a bid is acceptable or not
-		// A way to update and reuse the opponent bidding strategy
 		BidDetails nextOpponentBid = om.getBid(negotiationSession.getOutcomeSpace(), new Range(negotiationSession.getUtilitySpace().getUtility(negotiationSession.getUtilitySpace().getMinUtilityBid()),
 				negotiationSession.getUtilitySpace().getUtility(negotiationSession.getUtilitySpace().getMaxUtilityBid())));
 		Double score = nextOpponentBid.getMyUndiscountedUtil();
-		while (ac.determineAcceptability() != Actions.Accept) {
-			nextOpponentBid = om.getBid(negotiationSession.getOutcomeSpace(), new Range(negotiationSession.getUtilitySpace().getUtility(negotiationSession.getUtilitySpace().getMinUtilityBid()),
-					negotiationSession.getUtilitySpace().getUtility(negotiationSession.getUtilitySpace().getMaxUtilityBid())));
+		List<BidDetails> biddingHistory = new ArrayList<BidDetails>();
+		biddingHistory.add(nextOpponentBid);
+		BidDetails agentBid = bs.determineNextBidFromInput(nextOpponentBid.getBid());
+		node.setBid(agentBid);
+		// run until the rest of timesteps
+		while (ac.determineAcceptabilityBid(nextOpponentBid) != Actions.Accept) {
+			nextOpponentBid = om.getBidbyHistory(biddingHistory);
+			biddingHistory.add(nextOpponentBid);
+			agentBid = bs.determineNextBidFromInput(nextOpponentBid.getBid());
+			biddingHistory.add(agentBid);
 			score = nextOpponentBid.getMyUndiscountedUtil();
-			// my bid too
 		}
 		while (iterNodeCopy != null) {
 			iterNodeCopy.setScore(iterNodeCopy.getScore() + score);
