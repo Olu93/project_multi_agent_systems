@@ -43,8 +43,9 @@ public class MCTSStrategy extends OfferingStrategy {
 		for (int i=0; i<5; i++) {
 			System.out.println(i);
 			Node selectedNode = selectNode(node);
+			System.err.println(selectedNode.getNoVisits());
 			if (selectedNode.getNoVisits() >= selectedNode.getChildren().size()) {
-				System.err.println("Expansion: " + selectedNode.getId());
+				System.err.println("Expansion: " + selectedNode.getId() + " - " + selectedNode.getNoVisits());
 				expandNode(selectedNode);
 			}
 			Node exploredNode = selectedNode;
@@ -88,25 +89,22 @@ public class MCTSStrategy extends OfferingStrategy {
 	}
 	
 	public static Node getBestNode(Node node) {
-		Double parentVisits = 1.0;
-		if(node.getParent() != null){
-			parentVisits = node.getParent().getNoVisits();
-		}
-		Double finalParentVisits = parentVisits;
-
-		if(node.getChildren().size() == 0){
+		//TODO: bug in here; something is fucked		
+		if(node.getChildren().size() == 0 || node.getParent() == null){
 			return node;
 		}
+		
+		Double parentVisits = node.getParent().getNoVisits();
 		return Collections.max(node.getChildren(),
 				Comparator.comparing(c -> calculateUCB1(c.getNoVisits(),
-						finalParentVisits, c.getScore())));
+						parentVisits, c.getScore())));
 	}
 	
 	// node expansion
 	private void expandNode(Node node) {
 //		System.out.println("I run from expandNode");
 		Node newNode = new Node();
-		System.err.println("Child: " + newNode.getId());
+		System.err.println("Child: " + newNode.getId() + " - " + newNode.getNoVisits());
 		newNode.setParent(node);
 		node.getChildren().add(newNode);	
 	}
