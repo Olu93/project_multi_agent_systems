@@ -75,29 +75,10 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
 
 
     private Matrix init() {
-        // final List<Map<IssueDiscrete, Integer>> comparisons =
-        // getMatrixOfPairWiseComparisons();
-        // final Matrix comparisonMatrix =
-        // convertPairwiseComparisonsToMatrix(comparisons);
         final Matrix comparisonMatrix = getMatrixOfPairWiseComparisons();
-        // System.out.println("Comparison Matrix");
-        // Utils.printMatrix(comparisonMatrix);
         final Matrix simplexMatrix = getFinalSimplex(Matrix.constructWithCopy(comparisonMatrix.getArrayCopy()));
 
-        return computeSimplex8(simplexMatrix);
-    }
-
-    private Integer getIndex(final IssueDiscrete issue, final ValueDiscrete value) {
-        return issue.getValueIndex(value);
-    }
-
-    private Map<IssueDiscrete, Integer> pairwiseComparison2(final Bid firstBid, final Bid secondBid) {
-        final Map<IssueDiscrete, Integer> result = this.issues.stream().map(issue -> (IssueDiscrete) issue)
-                .map(issue -> new SimpleEntry<IssueDiscrete, Integer>(issue,
-                        issue.getValueIndex(firstBid.getValue(issue).toString())
-                                - issue.getValueIndex(secondBid.getValue(issue).toString())))
-                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-        return result;
+        return computeSimplex(simplexMatrix);
     }
 
     public Matrix getWeights() {
@@ -110,18 +91,12 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         Matrix firstRow = dummyEncodedBids.getMatrix(new int[] { 0 }, 0, numCol);
         Matrix secondRow = dummyEncodedBids.getMatrix(new int[] { 1 }, 0, numCol);
         Matrix comparisonRow = secondRow.minus(firstRow);
-
-        // .map(issue -> new SimpleEntry<IssueDiscrete, Integer>(issue,
-        // issue.getValueIndex(firstBid.getValue(issue).toString())
-        // - issue.getValueIndex(secondBid.getValue(issue).toString())))
         return comparisonRow;
     }
 
     private Matrix getMatrixOfPairWiseComparisons() {
         final List<Bid> bidOrder = this.rankings.getBidOrder();
         final List<Matrix> disjointComparisons = IntStream.range(0, rankings.getSize() - 1)
-                // .peek(idx -> Utils.printMatrix(pairwiseComparison2(bidOrder.get(idx),
-                // bidOrder.get(idx + 1))))
                 .mapToObj(idx -> pairwiseComparison(bidOrder.get(idx), bidOrder.get(idx + 1)))
                 .collect(Collectors.toList());
         final double[][] result = disjointComparisons.stream().map(row -> row.getRowPackedCopy())
@@ -129,37 +104,6 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         return new Matrix(result);
     }
 
-    // private List<Map<IssueDiscrete, Integer>> getMatrixOfPairWiseComparisons() {
-    // final List<Bid> bidOrder = this.rankings.getBidOrder();
-    // final List<Map<IssueDiscrete, Integer>> result = IntStream.range(0,
-    // rankings.getSize() - 1)
-    // // .peek(idx -> Utils.printMatrix(pairwiseComparison2(bidOrder.get(idx),
-    // bidOrder.get(idx + 1))))
-    // .mapToObj(idx -> pairwiseComparison(bidOrder.get(idx), bidOrder.get(idx +
-    // 1)))
-    // .collect(Collectors.toList());
-    // return result;
-    // }
-
-    // private Matrix convertPairwiseComparisonsToMatrix(final
-    // List<Map<IssueDiscrete, Integer>> input) {
-    // System.out.println(input.size());
-    // final Integer rowLength = input.size() - 1;
-    // final Integer colLength = input.get(0).size();
-    // final Matrix emptyMatrix = new Matrix(rowLength, colLength);
-    // Integer tmpCol;
-    // Map<IssueDiscrete, Integer> currentComparisonMap;
-
-    // for (int i = 0; i < rowLength; i++) {
-    // currentComparisonMap = input.get(i);
-    // for (final Entry<IssueDiscrete, Integer> tmp :
-    // currentComparisonMap.entrySet()) {
-    // tmpCol = tmp.getKey().getNumber() - 1;
-    // emptyMatrix.set(i, tmpCol, tmp.getValue());
-    // }
-    // }
-    // return emptyMatrix;
-    // }
 
     private Matrix getFinalSimplex(final Matrix comparisons) {
 
@@ -220,56 +164,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         return emptyMatrix;
     }
 
-    private Simplex computeSimplex(final double[][] simplexMatrix, final Integer rowNum, final Integer colNum) {
-        final Simplex simplex = new Simplex(rowNum, colNum);
-        boolean quit = false;
-
-        simplex.fillTable(simplexMatrix);
-
-        // print it out
-        System.out.println("---Starting set---");
-        simplex.print();
-
-        // if table is not optimal re-iterate
-        while (!quit) {
-            final Simplex.ERROR err = simplex.compute();
-            System.out.println("---Compute---: " + err);
-
-            if (err == Simplex.ERROR.IS_OPTIMAL) {
-                System.out.println("---Continue---");
-                simplex.print();
-                quit = true;
-            } else if (err == Simplex.ERROR.UNBOUNDED) {
-                System.out.println("---Solution is unbounded---");
-                quit = true;
-            }
-        }
-        return simplex;
-    }
-
-    private Matrix computeSimplex2(final Matrix convenience) {
-        Integer lastRowIdx = convenience.getRowDimension() - 1;
-        Integer lastColIdx = convenience.getColumnDimension() - 1;
-        Integer numberOfUnknowns = this.numberOfUnknowns.intValue();
-        double[][] A = convenience.getMatrix(0, lastRowIdx - 1, 0, numberOfUnknowns - 1).getArrayCopy();
-        System.out.println("Input for two-phase:");
-        Utils.printMatrix(A);
-        double[] b = convenience.getMatrix(0, lastRowIdx - 1, lastColIdx, lastColIdx).getRowPackedCopy();
-        double[] c = convenience.getMatrix(lastRowIdx, lastRowIdx, 0, numberOfUnknowns - 1).getRowPackedCopy();
-
-        TwoPhaseSimplex lp;
-        try {
-            lp = new TwoPhaseSimplex(A, b, c);
-        } catch (ArithmeticException e) {
-            System.out.println(e);
-            return null;
-        }
-        System.out.println("value = " + lp.value());
-        double[] x = lp.primal();
-        return new Matrix(x, 1);
-    }
-
-    private Matrix computeSimplex8(Matrix convenience) {
+    private Matrix computeSimplex(Matrix convenience) {
         Integer lastRowIdx = convenience.getRowDimension() - 1;
         Integer lastColIdx = convenience.getColumnDimension() - 1;
         Integer lastRowRankingsIdx = this.oneHotBids.getRowDimension() - 1;
