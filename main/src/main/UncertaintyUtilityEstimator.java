@@ -16,15 +16,15 @@ import java.util.stream.Stream;
 
 import javax.rmi.CORBA.Util;
 
-import org.apache.commons.math3.optim.MaxIter;
-import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.linear.LinearConstraint;
-import org.apache.commons.math3.optim.linear.LinearConstraintSet;
-import org.apache.commons.math3.optim.linear.LinearObjectiveFunction;
-import org.apache.commons.math3.optim.linear.NonNegativeConstraint;
-import org.apache.commons.math3.optim.linear.Relationship;
-import org.apache.commons.math3.optim.linear.SimplexSolver;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import agents.anac.y2019.harddealer.math3.optim.MaxIter;
+import agents.anac.y2019.harddealer.math3.optim.PointValuePair;
+import agents.anac.y2019.harddealer.math3.optim.linear.LinearConstraint;
+import agents.anac.y2019.harddealer.math3.optim.linear.LinearConstraintSet;
+import agents.anac.y2019.harddealer.math3.optim.linear.LinearObjectiveFunction;
+import agents.anac.y2019.harddealer.math3.optim.linear.NonNegativeConstraint;
+import agents.anac.y2019.harddealer.math3.optim.linear.Relationship;
+import agents.anac.y2019.harddealer.math3.optim.linear.SimplexSolver;
+import agents.anac.y2019.harddealer.math3.optim.nonlinear.scalar.GoalType;
 
 import genius.core.Bid;
 import genius.core.boaframework.NegotiationSession;
