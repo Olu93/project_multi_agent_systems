@@ -53,11 +53,12 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     private final Matrix weightsMatrix;
     private Simplex simplex;
     private final Long numberOfUnknowns; // Count of every individual issue value
-    private static final Double EPSILON = 0.0001; 
+    private static final Double EPSILON = 0.0001;
     private final Matrix oneHotBids;
+    private final Matrix oneHotEqualityBids;
     private final UserModel userModel;
     private final List<Issue> issues;
-    private final Boolean isVerbose = false;
+    private final Boolean isVerbose = true;
     private final Boolean hasStrongConstraints = true;
     private final Boolean hasEpsilon = true;
 
@@ -68,6 +69,8 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         this.numberOfUnknowns = this.issues.stream().mapToLong(issue -> ((IssueDiscrete) issue).getNumberOfValues())
                 .sum();
         this.oneHotBids = Utils.getDummyEncoding(this.issues, rankings.getBidOrder());
+        this.oneHotEqualityBids = Utils.getDummyEncoding(this.issues,
+                Arrays.asList(rankings.getMaximalBid(), rankings.getMinimalBid()));
         System.out.println("Number of unknowns: " + numberOfUnknowns);
 
         this.weightsMatrix = this.init();
@@ -76,20 +79,18 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
 
     private Matrix init() {
         final Matrix comparisonMatrix = getMatrixOfPairWiseComparisons(this.rankings.getBidOrder());
-        final Matrix simplexMatrix = getSimplexMatrix(comparisonMatrix, this.oneHotBids);
+        final Matrix simplexMatrix = getSimplexMatrix(comparisonMatrix, this.oneHotBids, this.oneHotEqualityBids);
         return computeSimplexMatrix(simplexMatrix, this.oneHotBids);
     }
 
-    private Matrix getSimplexMatrix(final Matrix comparisons, final Matrix oneHotEncodedBids) {
-
-        final List<Bid> hardConstraints = Arrays.asList(rankings.getMaximalBid(), rankings.getMinimalBid()); // TODO:
-                                                                                                             // Parametrize
-                                                                                                             // this
+    private Matrix getSimplexMatrix(final Matrix comparisons, final Matrix oneHotEncodedBids,
+            final Matrix oneHotEqualityBids) {
 
         final Integer endOfPairwiseComparisonIdx = comparisons.getRowDimension() - 1;
         final Integer lastRowRankingsIdx = oneHotEncodedBids.getRowDimension() - 1;
         final Integer lastColRankingsIdx = oneHotEncodedBids.getColumnDimension() - 1;
         final Integer splitAt = comparisons.getColumnDimension() - 1;
+        final int numberOfEqualityBids = oneHotEqualityBids.getRowDimension();
 
         final int startOfMinUtilitiesIdx = endOfPairwiseComparisonIdx + 1;
         final int endOfMinUtilitiesIdx = startOfMinUtilitiesIdx + lastRowRankingsIdx;
@@ -101,20 +102,20 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
 
         final Integer lastColComparisonIdx = comparisons.getRowDimension() + comparisons.getColumnDimension();
         final Matrix slackVars = Matrix.identity(startOfEqualities, startOfEqualities);
-        final Matrix emptyMatrix = new Matrix(startOfEqualities + hardConstraints.size() + 1, lastColComparisonIdx + 1);
+        final Matrix emptyMatrix = new Matrix(startOfEqualities + numberOfEqualityBids + 1, lastColComparisonIdx + 1);
         final int finalColIdx = emptyMatrix.getColumnDimension() - 1;
 
         emptyMatrix.setMatrix(0, endOfPairwiseComparisonIdx, 0, splitAt, comparisons);
         emptyMatrix.setMatrix(0, endOfPairwiseComparisonIdx, splitAt + 1, finalColIdx - 1, slackVars);
-        
-        if(hasEpsilon) {
+
+        if (hasEpsilon) {
             Matrix tmp = new Matrix(startOfMaxUtilitiesIdx, 1, EPSILON);
             emptyMatrix.setMatrix(0, endOfPairwiseComparisonIdx, finalColIdx, finalColIdx, tmp);
         }
 
-
         if (hasStrongConstraints) {
-            emptyMatrix.setMatrix(endOfPairwiseComparisonIdx+1, endOfMinUtilitiesIdx, 0, lastColRankingsIdx, oneHotBids);
+            emptyMatrix.setMatrix(endOfPairwiseComparisonIdx + 1, endOfMinUtilitiesIdx, 0, lastColRankingsIdx,
+                    oneHotBids);
             for (int i = startOfMinUtilitiesIdx; i < startOfMaxUtilitiesIdx; i++) {
                 emptyMatrix.set(i, lastColComparisonIdx, rankings.getLowUtility());
             }
@@ -127,18 +128,15 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         // System.out.println("Almost done");
         // Utils.printMatrix(emptyMatrix);
 
-        final Matrix dummyEncodedHardConstraints = Utils.getDummyEncoding(this.issues, hardConstraints);
-
-        final int[] range = IntStream.range(thirdToLastIdx, thirdToLastIdx + hardConstraints.size()).toArray();
-        emptyMatrix.setMatrix(range, 0, dummyEncodedHardConstraints.getColumnDimension() - 1,
-                dummyEncodedHardConstraints);
+        final int[] range = IntStream.range(thirdToLastIdx, thirdToLastIdx + numberOfEqualityBids).toArray();
+        emptyMatrix.setMatrix(range, 0, oneHotEqualityBids.getColumnDimension() - 1, oneHotEqualityBids);
         emptyMatrix.set(thirdToLastIdx, finalColIdx, rankings.getHighUtility());
         if (range.length > 1) {
             emptyMatrix.set(secondToLastIdx, finalColIdx, rankings.getLowUtility());
         }
 
         for (int i = 0; i < lastColComparisonIdx; i++) {
-            emptyMatrix.set(thirdToLastIdx + hardConstraints.size(), i, i > splitAt ? 1 : 0);
+            emptyMatrix.set(thirdToLastIdx + numberOfEqualityBids, i, i > splitAt ? 1 : 0);
         }
 
         if (this.isVerbose == true) {
@@ -172,8 +170,8 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         constraintsList.addAll(addRowsToConstraints(inputComparisonPart, Relationship.GEQ));
 
         if (hasStrongConstraints) {
-            final Matrix inputMinumumUtilityPart = convenience.getMatrix(startOfMinUtilitiesIdx+1, endOfMinUtitiliesIdx,
-                    0, lastColIdx);
+            final Matrix inputMinumumUtilityPart = convenience.getMatrix(startOfMinUtilitiesIdx + 1,
+                    endOfMinUtitiliesIdx, 0, lastColIdx);
             constraintsList.addAll(addRowsToConstraints(inputMinumumUtilityPart, Relationship.GEQ));
             final Matrix inputMaximumUtilityPart = convenience.getMatrix(startOfMaxUtilitiesIdx, endOfMaxUtitiliesIdx,
                     0, lastColIdx);
@@ -183,9 +181,11 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         final Matrix inputEqualityPart = convenience.getMatrix(startOfEqualityIdx, finalRowIdx - 1, 0, lastColIdx);
         constraintsList.addAll(addRowsToConstraints(inputEqualityPart, Relationship.EQ));
 
-        // double[] b = convenience.getMatrix(0, lastRowIdx - 1, lastColIdx, lastColIdx).getRowPackedCopy();
-        // b = Arrays.stream(b).boxed().map(val -> Utils.round(val, 2)).mapToDouble(val -> val).toArray();
-        final double[] c = convenience.getMatrix(lastRowIdx, lastRowIdx, 0, lastColIdx-1).getRowPackedCopy();
+        // double[] b = convenience.getMatrix(0, lastRowIdx - 1, lastColIdx,
+        // lastColIdx).getRowPackedCopy();
+        // b = Arrays.stream(b).boxed().map(val -> Utils.round(val, 2)).mapToDouble(val
+        // -> val).toArray();
+        final double[] c = convenience.getMatrix(lastRowIdx, lastRowIdx, 0, lastColIdx - 1).getRowPackedCopy();
 
         if (this.isVerbose) {
             System.out.println("Input c for two-phase:");
@@ -297,7 +297,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
             this.value = Utils.round(row.get(0, lastIndex), 4);
             this.type = type;
         }
-        
+
         @Override
         public String toString() {
             return Utils.getRowString(row) + (type == Relationship.EQ ? "=" + type + " " : type + " ") + value;
