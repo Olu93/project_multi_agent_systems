@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class MCTSStrategy extends OfferingStrategy{
+public class MCTSStrategy extends OfferingStrategy {
 	SmartAcceptanceStrategy ac;
 	SmartOpponentOfferingModel om;
 	BinarySearchStrategy bs;
@@ -19,6 +19,7 @@ public class MCTSStrategy extends OfferingStrategy{
 	
 	public MCTSStrategy() {;}
 	
+	// TODO: I need both the opponent model strategy and the acceptance strategy in here	
 	public MCTSStrategy(AcceptanceStrategy acceptanceStrategy, OMStrategy opponentBidModel) {
 		ac = (SmartAcceptanceStrategy) acceptanceStrategy;
 		om = (SmartOpponentOfferingModel) opponentBidModel;
@@ -41,9 +42,9 @@ public class MCTSStrategy extends OfferingStrategy{
 		System.out.println("Starting Simulation");
 		for (int i=0; i<5; i++) {
 			System.out.println(i);
-			System.out.println("Nema");
 			Node selectedNode = selectNode(node);
 			if (selectedNode.getNoVisits() >= selectedNode.getChildren().size()) {
+				System.err.println("Expansion: " + selectedNode.getId());
 				expandNode(selectedNode);
 			}
 			Node exploredNode = selectedNode;
@@ -59,6 +60,7 @@ public class MCTSStrategy extends OfferingStrategy{
 		}
 		
 		Node bestChoiceNode = node.getBestChild();
+		tree.setRoot(bestChoiceNode);
         return bestChoiceNode.getBid();
 	}
 	
@@ -104,12 +106,14 @@ public class MCTSStrategy extends OfferingStrategy{
 	private void expandNode(Node node) {
 //		System.out.println("I run from expandNode");
 		Node newNode = new Node();
+		System.err.println("Child: " + newNode.getId());
 		newNode.setParent(node);
 		node.getChildren().add(newNode);	
 	}
 	
 	// rollout and backpropagation
 	private void rolloutSimBackprop(Node node) throws Exception {
+		// TODO: make reset method		
 		bs = new BinarySearchStrategy();
 		Node iterNodeCopy = node;
 		List<BidDetails> biddingHistory = new ArrayList<BidDetails>();
@@ -123,13 +127,16 @@ public class MCTSStrategy extends OfferingStrategy{
 		biddingHistory.add(nextOpponentBid);
 		BidDetails agentBid = bs.determineNextBidFromInput(nextOpponentBid.getBid(), negotiationSession);
 		node.setBid(agentBid);
-		//todo change this with the time that we need till the end
+		//TODO: change this with the time that we need till the end
 		int count = 0;
 		while (ac.determineAcceptabilityBid(nextOpponentBid) != Actions.Accept && count <= 5) {
 			nextOpponentBid = om.getBidbyHistory(biddingHistory);
 			biddingHistory.add(nextOpponentBid);
+			// TODO: use getBid
 			agentBid = bs.determineNextBidFromInput(nextOpponentBid.getBid(), negotiationSession);
 			biddingHistory.add(agentBid);
+			// TODO: maybe do a an average on scores
+			// TODO: add perturbations and do a rollout multiple times
 			score = nextOpponentBid.getMyUndiscountedUtil();
 			count ++;
 		}
@@ -143,7 +150,7 @@ public class MCTSStrategy extends OfferingStrategy{
 	
 	@Override
 	public String getName() {
-		return "MCTS Strateg";
+		return "MCTS Strategy";
 	}
 	
 }

@@ -15,16 +15,11 @@ import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
 /**
  * SmartAgent
  */
-public class SmartAgent extends BoaParty{
-
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
+public class AgentBoaParty extends BoaParty{
 
     @Override
     public String getDescription() {
-        return "SmartAgentPArty";
+        return "MCSTParty";
     }
 
     @Override
@@ -32,9 +27,9 @@ public class SmartAgent extends BoaParty{
 	{
 		// The choice for each component is made here
 		AcceptanceStrategy 	ac  = new SmartAcceptanceStrategy();
-		OfferingStrategy 	os  = new NiceTitForTat_Offering();
 		OpponentModel 		om  = new FreqOpponentPrefModel();
 		OMStrategy			oms = new SmartOpponentOfferingModel();
+		OfferingStrategy 	os  = new MCTSStrategy(ac, oms);
 		
 		// All component parameters can be set below.
 		Map<String, Double> noparams = Collections.emptyMap();

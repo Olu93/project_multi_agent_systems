@@ -14,4 +14,5 @@ public class GameTree {
 	public Node getRoot() {
 		return root;
 	}
+	
 }

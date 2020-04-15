@@ -121,10 +121,6 @@ public class BinarySearchStrategy extends OfferingStrategy {
     }
 
     private List<BidDetails> getBidsOfUtility(double lowerBound, double upperBound, NegotiationSession negotiationSession) {
-        // In big domains, we need to find only this amount of bids around the
-        // target. Should be at least 2.
-        final int limit = 2;
-
         List<BidDetails> bidsInRange = new ArrayList<BidDetails>();
         BidIterator myBidIterator = new BidIterator(negotiationSession.getUtilitySpace().getDomain());
         while (myBidIterator.hasNext()) {

@@ -10,12 +10,16 @@ public class Node {
 	BidDetails bid;
 	Node parent;
 	List<Node> children;
+	String id;
+	Random rand;
 	
 	public Node() {
+		rand = new Random();
 		noVisits = 0.0;
 		score = 0.0;
 		parent = null;
 		children = new ArrayList<Node>();
+		id = rand.nextInt(Integer.MAX_VALUE) + "-" + rand.nextInt(Integer.MAX_VALUE);
 	}
 	
 	public List<Node> getChildren() {
@@ -36,6 +40,10 @@ public class Node {
 	
 	public BidDetails getBid() {
 		return bid;
+	}
+	
+	public String getId() {
+		return id;
 	}
 	
 	public void setNoVisits(Double noVisits) {
@@ -61,7 +69,7 @@ public class Node {
 	
 	 public Node getBestChild() {
 	        return Collections.max(this.children, Comparator.comparing(c -> {
-	            return c.getNoVisits();
+	            return c.getScore();
 	        }));
 	    }
 }
