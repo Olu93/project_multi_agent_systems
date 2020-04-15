@@ -75,33 +75,11 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
 
     private Matrix init() {
         final Matrix comparisonMatrix = getMatrixOfPairWiseComparisons(this.rankings.getBidOrder());
-        final Matrix simplexMatrix = getFinalSimplex(comparisonMatrix, this.oneHotBids);
-        return computeSimplex(simplexMatrix, this.oneHotBids);
+        final Matrix simplexMatrix = getSimplexMatrix(comparisonMatrix, this.oneHotBids);
+        return computeSimplexMatrix(simplexMatrix, this.oneHotBids);
     }
 
-    public Matrix getWeights() {
-        return weightsMatrix;
-    }
-
-    private Matrix pairwiseComparison(final Bid firstBid, final Bid secondBid) {
-        final Matrix dummyEncodedBids = Utils.getDummyEncoding(this.issues, Arrays.asList(firstBid, secondBid));
-        final Integer numCol = dummyEncodedBids.getColumnDimension() - 1;
-        final Matrix firstRow = dummyEncodedBids.getMatrix(new int[] { 0 }, 0, numCol);
-        final Matrix secondRow = dummyEncodedBids.getMatrix(new int[] { 1 }, 0, numCol);
-        final Matrix comparisonRow = secondRow.minus(firstRow);
-        return comparisonRow;
-    }
-
-    private Matrix getMatrixOfPairWiseComparisons(final List<Bid> bidOrder) {
-        final List<Matrix> disjointComparisons = IntStream.range(0, rankings.getSize() - 1)
-                .mapToObj(idx -> pairwiseComparison(bidOrder.get(idx), bidOrder.get(idx + 1)))
-                .collect(Collectors.toList());
-        final double[][] result = disjointComparisons.stream().map(row -> row.getRowPackedCopy())
-                .toArray(double[][]::new);
-        return new Matrix(result);
-    }
-
-    private Matrix getFinalSimplex(final Matrix comparisons, final Matrix oneHotEncodedBids) {
+    private Matrix getSimplexMatrix(final Matrix comparisons, final Matrix oneHotEncodedBids) {
 
         final List<Bid> hardConstraints = Arrays.asList(rankings.getMaximalBid(), rankings.getMinimalBid());
 
@@ -160,7 +138,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         return emptyMatrix;
     }
 
-    private Matrix computeSimplex(final Matrix convenience, final Matrix oneHotEncodedBids) {
+    private Matrix computeSimplexMatrix(final Matrix convenience, final Matrix oneHotEncodedBids) {
         final Integer lastRowIdx = convenience.getRowDimension() - 1;
         final Integer lastColIdx = convenience.getColumnDimension() - 1;
         final Integer lastRowRankingsIdx = oneHotEncodedBids.getRowDimension() - 1;
@@ -237,11 +215,28 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         return new Matrix(Arrays.copyOfRange(solution.getPoint(), 0, numberOfUnknowns), 1);
     }
 
-    @Override
-    public double getUtility(final Bid bid) {
-        final Matrix oneHotEncodedRankings = Utils.getDummyEncoding(this.issues, Arrays.asList(bid));
-        final Matrix prediction = oneHotEncodedRankings.times(this.getWeights().transpose());
-        return prediction.get(0, 0);
+
+
+    public Matrix getWeights() {
+        return weightsMatrix;
+    }
+
+    private Matrix pairwiseComparison(final Bid firstBid, final Bid secondBid) {
+        final Matrix dummyEncodedBids = Utils.getDummyEncoding(this.issues, Arrays.asList(firstBid, secondBid));
+        final Integer numCol = dummyEncodedBids.getColumnDimension() - 1;
+        final Matrix firstRow = dummyEncodedBids.getMatrix(new int[] { 0 }, 0, numCol);
+        final Matrix secondRow = dummyEncodedBids.getMatrix(new int[] { 1 }, 0, numCol);
+        final Matrix comparisonRow = secondRow.minus(firstRow);
+        return comparisonRow;
+    }
+
+    private Matrix getMatrixOfPairWiseComparisons(final List<Bid> bidOrder) {
+        final List<Matrix> disjointComparisons = IntStream.range(0, rankings.getSize() - 1)
+                .mapToObj(idx -> pairwiseComparison(bidOrder.get(idx), bidOrder.get(idx + 1)))
+                .collect(Collectors.toList());
+        final double[][] result = disjointComparisons.stream().map(row -> row.getRowPackedCopy())
+                .toArray(double[][]::new);
+        return new Matrix(result);
     }
 
     private void evaluatePerformance(final List<Bid> evaluationBids) {
@@ -280,6 +275,13 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
                     + statsPredictDiff.stream().mapToDouble(a -> a).average().getAsDouble());
         }
 
+    }
+
+    @Override
+    public double getUtility(final Bid bid) {
+        final Matrix oneHotEncodedRankings = Utils.getDummyEncoding(this.issues, Arrays.asList(bid));
+        final Matrix prediction = oneHotEncodedRankings.times(this.getWeights().transpose());
+        return prediction.get(0, 0);
     }
 
 }
