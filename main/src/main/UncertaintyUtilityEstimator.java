@@ -69,16 +69,15 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         System.out.println("Number of unknowns: " + numberOfUnknowns);
         
         this.weightsMatrix = this.init();
-        this.evaluatePerformance();
+        this.evaluatePerformance(this.rankings.getBidOrder());
     }
 
 
 
     private Matrix init() {
-        final Matrix comparisonMatrix = getMatrixOfPairWiseComparisons();
-        final Matrix simplexMatrix = getFinalSimplex(Matrix.constructWithCopy(comparisonMatrix.getArrayCopy()));
-
-        return computeSimplex(simplexMatrix);
+        final Matrix comparisonMatrix = getMatrixOfPairWiseComparisons(this.rankings.getBidOrder());
+        final Matrix simplexMatrix = getFinalSimplex(comparisonMatrix, this.oneHotBids);
+        return computeSimplex(simplexMatrix, this.oneHotBids);
     }
 
     public Matrix getWeights() {
@@ -94,8 +93,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         return comparisonRow;
     }
 
-    private Matrix getMatrixOfPairWiseComparisons() {
-        final List<Bid> bidOrder = this.rankings.getBidOrder();
+    private Matrix getMatrixOfPairWiseComparisons(final List<Bid> bidOrder) {
         final List<Matrix> disjointComparisons = IntStream.range(0, rankings.getSize() - 1)
                 .mapToObj(idx -> pairwiseComparison(bidOrder.get(idx), bidOrder.get(idx + 1)))
                 .collect(Collectors.toList());
@@ -105,13 +103,13 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     }
 
 
-    private Matrix getFinalSimplex(final Matrix comparisons) {
+    private Matrix getFinalSimplex(final Matrix comparisons, final Matrix oneHotEncodedBids) {
 
         List<Bid> hardConstraints = Arrays.asList(rankings.getMaximalBid(), rankings.getMinimalBid());
 
         final Integer endOfPairwiseComparisonIdx = comparisons.getRowDimension() - 1;
-        final Integer lastRowRankingsIdx = this.oneHotBids.getRowDimension() - 1;
-        final Integer lastColRankingsIdx = this.oneHotBids.getColumnDimension() - 1;
+        final Integer lastRowRankingsIdx = oneHotEncodedBids.getRowDimension() - 1;
+        final Integer lastColRankingsIdx = oneHotEncodedBids.getColumnDimension() - 1;
         final Integer splitAt = comparisons.getColumnDimension() - 1;
 
         int startOfMinUtilitiesIdx = endOfPairwiseComparisonIdx + 1;
@@ -164,11 +162,11 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         return emptyMatrix;
     }
 
-    private Matrix computeSimplex(Matrix convenience) {
+    private Matrix computeSimplex(Matrix convenience, Matrix oneHotEncodedBids) {
         Integer lastRowIdx = convenience.getRowDimension() - 1;
         Integer lastColIdx = convenience.getColumnDimension() - 1;
-        Integer lastRowRankingsIdx = this.oneHotBids.getRowDimension() - 1;
-        Integer lastColRankingsIdx = this.oneHotBids.getRowDimension() - 1;
+        Integer lastRowRankingsIdx = oneHotEncodedBids.getRowDimension() - 1;
+        Integer lastColRankingsIdx = oneHotEncodedBids.getRowDimension() - 1;
 
         Integer finalRowIdx = lastRowIdx;
         Integer startOfEqualityIdx = finalRowIdx - 2;
@@ -249,10 +247,10 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         return prediction.get(0, 0);
     }
 
-    private void evaluatePerformance() {
+    private void evaluatePerformance(List<Bid> evaluationBids) {
         if (this.userModel instanceof ExperimentalUserModel) {
             ExperimentalUserModel userModelExperimental = (ExperimentalUserModel) this.userModel;
-            Matrix oneHotEncodedRankings = Utils.getDummyEncoding(this.issues, this.rankings.getBidOrder());
+            Matrix oneHotEncodedRankings = Utils.getDummyEncoding(this.issues, evaluationBids);
             Matrix weights = this.getWeights();
 
             if (this.isVerbose) {
@@ -264,7 +262,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
             
             List<Double> statsPredictDiff = new ArrayList<Double>();
             List<Double> statsPredictMSE = new ArrayList<Double>();
-            for (Bid rankedBid : this.rankings.getBidOrder()) {
+            for (Bid rankedBid : evaluationBids) {
                 double realUtility = userModelExperimental.getRealUtility(rankedBid);
                 double predUtility = this.getUtility(rankedBid);
                 double predMSE = Math.pow(predUtility - realUtility, 2);
