@@ -1,4 +1,4 @@
-package group10_strategy;
+package main;
 
 public class GameTree {
 	Node root;

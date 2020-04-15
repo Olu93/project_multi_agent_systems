@@ -1,4 +1,4 @@
-package group10_strategy;
+package main;
 
 import genius.core.BidHistory;
 import genius.core.bidding.BidDetails;

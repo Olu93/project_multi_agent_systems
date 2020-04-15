@@ -52,6 +52,14 @@
             "mainClass": "misc.RunSession",
             "projectName": "main",
             "args": "lib\\run.xml logs\\last_run.csv"
+        },
+        {
+            "type": "java",
+            "name": "Run MCTS",
+            "request": "launch",
+            "mainClass": "misc.RunSession",
+            "projectName": "main",
+            "args": "lib\\mcts.xml logs\\last_run.csv"
         }
     ]
 }

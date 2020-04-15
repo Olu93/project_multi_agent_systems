@@ -1,4 +1,4 @@
-package group10_strategy;
+package main;
 
 import genius.core.boaframework.*;
 import genius.core.issue.IssueDiscrete;

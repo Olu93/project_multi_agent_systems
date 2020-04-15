@@ -1,4 +1,4 @@
-package group10_strategy;
+package main;
 
 /**
  * SmartConstants

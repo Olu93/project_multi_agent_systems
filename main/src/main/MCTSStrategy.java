@@ -1,4 +1,4 @@
-package group10_strategy;
+package main;
 
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.AcceptanceStrategy;
@@ -39,7 +39,7 @@ public class MCTSStrategy extends OfferingStrategy{
 	public BidDetails enhanceTree(Node node) {
 
 		System.out.println("Starting Simulation");
-		for (int i=0; i<2; i++) {
+		for (int i=0; i<5; i++) {
 			System.out.println(i);
 			System.out.println("Nema");
 			Node selectedNode = selectNode(node);
@@ -125,7 +125,7 @@ public class MCTSStrategy extends OfferingStrategy{
 		node.setBid(agentBid);
 		//todo change this with the time that we need till the end
 		int count = 0;
-		while (ac.determineAcceptabilityBid(nextOpponentBid) != Actions.Accept && count <= 60) {
+		while (ac.determineAcceptabilityBid(nextOpponentBid) != Actions.Accept && count <= 5) {
 			nextOpponentBid = om.getBidbyHistory(biddingHistory);
 			biddingHistory.add(nextOpponentBid);
 			agentBid = bs.determineNextBidFromInput(nextOpponentBid.getBid(), negotiationSession);

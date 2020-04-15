@@ -1,4 +1,4 @@
-package group10_strategy;
+package main;
 
 import java.util.HashMap;
 import java.util.Map;
