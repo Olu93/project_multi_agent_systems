@@ -1,4 +1,4 @@
-package main;
+package group10_strategy;
 
 import genius.core.Bid;
 import genius.core.boaframework.SharedAgentState;

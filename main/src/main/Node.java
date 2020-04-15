@@ -1,11 +1,8 @@
-package main;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+package group10_strategy;
 
 import genius.core.bidding.BidDetails;
+
+import java.util.*;
 
 public class Node {
 	Double noVisits;
@@ -18,6 +15,7 @@ public class Node {
 		noVisits = 0.0;
 		score = 0.0;
 		parent = null;
+		children = new ArrayList<Node>();
 	}
 	
 	public List<Node> getChildren() {

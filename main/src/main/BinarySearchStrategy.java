@@ -1,8 +1,9 @@
-package main;
+package group10_strategy;
 
 import genius.core.Bid;
 import genius.core.BidIterator;
 import genius.core.bidding.BidDetails;
+import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.OfferingStrategy;
 
 import java.util.ArrayList;
@@ -37,43 +38,44 @@ public class BinarySearchStrategy extends OfferingStrategy {
     @Override
     public BidDetails determineNextBid() {
         Bid opponentLastBid = negotiationSession.getOpponentBidHistory().getLastBidDetails().getBid();
-        return determineNextBidFromInput(opponentLastBid);
+        return determineNextBidFromInput(opponentLastBid, negotiationSession);
     }
     
-    public BidDetails determineNextBidFromInput(Bid opponentLastBid) {
+    public BidDetails determineNextBidFromInput(Bid opponentLastBid, NegotiationSession negotiationSession) {
+//	    System.out.println("negotiationSession "+ negotiationSession);
     	double myUtilityOfOpponentLastBid = negotiationSession.getUtilitySpace().getUtility(opponentLastBid);
-        System.out.println(negotiationSession.getOpponentBidHistory().getHistory());
-        System.out.println(negotiationSession.getOpponentBidHistory().getLastBidDetails().getMyUndiscountedUtil());
+//        System.out.println(negotiationSession.getOpponentBidHistory().getHistory());
+//        System.out.println(negotiationSession.getOpponentBidHistory().getLastBidDetails().getMyUndiscountedUtil());
         double proposeUtility;
         if(myUtilityOfOpponentLastBid > ourMaxBidThatWeGotFromOpponent){
             ourMaxBidThatWeGotFromOpponent = myUtilityOfOpponentLastBid;
             maxUtilityForBinary = maxUtilityForBinary - (maxUtilityForBinary - myUtilityOfOpponentLastBid) / 2;
             proposeUtility = maxUtilityForBinary;
-            System.out.println("Binary Tactic");
+//            System.out.println("Binary Tactic");
         }
         else{
             double targetUtility = maxUtilityForBinary - (maxUtilityForBinary - ourMaxBidThatWeGotFromOpponent) / 2;
-            System.out.println("Counter the hardheaded");
-            System.out.println("targetUtility: " + targetUtility);
-            System.out.println("ourMaxBidThatWeGotFromOpponent: " + ourMaxBidThatWeGotFromOpponent);
+//            System.out.println("Counter the hardheaded");
+//            System.out.println("targetUtility: " + targetUtility);
+//            System.out.println("ourMaxBidThatWeGotFromOpponent: " + ourMaxBidThatWeGotFromOpponent);
             proposeUtility = maxUtilityForBinary - (maxUtilityForBinary - targetUtility) * negotiationSession.getTime();
         }
-        System.out.println(negotiationSession.getTime());
+//        System.out.println(negotiationSession.getTime());
 
-        ArrayList<BidDetails> myBids = new ArrayList<BidDetails>(getBidsOfUtility(proposeUtility));
-        Bid myBid = getBestBidForSelf(myBids);
-        System.out.println("maxUtilityForBinary: " + maxUtilityForBinary);
-        System.out.println("proposeUtility: " + proposeUtility);
-        System.out.println("myUtilityOfOpponentLastBid: " + myUtilityOfOpponentLastBid);
+        ArrayList<BidDetails> myBids = new ArrayList<BidDetails>(getBidsOfUtility(proposeUtility, negotiationSession));
+        Bid myBid = getBestBidForSelf(myBids, negotiationSession);
+//        System.out.println("maxUtilityForBinary: " + maxUtilityForBinary);
+//        System.out.println("proposeUtility: " + proposeUtility);
+//        System.out.println("myUtilityOfOpponentLastBid: " + myUtilityOfOpponentLastBid);
         nextBid = new BidDetails(myBid, negotiationSession.getUtilitySpace().getUtility(myBid),
                 negotiationSession.getTime());
-        System.out.println("nextBid: " + nextBid);
-        System.out.println("myBid: " + myBid);
-        System.out.println("===================================================");
+//        System.out.println("nextBid: " + nextBid);
+//        System.out.println("myBid: " + myBid);
+//        System.out.println("===================================================");
         return nextBid;
     }
 
-    private Bid getBestBidForSelf(ArrayList<BidDetails> bids) {
+    private Bid getBestBidForSelf(ArrayList<BidDetails> bids, NegotiationSession negotiationSession) {
         Bid maxBid = bids.get(0).getBid();
         for (int i = 0; i < bids.size(); i++) {
             try {
@@ -91,7 +93,7 @@ public class BinarySearchStrategy extends OfferingStrategy {
     /**
      * Get all bids in a utility range.
      */
-    private List<BidDetails> getBidsOfUtility(double target) {
+    private List<BidDetails> getBidsOfUtility(double target, NegotiationSession negotiationSession) {
         if (target > 1)
             target = 1;
 
@@ -99,7 +101,7 @@ public class BinarySearchStrategy extends OfferingStrategy {
         double max = target + 0.04;
         do {
             max += 0.01;
-            List<BidDetails> bids = getBidsOfUtility(min, max);
+            List<BidDetails> bids = getBidsOfUtility(min, max, negotiationSession);
             int size = bids.size();
             // We need at least 2 bids. Or if max = 1, then we settle for 1 bid.
             if (size > 1 || (max >= 1 && size > 0)) {
@@ -118,7 +120,7 @@ public class BinarySearchStrategy extends OfferingStrategy {
         return best;
     }
 
-    private List<BidDetails> getBidsOfUtility(double lowerBound, double upperBound) {
+    private List<BidDetails> getBidsOfUtility(double lowerBound, double upperBound, NegotiationSession negotiationSession) {
         // In big domains, we need to find only this amount of bids around the
         // target. Should be at least 2.
         final int limit = 2;

@@ -1,24 +1,15 @@
-package main;
+package group10_strategy;
 
-import java.lang.reflect.Constructor;
+import genius.core.bidding.BidDetails;
+import genius.core.boaframework.AcceptanceStrategy;
+import genius.core.boaframework.Actions;
+import genius.core.boaframework.OMStrategy;
+import genius.core.boaframework.OfferingStrategy;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import genius.core.Bid;
-import genius.core.BidIterator;
-import genius.core.NegoRound;
-import genius.core.NegoTurn;
-import genius.core.actions.Accept;
-import genius.core.actions.Action;
-import genius.core.bidding.BidDetails;
-import genius.core.boaframework.AcceptanceStrategy;
-import genius.core.boaframework.Actions;
-import genius.core.boaframework.NegotiationSession;
-import genius.core.boaframework.OMStrategy;
-import genius.core.boaframework.OfferingStrategy;
-import genius.core.misc.Range;
 
 public class MCTSStrategy extends OfferingStrategy{
 	SmartAcceptanceStrategy ac;
@@ -42,13 +33,15 @@ public class MCTSStrategy extends OfferingStrategy{
 	@Override
 	public BidDetails determineNextBid() {
 		// TODO Auto-generated method stub
-		enhanceTree(tree.getRoot());
-		return null;
+		return enhanceTree(tree.getRoot());
 	}
 
 	public BidDetails enhanceTree(Node node) {
-		
-		for (int i=0; i<100; i++) {
+
+		System.out.println("Starting Simulation");
+		for (int i=0; i<2; i++) {
+			System.out.println(i);
+			System.out.println("Nema");
 			Node selectedNode = selectNode(node);
 			if (selectedNode.getNoVisits() >= selectedNode.getChildren().size()) {
 				expandNode(selectedNode);
@@ -72,7 +65,7 @@ public class MCTSStrategy extends OfferingStrategy{
 	//	node selection
 	private Node selectNode(Node rootNode) {
 		Node currNode = rootNode;
-		while (!currNode.getChildren().isEmpty()) {
+		while (currNode.getChildren().size() != 0) {
 			currNode = MCTSStrategy.getBestNode(currNode);
 		}
 		return currNode;
@@ -93,14 +86,23 @@ public class MCTSStrategy extends OfferingStrategy{
 	}
 	
 	public static Node getBestNode(Node node) {
-		Double parentVisits = node.getParent().getNoVisits();
+		Double parentVisits = 1.0;
+		if(node.getParent() != null){
+			parentVisits = node.getParent().getNoVisits();
+		}
+		Double finalParentVisits = parentVisits;
+
+		if(node.getChildren().size() == 0){
+			return node;
+		}
 		return Collections.max(node.getChildren(),
 				Comparator.comparing(c -> calculateUCB1(c.getNoVisits(),
-						parentVisits, c.getScore())));
+						finalParentVisits, c.getScore())));
 	}
 	
 	// node expansion
 	private void expandNode(Node node) {
+//		System.out.println("I run from expandNode");
 		Node newNode = new Node();
 		newNode.setParent(node);
 		node.getChildren().add(newNode);	
@@ -110,21 +112,28 @@ public class MCTSStrategy extends OfferingStrategy{
 	private void rolloutSimBackprop(Node node) throws Exception {
 		bs = new BinarySearchStrategy();
 		Node iterNodeCopy = node;
-		BidDetails nextOpponentBid = om.getBid(negotiationSession.getOutcomeSpace(), new Range(negotiationSession.getUtilitySpace().getUtility(negotiationSession.getUtilitySpace().getMinUtilityBid()),
-				negotiationSession.getUtilitySpace().getUtility(negotiationSession.getUtilitySpace().getMaxUtilityBid())));
-		Double score = nextOpponentBid.getMyUndiscountedUtil();
 		List<BidDetails> biddingHistory = new ArrayList<BidDetails>();
+		biddingHistory = negotiationSession.getOpponentBidHistory().getHistory();
+		if(biddingHistory.size() <= 1) {
+			biddingHistory.add(negotiationSession.getMinBidinDomain());
+			biddingHistory.add(negotiationSession.getMinBidinDomain());
+		}
+		BidDetails nextOpponentBid = om.getBidbyHistory(biddingHistory);
+		Double score = nextOpponentBid.getMyUndiscountedUtil();
 		biddingHistory.add(nextOpponentBid);
-		BidDetails agentBid = bs.determineNextBidFromInput(nextOpponentBid.getBid());
+		BidDetails agentBid = bs.determineNextBidFromInput(nextOpponentBid.getBid(), negotiationSession);
 		node.setBid(agentBid);
-		// run until the rest of timesteps
-		while (ac.determineAcceptabilityBid(nextOpponentBid) != Actions.Accept) {
+		//todo change this with the time that we need till the end
+		int count = 0;
+		while (ac.determineAcceptabilityBid(nextOpponentBid) != Actions.Accept && count <= 60) {
 			nextOpponentBid = om.getBidbyHistory(biddingHistory);
 			biddingHistory.add(nextOpponentBid);
-			agentBid = bs.determineNextBidFromInput(nextOpponentBid.getBid());
+			agentBid = bs.determineNextBidFromInput(nextOpponentBid.getBid(), negotiationSession);
 			biddingHistory.add(agentBid);
 			score = nextOpponentBid.getMyUndiscountedUtil();
+			count ++;
 		}
+		System.out.println(score);
 		while (iterNodeCopy != null) {
 			iterNodeCopy.setScore(iterNodeCopy.getScore() + score);
 			iterNodeCopy.setNoVisits(iterNodeCopy.getNoVisits() + 1);

@@ -1,39 +1,23 @@
-package main;
-
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import org.apache.commons.math3.util.Pair;
+package group10_strategy;
 
 import genius.core.Bid;
 import genius.core.BidHistory;
-import genius.core.analysis.pareto.IssueValue;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OpponentModel;
-import genius.core.boaframework.OutcomeSpace;
-import genius.core.boaframework.SortedOutcomeSpace;
-import genius.core.issue.ISSUETYPE;
-import genius.core.issue.Issue;
-import genius.core.issue.IssueDiscrete;
-import genius.core.issue.IssueInteger;
-import genius.core.issue.Value;
-import genius.core.issue.ValueDiscrete;
-import genius.core.issue.ValueInteger;
-import genius.core.misc.Range;
+import genius.core.issue.*;
 import math.Matrix;
+
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * SmartOpponentOfferingModel
@@ -64,7 +48,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
     @Override
     public BidDetails getBid(final List<BidDetails> bidsInRange) {
         if(this.opponentBiddingHistory.size() == 0) return null;
-        System.out.println("Starting the prediction process");
+//        System.out.println("Starting the prediction process");
         List<BidDetails> tmp =  this.opponentBiddingHistory.getHistory();
         return getBidbyHistory(tmp);
     }
@@ -87,7 +71,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         
         Matrix[] prediction = predictGaussianProcess(observedX, observedY, unObservedX);
 
-        System.out.println("Predictions: "+Arrays.toString(prediction[0].getRowPackedCopy()));
+//        System.out.println("Predictions: "+Arrays.toString(prediction[0].getRowPackedCopy()));
 
         Map<IssueDiscrete, Matrix> splittedPredictions = IntStream.range(0, sizes.size()-1)
             .mapToObj(idx -> new SimpleEntry<IssueDiscrete,Matrix>(this.domainIssues.get(idx), prediction[0].getMatrix(0, prediction[0].getRowDimension()-1, sizes.get(idx), sizes.get(idx)-1)))
@@ -99,7 +83,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
         Bid nextBid = constructBid(tmpList);
         BidDetails result = new BidDetails(nextBid, negotiationSession.getUtilitySpace().getUtility(nextBid)); // TODO: Deal with preference uncertainty!
-        System.out.println(nextBid.toStringCSV());
+//        System.out.println(nextBid.toStringCSV());
         return result;
     }
 

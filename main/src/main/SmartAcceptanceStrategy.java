@@ -1,8 +1,4 @@
-package main;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+package group10_strategy;
 
 import genius.core.BidHistory;
 import genius.core.bidding.BidDetails;
@@ -10,6 +6,10 @@ import genius.core.boaframework.AcceptanceStrategy;
 import genius.core.boaframework.Actions;
 import genius.core.uncertainty.OutcomeComparison;
 import genius.core.uncertainty.UserModel;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 
@@ -40,7 +40,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 			return Actions.Reject;
 		}
 
-		System.out.println("Checking availability of SmartOfferingStrategy... " + isSmartOffering);
+//		System.out.println("Checking availability of SmartOfferingStrategy... " + isSmartOffering);
 		if (isUncertain ? agentNextBid.getMyUndiscountedUtil() <= opponentBid.getMyUndiscountedUtil()
 				: new OutcomeComparison(agentNextBid, opponentBid).getComparisonResult() >= 0) {
 			System.out.println("Next bid is going to be smaller than opponent bid!");

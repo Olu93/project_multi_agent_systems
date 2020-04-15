@@ -1,8 +1,12 @@
-package main;
+package group10_strategy;
 
 public class GameTree {
 	Node root;
-	
+
+	public GameTree(){
+		root = new Node();
+	}
+
 	public void setRoot(Node root) {
 		this.root = root;
 	}
