@@ -1,0 +1,15 @@
+Onehot - Weak - Party:
+Avg Difference of prediction utility estimator: 0.13375391863276295
+Onehot - Weak - Laptop:
+Avg Difference of prediction utility estimator: 0.07360432168664602
+Onehot - Weak - Test:
+Avg Difference of prediction utility estimator: 0.09324548749047704
+
+Index - Weak - Party:
+Avg Distance of prediction utility estimator: 0.11243966169874932
+Index - Weak - Laptop:
+Avg Distance of prediction utility estimator: 0.6493543027485382
+Index - Weak - Test:
+Avg Distance of prediction utility estimator: 0.40054530629285345
+
+====> One-Hot version is better than index

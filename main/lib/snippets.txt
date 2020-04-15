@@ -1,0 +1,2 @@
+[Olu] Start Genius Application:
+"C:\\Program Files\\Java\\jdk-8\\bin\\java.exe" -cp .\lib\genius-9.1.11.jar genius.Application

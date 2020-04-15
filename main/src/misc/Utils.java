@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import genius.core.Bid;
 import genius.core.issue.Issue;
@@ -34,10 +35,18 @@ public class Utils {
 
     private static void writeRow(double[] row) {
         for (double ds : row) {
-            double ss = (Math.round(ds*100));
-            System.out.print((ds < 0 ? ss/100 : " " + ss/100) + "\t");
+            double ss = (Math.round(ds * 100));
+            System.out.print((ds < 0 ? ss / 100 : " " + ss / 100) + "\t");
         }
         System.out.print("\n");
+    }
+
+    public static String getRowString(double[] row) {
+        String resultString = Arrays.stream(row).boxed().map(ds -> Utils.round(ds, 2))
+                .map(ds -> (ds < 0 ? ds : " " + ds) + "\t")
+                .reduce("", (subtotal, element) -> subtotal + element);
+
+        return resultString;
     }
 
     public static Matrix getDummyEncoding(List<Issue> domainIssues, List<Bid> lBids) {
@@ -89,8 +98,9 @@ public class Utils {
     }
 
     public static double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
-    
+        if (places < 0)
+            throw new IllegalArgumentException();
+
         BigDecimal bd = BigDecimal.valueOf(value);
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
