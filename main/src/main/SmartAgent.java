@@ -53,7 +53,7 @@ public class SmartAgent extends BoaParty {
 		System.out.println("!!!!!!!!!!!!!!START!!!!!!!!!!!!");
 		Boolean isUncertain = info.getUserModel() == null;
 		System.out.println(isUncertain ? "Preferences are certain!" : "Uncertain preferences detected!");
-		info.setUtilSpace((AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilityEstimatorOldSchool(info.getUserModel()))); 
+		info.setUtilSpace((AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilityEstimator(info.getUserModel()))); 
 		super.init(info);
 
 	}

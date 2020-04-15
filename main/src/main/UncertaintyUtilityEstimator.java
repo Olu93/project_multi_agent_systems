@@ -57,7 +57,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     private Matrix oneHotBids;
     private UserModel userModel;
     private List<Issue> issues;
-    private final Boolean isVerbose = false;
+    private final Boolean isVerbose = true;
 
     public UncertaintyUtilityEstimator(final UserModel userModel) {
         this.userModel = userModel;
@@ -72,42 +72,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         this.evaluatePerformance();
     }
 
-    private void evaluatePerformance() {
-        if (this.userModel instanceof ExperimentalUserModel) {
-            ExperimentalUserModel userModelExperimental = (ExperimentalUserModel) this.userModel;
-            Matrix oneHotEncodedRankings = Utils.getDummyEncoding(this.issues, this.rankings.getBidOrder());
 
-            if (this.isVerbose) {
-                System.out.println("Encoded ranking");
-                Utils.printMatrix(oneHotEncodedRankings);
-            }
-            System.out.println("Weights");
-            Utils.printMatrix(this.getWeights());
-            Matrix prediction = oneHotEncodedRankings.times(this.getWeights().transpose());
-            int i = 0;
-            List<Double> statsBuiltin = new ArrayList<Double>();
-            List<Double> statsPredict = new ArrayList<Double>();
-            for (Bid rankedBid : this.rankings.getBidOrder()) {
-                double realUtility = userModelExperimental.getRealUtility(rankedBid);
-                double builtInDiff = Math.abs(this.getUtility(rankedBid) - realUtility);
-                double predDiff = Math.abs(prediction.get(i, 0) - realUtility);
-                statsBuiltin.add(builtInDiff);
-                statsPredict.add(predDiff);
-                if (this.isVerbose) {
-                    System.out.println("===> Bid: " + rankedBid);
-                    System.out.println("True  Util: " + realUtility);
-                    System.out.println("Built-in 	distance to real utility: " + builtInDiff);
-                    System.out.println("Prediction 	distance to real utility: " + predDiff);
-                }
-                i++;
-            }
-            System.out.println("Avg Distance of built in utility estimator: "
-                    + statsBuiltin.stream().mapToDouble(a -> a).average().getAsDouble());
-            System.out.println("Avg Distance of prediction utility estimator: "
-                    + statsPredict.stream().mapToDouble(a -> a).average().getAsDouble());
-        }
-
-    }
 
     private Matrix init() {
         // final List<Map<IssueDiscrete, Integer>> comparisons =
@@ -201,43 +166,38 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         List<Bid> hardConstraints = Arrays.asList(rankings.getMaximalBid(), rankings.getMinimalBid());
 
         final Integer endOfPairwiseComparisonIdx = comparisons.getRowDimension() - 1;
-        final Integer lastColComparisonIdx = endOfPairwiseComparisonIdx + comparisons.getColumnDimension();
-        final Integer splitAt = comparisons.getColumnDimension() - 1;
-
         final Integer lastRowRankingsIdx = this.oneHotBids.getRowDimension() - 1;
         final Integer lastColRankingsIdx = this.oneHotBids.getColumnDimension() - 1;
+        final Integer splitAt = comparisons.getColumnDimension() - 1;
 
-        int startOfMinUtilitiesIdx = endOfPairwiseComparisonIdx;
-        int endOfMinUtilitiesIdx = endOfPairwiseComparisonIdx + lastRowRankingsIdx - 1;
+        int startOfMinUtilitiesIdx = endOfPairwiseComparisonIdx + 1;
+        int endOfMinUtilitiesIdx = startOfMinUtilitiesIdx + lastRowRankingsIdx;
         int startOfMaxUtilitiesIdx = endOfMinUtilitiesIdx + 1;
-        int endOfMaxUtilitiesIdx = endOfPairwiseComparisonIdx + lastRowRankingsIdx * 2 - 1;
-        int thirdToLastIdx = endOfMaxUtilitiesIdx + 1;
-        int secondToLastIdx = thirdToLastIdx + 1;
+        int endOfMaxUtilitiesIdx = startOfMaxUtilitiesIdx + lastRowRankingsIdx;
+        int startOfEqualities = endOfMaxUtilitiesIdx + 1;
+        int thirdToLastIdx = startOfEqualities;
+        int secondToLastIdx = startOfEqualities + 1;
 
-        final Matrix slackVars = Matrix.identity(endOfPairwiseComparisonIdx, endOfPairwiseComparisonIdx);
-        final Matrix emptyMatrix = new Matrix(
-                endOfPairwiseComparisonIdx + lastRowRankingsIdx * 2 + hardConstraints.size() + 1,
-                lastColComparisonIdx + 1);
+        final Integer lastColComparisonIdx = comparisons.getRowDimension() + comparisons.getColumnDimension();
+        final Matrix slackVars = Matrix.identity(startOfEqualities, startOfEqualities);
+        final Matrix emptyMatrix = new Matrix(startOfEqualities + hardConstraints.size() + 1, lastColComparisonIdx + 1);
         int finalColIdx = emptyMatrix.getColumnDimension() - 1;
-
-        for (int i = 0; i < startOfMinUtilitiesIdx; i++) {
-            for (int j = 0; j < lastColComparisonIdx; j++) {
-                emptyMatrix.set(i, j, j > splitAt ? slackVars.get(i, j - splitAt - 1) : comparisons.get(i, j));
-            }
-        }
+        
+        emptyMatrix.setMatrix(0, endOfPairwiseComparisonIdx, 0, splitAt, comparisons);
+        emptyMatrix.setMatrix(0, endOfPairwiseComparisonIdx, splitAt + 1, finalColIdx - 1, slackVars);
+        
         emptyMatrix.setMatrix(startOfMinUtilitiesIdx, endOfMinUtilitiesIdx, 0, lastColRankingsIdx, oneHotBids);
         for (int i = startOfMinUtilitiesIdx; i < startOfMaxUtilitiesIdx; i++) {
             emptyMatrix.set(i, lastColComparisonIdx, rankings.getLowUtility());
         }
-
+        
         emptyMatrix.setMatrix(startOfMaxUtilitiesIdx, endOfMaxUtilitiesIdx, 0, lastColRankingsIdx, oneHotBids);
         for (int i = startOfMaxUtilitiesIdx; i < thirdToLastIdx; i++) {
             emptyMatrix.set(i, lastColComparisonIdx, rankings.getHighUtility());
         }
-        // if (isDebug) {
         // System.out.println("Almost done");
         // Utils.printMatrix(emptyMatrix);
-        // }
+
         Matrix dummyEncodedHardConstraints = Utils.getDummyEncoding(this.issues, hardConstraints);
 
         int[] range = IntStream.range(thirdToLastIdx, thirdToLastIdx + hardConstraints.size()).toArray();
@@ -314,19 +274,29 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         Integer lastColIdx = convenience.getColumnDimension() - 1;
         Integer lastRowRankingsIdx = this.oneHotBids.getRowDimension() - 1;
         Integer lastColRankingsIdx = this.oneHotBids.getRowDimension() - 1;
+
+        Integer finalRowIdx = lastRowIdx;
+        Integer startOfEqualityIdx = finalRowIdx - 2;
+        Integer endOfMaxUtitiliesIdx = startOfEqualityIdx - 1;
+        Integer startOfMaxUtilitiesIdx = endOfMaxUtitiliesIdx - lastRowRankingsIdx;
+        Integer endOfMinUtitiliesIdx = startOfMaxUtilitiesIdx - 1;
+        Integer startOfMinUtilitiesIdx = endOfMinUtitiliesIdx - lastRowRankingsIdx;
+        Integer endOfComparisonsIdx = startOfMinUtilitiesIdx - 1;
+        Integer startIdx = 0;
+
         Integer numberOfUnknowns = this.numberOfUnknowns.intValue();
-        double[][] inputComparisonPart = convenience
-                .getMatrix(0, lastRowIdx - lastRowRankingsIdx * 2 - 3, 0, lastColIdx - 1).getArrayCopy();
-        double[][] inputMinumumUtilityPart = convenience.getMatrix(lastRowIdx - lastRowRankingsIdx * 2 - 2,
-                lastRowIdx - lastRowRankingsIdx - 3, 0, lastColIdx - 1).getArrayCopy();
+        double[][] inputComparisonPart = convenience.getMatrix(startIdx, endOfComparisonsIdx, 0, lastColIdx - 1)
+                .getArrayCopy();
+        double[][] inputMinumumUtilityPart = convenience
+                .getMatrix(startOfMinUtilitiesIdx, endOfMinUtitiliesIdx, 0, lastColIdx - 1).getArrayCopy();
         double[][] inputMaximumUtilityPart = convenience
-                .getMatrix(lastRowIdx - lastRowRankingsIdx - 2, lastRowIdx - 3, 0, lastColIdx - 1).getArrayCopy();
-        double[][] inputEqualityPart = convenience.getMatrix(lastRowIdx - 2, lastRowIdx - 1, 0, lastColIdx - 1)
+                .getMatrix(startOfMaxUtilitiesIdx, endOfMaxUtitiliesIdx, 0, lastColIdx - 1).getArrayCopy();
+        double[][] inputEqualityPart = convenience.getMatrix(startOfEqualityIdx, finalRowIdx - 1, 0, lastColIdx - 1)
                 .getArrayCopy();
                 
                 
         double[] b = convenience.getMatrix(0, lastRowIdx - 1, lastColIdx, lastColIdx).getRowPackedCopy();
-        b = Arrays.stream(b).boxed().map(val -> Utils.round(val, 3)).mapToDouble(val -> val).toArray();
+        b = Arrays.stream(b).boxed().map(val -> Utils.round(val, 2)).mapToDouble(val -> val).toArray();
         double[] c = convenience.getMatrix(lastRowIdx, lastRowIdx, 0, lastColIdx - 1).getRowPackedCopy();
         if (this.isVerbose) {
             System.out.println("========");
@@ -382,6 +352,44 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         Matrix oneHotEncodedRankings = Utils.getDummyEncoding(this.issues, Arrays.asList(bid));
         Matrix prediction = oneHotEncodedRankings.times(this.getWeights().transpose());
         return prediction.get(0, 0);
+    }
+
+    private void evaluatePerformance() {
+        if (this.userModel instanceof ExperimentalUserModel) {
+            ExperimentalUserModel userModelExperimental = (ExperimentalUserModel) this.userModel;
+            Matrix oneHotEncodedRankings = Utils.getDummyEncoding(this.issues, this.rankings.getBidOrder());
+            Matrix weights = this.getWeights();
+
+            if (this.isVerbose) {
+                System.out.println("Encoded ranking");
+                Utils.printMatrix(oneHotEncodedRankings);
+            }
+            System.out.println("Weights");
+            Utils.printMatrix(weights);
+            
+            List<Double> statsPredictDiff = new ArrayList<Double>();
+            List<Double> statsPredictMSE = new ArrayList<Double>();
+            for (Bid rankedBid : this.rankings.getBidOrder()) {
+                double realUtility = userModelExperimental.getRealUtility(rankedBid);
+                double predUtility = this.getUtility(rankedBid);
+                double predMSE = Math.pow(predUtility - realUtility, 2);
+                double predDiff = Math.abs(predUtility - realUtility);
+                statsPredictMSE.add(predMSE);
+                statsPredictDiff.add(predDiff);
+                if (this.isVerbose) {
+                    System.out.println("===>   Bid: " + rankedBid);
+                    System.out.println("True  Util: " + realUtility);
+                    System.out.println("Pred  Util: " + predUtility);
+                    System.out.println("       MSE: " + predMSE);
+                    System.out.println("Difference: " + predDiff);
+                }
+            }
+            System.out.println("Avg MSE of prediction utility estimator: "
+                    + statsPredictMSE.stream().mapToDouble(a -> a).average().getAsDouble());
+            System.out.println("Avg Difference of prediction utility estimator: "
+                    + statsPredictDiff.stream().mapToDouble(a -> a).average().getAsDouble());
+        }
+
     }
 
 }

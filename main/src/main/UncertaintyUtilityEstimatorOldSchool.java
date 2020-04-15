@@ -294,6 +294,13 @@ public class UncertaintyUtilityEstimatorOldSchool extends AdditiveUtilitySpace {
             System.out.println(Arrays.toString(row) + "  = " + b[i]);
             i++;
         }
+        // for (double[] row : inputEqualityPart) {
+        //     constraints.add(new LinearConstraint(row, Relationship.LEQ, b[b.length-2]));
+        //     constraints.add(new LinearConstraint(row, Relationship.GEQ, b[b.length-1]));
+        //     System.out.println(Arrays.toString(row) + "  <= " + b[b.length-2]);
+        //     System.out.println(Arrays.toString(row) + "  >= " + b[b.length-1]);
+        //     i++;
+        // }
 
         SimplexSolver solver = new SimplexSolver();
         PointValuePair solution = solver.optimize(new MaxIter(100), oFunc, new LinearConstraintSet(constraints),
