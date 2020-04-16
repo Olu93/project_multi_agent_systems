@@ -55,10 +55,13 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         // System.out.println("Starting the prediction process");
         List<BidDetails> o = this.opponentBiddingHistory.getHistory();
         List<BidDetails> a = this.myBiddingHistory.getHistory();
-        return getBidbyHistory(o,a);
+        return getBidbyHistory(o, a);
     }
 
     public DataSet getMatrixRepresentation(List<BidDetails> oppBidList, List<BidDetails> agBidList) {
+        // System.out.println("");
+        // System.out.println("==========New Round=======================");
+
         List<BidDetails> opponent = oppBidList; // Xo + Xo*
         List<BidDetails> agent = agBidList; // Xa + Xa*
         // TODOs: Use skip instead
@@ -66,18 +69,15 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         int asize = agent.size();
         if (asize < osize) {
             agent.add(0, agent.get(0));
+            asize = agent.size();
         }
 
-
-        BidHistory slicedXOpponent = new BidHistory(opponent.subList(0, osize > 1 ? osize - 1 : osize));  // Xo 
+        BidHistory slicedXOpponent = new BidHistory(opponent.subList(0, osize > 1 ? osize - 1 : osize)); // Xo
         BidHistory shiftedOpponentBidHistory = new BidHistory(opponent.subList(osize > 1 ? 1 : 0, osize)); // Y
 
         BidHistory newXOpponent = new BidHistory(opponent.subList(osize - 1, osize)); // X*
+        BidHistory newXAgent = new BidHistory(agent.subList(asize - 1, asize));
         BidHistory slicedXAgent = new BidHistory(agent.subList(0, asize > 1 ? asize - 1 : asize)); // Xa
-        // BidHistory shiftedAgentBidHistory = new BidHistory(agent.subList(1,
-        // agent.size()));
-        // BidHistory newXAgent = new BidHistory(agent.subList(agent.size()-1,
-        // agent.size()));
 
         Matrix observedXOpponent = converHistoryToMatrix(slicedXOpponent);
         Matrix observedXAgent = converHistoryToMatrix(slicedXAgent);
@@ -88,18 +88,26 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         Matrix X = new Matrix(numRow, numCol);
         X.setMatrix(0, numRow - 1, 0, shift - 1, observedXOpponent);
         X.setMatrix(0, numRow - 1, shift, numCol - 1, observedXAgent);
-        Utils.printMatrix(X);
+
+        // System.out.println("X");
+        // Utils.printMatrix(X);
         Matrix Y = converHistoryToMatrix(shiftedOpponentBidHistory);
-        Matrix X_star = converHistoryToMatrix(newXOpponent);
+        Matrix opponentX_star = converHistoryToMatrix(newXOpponent);
+        Matrix agentX_star = converHistoryToMatrix(newXAgent);
+
+        Matrix X_star = new Matrix(1, numCol);
+        X_star.setMatrix(0, 0, 0, shift - 1, opponentX_star);
+        X_star.setMatrix(0, 0, shift, numCol - 1, agentX_star);
+        // System.out.println("X*");
+        // Utils.printMatrix(X_star);
         // TODO: Consider doing gaussian regression per issue.
-        // Matrix observedYAgent = converHistoryToMatrix(shiftedAgentBidHistory); //
-        // Matrix unObservedXAgent = converHistoryToMatrix(newXAgent);
 
         return new DataSet(X, Y, X_star);
     }
 
     public BidDetails getBidbyHistory(List<BidDetails> oppBidList, List<BidDetails> agBidList) {
-        // BidHistory shiftedOpponentBidHistory = new BidHistory(tmp.subList(1, tmp.size()));
+        // BidHistory shiftedOpponentBidHistory = new BidHistory(tmp.subList(1,
+        // tmp.size()));
         // BidHistory slicedX = new BidHistory(tmp.subList(0, tmp.size() - 1));
         // BidHistory newX = new BidHistory(tmp.subList(tmp.size() - 1, tmp.size()));
         DataSet ds = getMatrixRepresentation(oppBidList, agBidList);
@@ -269,7 +277,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
     }
 
     private Matrix[] predictGaussianProcess(Matrix observedX, Matrix observedY, Matrix unObservedX) {
-        Matrix K = computeCovarianceMatrix(observedX, observedY);
+        Matrix K = computeCovarianceMatrix(observedX, observedX);
         Matrix K_stable = K.plus(Matrix.identity(K.getRowDimension(), K.getColumnDimension()).times(0.00001));
         Matrix K_star = computeCovarianceMatrix(unObservedX, observedX);
         Matrix K_star_star = computeCovarianceMatrix(unObservedX, unObservedX);

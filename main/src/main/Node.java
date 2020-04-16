@@ -1,6 +1,7 @@
 package main;
 
 import genius.core.bidding.BidDetails;
+import misc.Utils;
 
 import java.util.*;
 
@@ -19,7 +20,7 @@ public class Node {
 		score = 0.0;
 		parent = null;
 		children = new ArrayList<Node>();
-		id = rand.nextInt(Integer.MAX_VALUE) + "-" + rand.nextInt(Integer.MAX_VALUE);
+		id = rand.nextInt(Integer.MAX_VALUE) + "";
 	}
 
 	public List<Node> getChildren() {
@@ -43,7 +44,7 @@ public class Node {
 	}
 
 	public String getId() {
-		return id + "("+noVisits+"-"+score+")" + bid;
+		return id + ": "+noVisits+" - "+Utils.round(score, 2)+" - " + bid;
 	}
 
 	public void setNoVisits(Double noVisits) {
@@ -64,8 +65,9 @@ public class Node {
 		this.score = score;
 	}
 
-	public void setBid(BidDetails bid) {
+	public Node setBid(BidDetails bid) {
 		this.bid = bid;
+		return this;
 	}
 
 	public Node getRandomChild() {

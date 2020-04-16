@@ -29,7 +29,7 @@ public class AgentBoaParty extends BoaParty{
 		AcceptanceStrategy 	ac  = new SmartAcceptanceStrategy();
 		OpponentModel 		om  = new FreqOpponentPrefModel();
 		OMStrategy			oms = new SmartOpponentOfferingModel();
-		OfferingStrategy 	os  = new MCTSStrategy(ac, oms);
+		OfferingStrategy 	os  = new MCTSStrategy(ac, oms); // TODO remove params 
 		
 		// All component parameters can be set below.
 		Map<String, Double> noparams = Collections.emptyMap();
