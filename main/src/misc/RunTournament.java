@@ -48,7 +48,7 @@ public class RunTournament {
         }
 
         // System.out.println(Arrays.toString(header));
-        printAllStatistics("SmartAgent", extractedData);
+        printAllStatistics("NiceTitForTat", extractedData);
         csvReader.close();
     }
 
