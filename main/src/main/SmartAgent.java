@@ -16,6 +16,7 @@ import negotiator.boaframework.acceptanceconditions.anac2010.AC_IAMHaggler2010;
 import negotiator.boaframework.acceptanceconditions.anac2011.AC_HardHeaded;
 import negotiator.boaframework.acceptanceconditions.anac2012.AC_BRAMAgent2;
 import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
+import negotiator.boaframework.offeringstrategy.anac2010.IAMhaggler2010_Offering;
 
 /**
  * SmartAgent
@@ -38,6 +39,7 @@ public class SmartAgent extends BoaParty {
 		// The choice for each component is made here
 		AcceptanceStrategy ac = new SmartAcceptanceStrategy();
 		OfferingStrategy os = new NiceTitForTat_Offering();
+		//OfferingStrategy os = new IAMhaggler2010_Offering();
 		OpponentModel om = new FreqOpponentPrefModel();
 		OMStrategy oms = new SmartOpponentOfferingModel();
 

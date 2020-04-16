@@ -26,14 +26,14 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 
 	@Override
 	public Actions determineAcceptability() {
-		System.out.println("OVERWRITE SMALLER DETERMINE ACCAPTABILITY");
+		System.out.println("OVERWRITE SMALLER DETERMINE ACCEPTABILITY");
 		final BidDetails opponentBid = negotiationSession.getOpponentBidHistory().getLastBidDetails();
 		// TODO: Uncertainty makes it unclear whether that really is the best bid.
 		return determineAcceptabilityBid(opponentBid);
 	}
 	
 	public Actions determineAcceptabilityBid(BidDetails opponentBid) {
-		System.out.println("START DETERMINE ACCEPTIBILITY: ");
+		System.out.println("START DETERMINE ACCEPTABILITY: ");
 		final Boolean isSmartOffering = offeringStrategy instanceof SmartOfferingStrategy;
 		final UserModel userModel = negotiationSession.getUserModel();
 		final boolean isUncertain = userModel == null;
