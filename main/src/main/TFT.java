@@ -39,6 +39,12 @@ public class TFT extends OfferingStrategy {
         return ntft.determineNextBid();
     }
 
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 //    public double getUtility(Bid bid) {
 //        return negotiationSession.getUtilitySpace().getUtilityWithDiscount(bid,

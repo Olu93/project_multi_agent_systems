@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import javax.rmi.CORBA.Util;
 
 import agents.anac.y2019.harddealer.math3.optim.MaxIter;
 import agents.anac.y2019.harddealer.math3.optim.PointValuePair;
@@ -30,12 +29,14 @@ import genius.core.Bid;
 import genius.core.boaframework.NegotiationSession;
 import genius.core.issue.Issue;
 import genius.core.issue.IssueDiscrete;
+import genius.core.issue.Objective;
 import genius.core.issue.ValueDiscrete;
 import genius.core.uncertainty.BidRanking;
 import genius.core.uncertainty.ExperimentalUserModel;
 import genius.core.uncertainty.UserModel;
 import genius.core.utility.AbstractUtilitySpace;
 import genius.core.utility.AdditiveUtilitySpace;
+import genius.core.utility.Evaluator;
 import genius.core.utility.UtilitySpace;
 import genius.core.xml.SimpleElement;
 import math.Matrix;
@@ -58,7 +59,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     private final Matrix oneHotEqualityBids;
     private final UserModel userModel;
     private final List<Issue> issues;
-    private final Boolean isVerbose = true;
+    private final Boolean isVerbose = false;
     private final Boolean hasStrongConstraints = true;
     private final Boolean hasEpsilon = true;
 
@@ -71,7 +72,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         this.oneHotBids = Utils.getDummyEncoding(this.issues, rankings.getBidOrder());
         this.oneHotEqualityBids = Utils.getDummyEncoding(this.issues,
                 Arrays.asList(rankings.getMaximalBid(), rankings.getMinimalBid()));
-        System.out.println("Number of unknowns: " + numberOfUnknowns);
+        // system.out.println("Number of unknowns: " + numberOfUnknowns);
 
         this.weightsMatrix = this.init();
         this.evaluatePerformance(this.rankings.getBidOrder());
@@ -125,7 +126,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
                 emptyMatrix.set(i, lastColComparisonIdx, rankings.getHighUtility());
             }
         }
-        // System.out.println("Almost done");
+        // // system.out.println("Almost done");
         // Utils.printMatrix(emptyMatrix);
 
         final int[] range = IntStream.range(thirdToLastIdx, thirdToLastIdx + numberOfEqualityBids).toArray();
@@ -140,7 +141,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         }
 
         if (this.isVerbose == true) {
-            System.out.println("Done");
+            // system.out.println("Done");
             Utils.printMatrix(emptyMatrix);
         }
 
@@ -195,17 +196,17 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         final LinearObjectiveFunction oFunc = new LinearObjectiveFunction(c, 0);
         final Collection<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
         int i = 0;
-        System.out.println("Constraints");
+        // system.out.println("Constraints");
         for (Constraint entry : constraintsList) {
             constraints.add(new LinearConstraint(entry.getRow(), entry.getType(), entry.getValue()));
-            System.out.println(entry);
+            // system.out.println(entry);
         }
 
         final SimplexSolver solver = new SimplexSolver();
         final PointValuePair solution = solver.optimize(new MaxIter(100), oFunc, new LinearConstraintSet(constraints),
                 GoalType.MINIMIZE, new NonNegativeConstraint(true));
-        System.out.println("Pred Weights:");
-        System.out.println(Arrays.toString(solution.getPoint()) + " : " + solution.getSecond());
+        // system.out.println("Pred Weights:");
+        // system.out.println(Arrays.toString(solution.getPoint()) + " : " + solution.getSecond());
 
         return new Matrix(Arrays.copyOfRange(solution.getPoint(), 0, numberOfUnknowns), 1);
     }
@@ -281,9 +282,43 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
 
     @Override
     public double getUtility(final Bid bid) {
-        final Matrix oneHotEncodedRankings = Utils.getDummyEncoding(this.issues, Arrays.asList(bid));
-        final Matrix prediction = oneHotEncodedRankings.times(this.getWeights().transpose());
-        return prediction.get(0, 0);
+    	System.out.println("CONTENT OF BID");
+    	System.out.println(bid);
+//    	System.out.println("number of issues" + bid.getIssues().size());
+//    	System.out.println("number of values" + bid.getValues().size());
+    	if (bid != null && bid.getValues().size() > 0) {
+	        final Matrix oneHotEncodedRankings = Utils.getDummyEncoding(this.issues, Arrays.asList(bid));
+	        final Matrix prediction = oneHotEncodedRankings.times(this.getWeights().transpose());
+	        System.out.println("OVERRIDE SUCCESSFUL");
+	        return prediction.get(0, 0);
+    	}
+//    	// default utility function in case of null bid
+//    	// System.out.println("ENTERING DEFAULT METHOD");
+//    	double utility = 0;
+//    	Objective root = getDomain().getObjectivesRoot();
+//    	Enumeration<Objective> issueEnum = root.getPreorderIssueEnumeration();
+//    	while (issueEnum.hasMoreElements()) {
+//	    	Objective is = issueEnum.nextElement();
+//	    	Evaluator eval = getfEvaluators().get(is);
+//	    	if (eval == null) {
+//	    		throw new IllegalArgumentException("UtilitySpace does not contain evaluator for issue "+ is + ". ");
+//	    	}
+//	    	switch (eval.getType()) {
+//		    	case DISCRETE:
+//		    	case INTEGER:
+//		    	case REAL:
+//		    		utility += eval.getWeight() * getEvaluation(is.getNumber(), bid);
+//		    		break;
+//		    	case OBJECTIVE:
+//		    	// we ignore OBJECTIVE. Not clear what it is and why.
+//		    	break;
+//	    	}
+//    	}
+//    	double result = utility;
+//    	System.out.println("LEAVING DEFAULT METHOD WITH RESULT: " + result);
+//    	if (result > 1)
+//    		return 1;
+    	return 0.0;
     }
 
     private class Constraint {

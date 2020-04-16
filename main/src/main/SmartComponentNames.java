@@ -16,7 +16,7 @@ public enum SmartComponentNames {
             case SMART_OPPONENT_BIDDING_STRATEGY:
                 return "Smart Opponent Bidding Strategy";
             case SMART_ACCEPTANCE_STRATEGY:
-                return "Smart Opponent Bidding Strategy";
+                return "Smart Acceptance Bidding Strategy";
         }
         return null;
     }

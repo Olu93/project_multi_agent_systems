@@ -16,20 +16,22 @@ import negotiator.boaframework.acceptanceconditions.anac2010.AC_IAMHaggler2010;
 import negotiator.boaframework.acceptanceconditions.anac2011.AC_HardHeaded;
 import negotiator.boaframework.acceptanceconditions.anac2012.AC_BRAMAgent2;
 import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
+import negotiator.boaframework.offeringstrategy.anac2010.IAMhaggler2010_Offering;
 
 /**
  * SmartAgent
  */
 public class SmartAgent extends BoaParty {
-
+	// TODO: Fix setTilSpace not working (or remove this code)
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-
+	private NegotiationInfo info;
+	
 	@Override
 	public String getDescription() {
-		return "SmartAgentPArty";
+		return "SmartAgentParty";
 	}
 
 	@Override
@@ -37,6 +39,7 @@ public class SmartAgent extends BoaParty {
 		// The choice for each component is made here
 		AcceptanceStrategy ac = new SmartAcceptanceStrategy();
 		OfferingStrategy os = new NiceTitForTat_Offering();
+		//OfferingStrategy os = new IAMhaggler2010_Offering();
 		OpponentModel om = new FreqOpponentPrefModel();
 		OMStrategy oms = new SmartOpponentOfferingModel();
 
@@ -54,13 +57,15 @@ public class SmartAgent extends BoaParty {
 		Boolean isUncertain = info.getUserModel() == null;
 		System.out.println(isUncertain ? "Preferences are certain!" : "Uncertain preferences detected!");
 		info.setUtilSpace((AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilityEstimator(info.getUserModel()))); 
+		this.info = info;
 		super.init(info);
 
 	}
 
-	// @Override
-	// public AbstractUtilitySpace estimateUtilitySpace() {
-	// 	return n;
-	// }
+	 @Override
+	 public AbstractUtilitySpace estimateUtilitySpace() {
+		Boolean isUncertain = info.getUserModel() == null;
+	 	return (AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilityEstimator(info.getUserModel()));
+	 }
 
 }

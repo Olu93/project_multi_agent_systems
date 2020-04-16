@@ -1,4 +1,4 @@
-package group10_strategy;
+package main;
 
 import genius.core.Bid;
 import genius.core.BidIterator;
@@ -10,10 +10,16 @@ import java.util.List;
 import java.util.Random;
 
 public class BinarySearchStrategy extends OfferingStrategy {
-
-    Random rand = new Random();
-    double maxUtilityForBinary = 1;
-    double ourMaxBidThatWeGotFromOpponent = 0.4;
+	Random rand;
+    double maxUtilityForBinary;
+    double ourMaxBidThatWeGotFromOpponent;
+	
+	public BinarySearchStrategy() {
+		rand = new Random();
+	    maxUtilityForBinary = 1;
+	    ourMaxBidThatWeGotFromOpponent = 0.4;
+	}
+    
 
     @Override
     public BidDetails determineOpeningBid() {
@@ -31,9 +37,11 @@ public class BinarySearchStrategy extends OfferingStrategy {
     @Override
     public BidDetails determineNextBid() {
         Bid opponentLastBid = negotiationSession.getOpponentBidHistory().getLastBidDetails().getBid();
-        double myUtilityOfOpponentLastBid = negotiationSession.getUtilitySpace().getUtility(opponentLastBid);
-
-
+        return determineNextBidFromInput(opponentLastBid);
+    }
+    
+    public BidDetails determineNextBidFromInput(Bid opponentLastBid) {
+    	double myUtilityOfOpponentLastBid = negotiationSession.getUtilitySpace().getUtility(opponentLastBid);
         System.out.println(negotiationSession.getOpponentBidHistory().getHistory());
         System.out.println(negotiationSession.getOpponentBidHistory().getLastBidDetails().getMyUndiscountedUtil());
         double proposeUtility;
