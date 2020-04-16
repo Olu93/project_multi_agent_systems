@@ -1,15 +1,5 @@
 package main;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.rmi.CORBA.Util;
-
-import genius.core.Bid;
 import genius.core.BidHistory;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.AcceptanceStrategy;
@@ -21,6 +11,11 @@ import genius.core.uncertainty.UserModel;
 import math.Matrix;
 import misc.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 
 	private final ArrayList<BidDetails> bestBidProposals = new ArrayList<BidDetails>();
@@ -30,9 +25,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 	@Override
 	protected void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
 		super.init(negotiationSession, parameters);
-		if(this.helper == null){
-			this.helper = new SmartAgentState(negotiationSession);
-		}
+
 	}
 
 	@Override

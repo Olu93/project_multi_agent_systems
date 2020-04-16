@@ -1,21 +1,13 @@
 package main;
 
-import genius.core.Bid;
-import genius.core.BidHistory;
-import genius.core.BidIterator;
-import genius.core.analysis.BidPoint;
-import genius.core.analysis.BidSpace;
-import genius.core.bidding.BidDetails;
-import genius.core.boaframework.*;
-import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
-import negotiator.boaframework.opponentmodel.DefaultModel;
-import negotiator.boaframework.opponentmodel.ScalableBayesianModel;
-import negotiator.boaframework.sharedagentstate.anac2011.NiceTitForTatSAS;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
+
+import genius.core.bidding.BidDetails;
+import genius.core.boaframework.NegotiationSession;
+import genius.core.boaframework.OMStrategy;
+import genius.core.boaframework.OfferingStrategy;
+import genius.core.boaframework.OpponentModel;
+import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
 
 public class TFT extends OfferingStrategy {
 
@@ -39,11 +31,11 @@ public class TFT extends OfferingStrategy {
         return ntft.determineNextBid();
     }
 
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	// @Override
+	// public String getName() {
+	// 	// TODO Auto-generated method stub
+	// 	return null;
+	// }
 
 
 //    public double getUtility(Bid bid) {

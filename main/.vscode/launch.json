@@ -6,43 +6,15 @@
     "configurations": [
         {
             "type": "java",
-            "name": "CodeLens (Launch) - RunTournament",
-            "request": "launch",
-            "mainClass": "misc.RunTournament",
-            "projectName": "main"
-        },
-        {
-            "type": "java",
             "name": "Debug (Launch) - Current File",
             "request": "launch",
             "mainClass": "${file}"
         },
         {
             "type": "java",
-            "name": "Debug (Launch)-Main<main>",
-            "request": "launch",
-            "mainClass": "Main",
-            "projectName": "main"
-        },
-        {
-            "type": "java",
-            "name": "Debug (Launch)-GaussianProcess<main>",
-            "request": "launch",
-            "mainClass": "agents.anac.y2015.Phoenix.GP.GaussianProcess",
-            "projectName": "main"
-        },
-        {
-            "type": "java",
-            "name": "Debug (Launch)-Application<main>",
+            "name": "Application",
             "request": "launch",
             "mainClass": "genius.Application",
-            "projectName": "main"
-        },
-        {
-            "type": "java",
-            "name": "Debug (Launch)-Runner<main>",
-            "request": "launch",
-            "mainClass": "genius.cli.Runner",
             "projectName": "main"
         },
         {
@@ -58,15 +30,15 @@
             "request": "launch",
             "mainClass": "misc.RunSession",
             "projectName": "main",
-            "args": "lib\\run.xml logs\\last_run.csv"
+            "args": "lib\\party.xml logs\\last_run.csv"
         },
         {
             "type": "java",
-            "name": "Run Laptop",
+            "name": "Run MCTS",
             "request": "launch",
             "mainClass": "misc.RunSession",
             "projectName": "main",
-            "args": "lib\\laptop.xml logs\\last_run.csv"
+            "args": "lib\\mcts.xml logs\\last_run.csv"
         },
         {
             "type": "java",
@@ -74,7 +46,22 @@
             "request": "launch",
             "mainClass": "misc.RunSession",
             "projectName": "main",
-            "args": "lib\\test.xml logs\\last_run.csv"
+            "args": "lib\\test_certain.xml logs\\last_run.csv"
+        },
+        {
+            "type": "java",
+            "name": "Run Test (uncertain)",
+            "request": "launch",
+            "mainClass": "misc.RunSession",
+            "projectName": "main",
+            "args": "lib\\test_uncertain.xml logs\\last_run.csv"
+        },
+        {
+            "name": "Run Laptop",
+            "request": "launch",
+            "mainClass": "misc.RunSession",
+            "projectName": "main",
+            "args": "lib\\laptop.xml logs\\last_run.csv"
         },
         {
             "type": "java",
