@@ -3,4 +3,4 @@
 /log/
 /logs/
 settings.json
-!run*.xml
+!/lib/*.xml

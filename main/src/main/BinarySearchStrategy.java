@@ -14,11 +14,13 @@ public class BinarySearchStrategy extends OfferingStrategy {
 	Random rand;
     double maxUtilityForBinary;
     double ourMaxBidThatWeGotFromOpponent;
+    // SmartOpponentOfferingModel omStrategy;; 
 	
 	public BinarySearchStrategy() {
 		rand = new Random();
 	    maxUtilityForBinary = 1;
-	    ourMaxBidThatWeGotFromOpponent = 0.4;
+        ourMaxBidThatWeGotFromOpponent = 0.4;
+        // omStrategy = new SmartOpponentOfferingModel();
 	}
     
 
@@ -37,6 +39,8 @@ public class BinarySearchStrategy extends OfferingStrategy {
 
     @Override
     public BidDetails determineNextBid() {
+
+        ((SmartOpponentOfferingModel) omStrategy).getBid(negotiationSession.getOpponentBidHistory().getHistory());
         Bid opponentLastBid = negotiationSession.getOpponentBidHistory().getLastBidDetails().getBid();
         return determineNextBidFromInput(opponentLastBid, negotiationSession);
     }

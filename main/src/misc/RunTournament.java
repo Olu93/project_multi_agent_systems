@@ -48,12 +48,45 @@ public class RunTournament {
         }
 
         // System.out.println(Arrays.toString(header));
+        System.out.println("==========================");
+        printAllStatistics("AgentBoaParty", extractedData);
+        System.out.println("==========================");
         printAllStatistics("NiceTitForTat", extractedData);
+        System.out.println("==========================");
+        printAllStatistics("BoulwareNegotiationParty", extractedData);
+        System.out.println("==========================");
+        printAllStatistics("ConcederNegotiationParty", extractedData);
+        System.out.println("==========================");
+        printAllStatistics("BRAMAgent", extractedData);
+        System.out.println("==========================");
+        printAllStatistics("KLH", extractedData);
+        System.out.println("==========================");
+        printAllStatistics("IAMhaggler2012", extractedData);
+        System.out.println("==========================");
+        printAllStatistics("BayesianAgent", extractedData);
+
+        System.out.println("==========================");
+        System.out.println("==========================");
+
+        printRanking(extractedData);
         csvReader.close();
     }
 
+    private static void printRanking(List<DataLine> extractedData) {
+        List<String> agentNames = extractedData.stream().map(row -> row.get("Agent 1").split("@")[0])
+                .collect(Collectors.toList());
+        Map<String, Double> rank = agentNames.stream()
+                .map(name -> new SimpleEntry<>(name, getSumUtility(extractedData, name)))
+                .sorted(Map.Entry.comparingByValue())
+                .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+        rank.entrySet().stream().peek(entry -> System.out.println(entry.getKey() + ":" + entry.getValue())).collect(Collectors.toList());
+    }
+
     private static void printAllStatistics(String agent, List<DataLine> extractedData) {
-        System.out.println(agent + " played "+ getNumberOfNegotiations(extractedData, agent) + " games");
+        if (extractedData.stream().map(row -> row.get("Agent 1").split("@")[0]).filter(name -> name.contains(agent))
+                .collect(Collectors.toList()).size() < 1) return;
+
+        System.out.println(agent + " played " + getNumberOfNegotiations(extractedData, agent) + " games");
         System.out.println("                Sum of " + agent + ": " + getSumUtility(extractedData, agent));
         System.out.println("    Perceveived Sum of " + agent + ": " + getSumPerceivedUtility(extractedData, agent));
         System.out.println("         Robustness of " + agent + ": " + getUtilityRobustness(extractedData, agent));
@@ -68,11 +101,10 @@ public class RunTournament {
                 + data.stream().filter(row -> row.get("Agent 2").contains(extract))
                         .mapToDouble(row -> Double.parseDouble(row.get("Utility 2"))).sum();
     }
-    
+
     private static Long getNumberOfNegotiations(List<DataLine> data, String extract) {
-        return data.stream()
-        .filter(row -> row.get("Agent 1").contains(extract)||row.get("Agent 2").contains(extract))
-        .mapToInt(row -> 1).count();
+        return data.stream().filter(row -> row.get("Agent 1").contains(extract) || row.get("Agent 2").contains(extract))
+                .mapToInt(row -> 1).count();
     }
 
     private static Double getUtilityRobustness(List<DataLine> data, String extract) {
@@ -83,62 +115,52 @@ public class RunTournament {
         Stream<Double> val = Stream.concat(stream1, stream2);
         return Math.sqrt(val.collect(VARIANCE_COLLECTOR));
     }
-    
+
     private static Double getSumPerceivedUtility(List<DataLine> data, String extract) {
-        return data.stream()
-                .filter(row -> row.get("Agent 1").contains(extract))
-                .mapToDouble(row -> Double.parseDouble(row.get("Perceived. Util. 1")))
-                .sum() 
-                + data.stream()
-                .filter(row -> row.get("Agent 2").contains(extract))
-                .mapToDouble(row -> Double.parseDouble(row.get("Perceived. Util. 2")))
-                .sum();
+        return data.stream().filter(row -> row.get("Agent 1").contains(extract))
+                .mapToDouble(row -> Double.parseDouble(row.get("Perceived. Util. 1"))).sum()
+                + data.stream().filter(row -> row.get("Agent 2").contains(extract))
+                        .mapToDouble(row -> Double.parseDouble(row.get("Perceived. Util. 2"))).sum();
     }
 
     private static Double getAvgAgreement(List<DataLine> data, String extract) {
-        return data.stream()
-                .filter(row -> row.get("Agent 1").contains(extract)||row.get("Agent 2").contains(extract))
+        return data.stream().filter(row -> row.get("Agent 1").contains(extract) || row.get("Agent 2").contains(extract))
                 // .peek(System.out::println)
-                .mapToDouble(row -> row.get("Agreement").contains("Yes") ? 1 : 0)
-                .average().getAsDouble();
+                .mapToDouble(row -> row.get("Agreement").contains("Yes") ? 1 : 0).average().getAsDouble();
     }
 
     private static Double getAvgDistanceToPareto(List<DataLine> data, String extract) {
-        return data.stream()
-                .filter(row -> row.get("Agent 1").contains(extract)||row.get("Agent 2").contains(extract))
+        return data.stream().filter(row -> row.get("Agent 1").contains(extract) || row.get("Agent 2").contains(extract))
                 // .peek(System.out::println)
-                .mapToDouble(row -> Double.parseDouble(row.get("Dist. to Pareto")))
-                .average().getAsDouble();
+                .mapToDouble(row -> Double.parseDouble(row.get("Dist. to Pareto"))).average().getAsDouble();
     }
 
     private static Double getAvgTimeToAgree(List<DataLine> data, String extract) {
-        return data.stream()
-                .filter(row -> row.get("Agent 1").contains(extract)||row.get("Agent 2").contains(extract))
+        return data.stream().filter(row -> row.get("Agent 1").contains(extract) || row.get("Agent 2").contains(extract))
                 // .peek(System.out::println)
-                .mapToDouble(row -> Double.parseDouble(row.get("Round")))
-                .average().getAsDouble();
+                .mapToDouble(row -> Double.parseDouble(row.get("Round"))).average().getAsDouble();
     }
 
-
-    private static final Collector<Double, double[], Double> VARIANCE_COLLECTOR = Collector.of( // See https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-        () -> new double[3], // {count, mean, M2}
-        (acu, d) -> { // See chapter about Welford's online algorithm and https://math.stackexchange.com/questions/198336/how-to-calculate-standard-deviation-with-streaming-inputs
-            acu[0]++; // Count
-            double delta = d - acu[1];
-            acu[1] += delta / acu[0]; // Mean
-            acu[2] += delta * (d - acu[1]); // M2
-        },
-        (acuA, acuB) -> { // See chapter about "Parallel algorithm" : only called if stream is parallel ...
-            double delta = acuB[1] - acuA[1];
-            double count = acuA[0] + acuB[0];
-            acuA[2] = acuA[2] + acuB[2] + delta * delta * acuA[0] * acuB[0] / count; // M2
-            acuA[1] += delta * acuB[0] / count;  // Mean
-            acuA[0] = count; // Count
-            return acuA;
-        },
-        acu -> acu[2] / (acu[0] - 1.0) // Var = M2 / (count - 1)
+    private static final Collector<Double, double[], Double> VARIANCE_COLLECTOR = Collector.of( // See
+                                                                                                // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+            () -> new double[3], // {count, mean, M2}
+            (acu, d) -> { // See chapter about Welford's online algorithm and
+                          // https://math.stackexchange.com/questions/198336/how-to-calculate-standard-deviation-with-streaming-inputs
+                acu[0]++; // Count
+                double delta = d - acu[1];
+                acu[1] += delta / acu[0]; // Mean
+                acu[2] += delta * (d - acu[1]); // M2
+            }, (acuA, acuB) -> { // See chapter about "Parallel algorithm" : only called if stream is parallel
+                                 // ...
+                double delta = acuB[1] - acuA[1];
+                double count = acuA[0] + acuB[0];
+                acuA[2] = acuA[2] + acuB[2] + delta * delta * acuA[0] * acuB[0] / count; // M2
+                acuA[1] += delta * acuB[0] / count; // Mean
+                acuA[0] = count; // Count
+                return acuA;
+            }, acu -> acu[2] / (acu[0] - 1.0) // Var = M2 / (count - 1)
     );
-        
+
     private static class DataLine {
         String[] header;
         Map<String, String> innerMap = new HashMap<>();
@@ -157,16 +179,14 @@ public class RunTournament {
 
         @Override
         public String toString() {
-            return Arrays.asList(
-                "Run time (s) "+ innerMap.get("Run time (s)"),
-                "Agreement "+ innerMap.get("Agreement"),
-                "Round "+ innerMap.get("Round"),
-                "Exception "+ innerMap.get("Exception"),
-                "Dist. to Pareto "+ innerMap.get("Dist. to Pareto"),
-                "Agents "+ innerMap.get("Agent 1")+ " vs. " + innerMap.get("Agent 2"),
-                "Util "+ innerMap.get("Utility 1")+ " vs. " + innerMap.get("Utility 2"),
-                "Perceived Util "+ innerMap.get("Perceived. Util. 1")+ " vs. " + innerMap.get("Perceived. Util. 2")
-            ).toString();
+            return Arrays
+                    .asList("Run time (s) " + innerMap.get("Run time (s)"), "Agreement " + innerMap.get("Agreement"),
+                            "Round " + innerMap.get("Round"), "Exception " + innerMap.get("Exception"),
+                            "Dist. to Pareto " + innerMap.get("Dist. to Pareto"),
+                            "Agents " + innerMap.get("Agent 1") + " vs. " + innerMap.get("Agent 2"),
+                            "Util " + innerMap.get("Utility 1") + " vs. " + innerMap.get("Utility 2"), "Perceived Util "
+                                    + innerMap.get("Perceived. Util. 1") + " vs. " + innerMap.get("Perceived. Util. 2"))
+                    .toString();
         }
 
     }

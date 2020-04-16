@@ -60,9 +60,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 		
 		System.out.println("epsilon value");
 		System.out.println(epsilon);
-		System.out.println("Agent next bid: " + negotiationSession.getUtilitySpace().getUtility(agentNextBid.getBid()));
-		System.out.println("Opponent bid: " + negotiationSession.getUtilitySpace().getUtility(opponentBid.getBid()));
-
+		
 		
 		if (opponentBid == null || agentNextBid == null) {
 			System.out.println("END REACHED");
@@ -70,28 +68,28 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 		}
 		System.out.println("Checking availability of SmartOfferingStrategy... " + isSmartOffering);
 		// Possibly temporary addition of extra requirement to proceed. Until smartOfferingStrategy is done, accepts way too easily
-		if (negotiationSession.getUtilitySpace().getUtility(agentNextBid.getBid()) <= negotiationSession.getUtilitySpace().getUtility(opponentBid.getBid()) + epsilon
-				&& negotiationSession.getUtilitySpace().getUtility(agentNextBid.getBid()) > epsilon) {
+		double utilityAgentBid = negotiationSession.getUtilitySpace().getUtility(agentNextBid.getBid());
+		double utilityOpponentBid = negotiationSession.getUtilitySpace().getUtility(opponentBid.getBid()) ;
+		System.out.println("Agent next bid: " + utilityAgentBid);
+		System.out.println("Opponent bid: " + utilityOpponentBid);
+		if (utilityAgentBid <= utilityOpponentBid + epsilon && utilityAgentBid > epsilon) { // TODO why the second?
 			System.out.println("Next bid is going to be smaller than opponent bid!");
 			if (isSmartOffering) {
-
-				if (opponentBid.getMyUndiscountedUtil() < opponentBestBid.getMyUndiscountedUtil()) {
+				if (utilityOpponentBid < opponentBestBid.getMyUndiscountedUtil()) {
 					System.out.println("Opponent bid is worse than a bid in his history!");
 					bestBidProposals.add(opponentBestBid);
 					((SmartOfferingStrategy) offeringStrategy).setOpponentBestBid(opponentBestBid.getBid());
 					System.out.println("END REACHED");
 					return Actions.Reject;
-				}
-
+				}				
 				System.out.println("Opponent bid is best bid so far!");
 				final BidDetails opponentNextBid = ((SmartOfferingStrategy) offeringStrategy)
 						.getOpponentBidPrediction();
-				if (opponentBid.getMyUndiscountedUtil() < opponentNextBid.getMyUndiscountedUtil()) {
+				if (utilityOpponentBid < opponentNextBid.getMyUndiscountedUtil()) {
 					System.out.println("Opponent is going to bid better in the next!");
 					System.out.println("END REACHED");
 					return Actions.Reject;
 				}
-
 			}
 			System.out.println("Accepting bid!");
 			return Actions.Accept;

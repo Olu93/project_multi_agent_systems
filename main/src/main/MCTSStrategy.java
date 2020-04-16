@@ -20,14 +20,26 @@ public class MCTSStrategy extends OfferingStrategy {
 	/**
 	 *
 	 */
+	private Bid opponentBestBid;
+
 	private static final double UPPER_BOUND = 1.0;
 	SmartAcceptanceStrategy ac;
 	OMStrategy om;
 	GameTree tree;
 	private final Double DISCOUNT_FACTOR = 0.90;
 	private Double lowerBound = 0.95;
-	private final Boolean IS_VERBOSE = true;
+	private final Boolean IS_VERBOSE = false;
 
+	public void setOpponentBestBid(Bid bestBid) {
+		this.opponentBestBid = bestBid;
+	}
+	
+	public Bid getBestOpponentBid() {
+		Bid tmp = opponentBestBid;
+		opponentBestBid = null;
+		return tmp;
+    }
+	//#endregion
 	public MCTSStrategy() {
 		if (this.omStrategy instanceof SmartOpponentOfferingModel) {
 			om = (SmartOpponentOfferingModel) this.omStrategy;
@@ -158,7 +170,8 @@ public class MCTSStrategy extends OfferingStrategy {
 		final List<Double> scores = new ArrayList<>();
 		Double avgScore = 0.0;
 		do {
-			if (negotiationSession.getTime() > 0.25) {
+			// if (negotiationSession.getTime() > 0.25) {
+			if (negotiationSession.getTime() > 0.99) {
 				nextOpponentBid = this.om instanceof SmartOpponentOfferingModel
 						? ((SmartOpponentOfferingModel) this.om).getBidbyHistory(oppHistory, agentHistory)
 						: this.om.getBid(oppHistory);
