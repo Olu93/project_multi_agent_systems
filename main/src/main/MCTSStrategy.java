@@ -16,11 +16,13 @@ import java.util.Random;
 
 public class MCTSStrategy extends OfferingStrategy {
 	SmartAcceptanceStrategy ac;
-	SmartOpponentOfferingModel om;
+	OMStrategy om;
 	GameTree tree;
 
 	public MCTSStrategy() {
-		;
+		if (this.omStrategy instanceof SmartOpponentOfferingModel) {
+			om = (SmartOpponentOfferingModel) this.omStrategy;
+		}
 	}
 
 	// TODO: I need both the opponent model strategy and the acceptance strategy in
@@ -68,8 +70,8 @@ public class MCTSStrategy extends OfferingStrategy {
 
 		Node bestChoiceNode = node.getBestChild();
 		tree.setRoot(bestChoiceNode);
-		System.out.println("===========> Best choice: "+bestChoiceNode.getBid());
-		System.out.println("===========> Best choice: "+bestChoiceNode.getId());
+		System.out.println("===========> Best choice: " + bestChoiceNode.getBid());
+		System.out.println("===========> Best choice: " + bestChoiceNode.getId());
 		return bestChoiceNode.getBid();
 	}
 
@@ -113,15 +115,14 @@ public class MCTSStrategy extends OfferingStrategy {
 	private void expandNode(Node node) {
 		// System.out.println("I run from expandNode");
 		// TODO: beautify
-		
-		node.addChild(new Node().setParent(node))
-		.addChild(new Node().setParent(node))
-		.addChild(new Node().setParent(node));
+
+		node.addChild(new Node().setParent(node)).addChild(new Node().setParent(node))
+				.addChild(new Node().setParent(node));
 
 		// for (int i = 0; i < 3; i++) {
-		// 	Node newNode = new Node();
-		// 	newNode.setParent(node);
-		// 	node.addChild(newNode);
+		// Node newNode = new Node();
+		// newNode.setParent(node);
+		// node.addChild(newNode);
 		// }
 
 	}
@@ -131,33 +132,41 @@ public class MCTSStrategy extends OfferingStrategy {
 		// TODO: make reset method
 		// TODO: Actions might be strategies
 		Node iterNodeCopy = node;
-		List<BidDetails> biddingHistory = new ArrayList<BidDetails>();
-		biddingHistory = negotiationSession.getOpponentBidHistory().getHistory();
-		if (biddingHistory.size() <= 1) {
-			biddingHistory.add(negotiationSession.getMinBidinDomain());
-			biddingHistory.add(negotiationSession.getMinBidinDomain());
-		}
+		List<BidDetails> oppHistory = new ArrayList<BidDetails>();
+		List<BidDetails> agentHistory = new ArrayList<BidDetails>();
+		oppHistory.addAll(negotiationSession.getOpponentBidHistory().getHistory());
+		agentHistory.addAll(negotiationSession.getOwnBidHistory().getHistory());
+		// if (biddingHistory.size() <= 1) {
+		// biddingHistory.add(negotiationSession.getMinBidinDomain());
+		// biddingHistory.add(negotiationSession.getMinBidinDomain());
+		// }
 
-		BidDetails nextOpponentBid = om.getBidbyHistory(biddingHistory);
-		Double score = nextOpponentBid.getMyUndiscountedUtil();
-		biddingHistory.add(nextOpponentBid);
-		BidDetails agentBid = generateRandomBidDetails();
+		// BidDetails nextOpponentBid = om.getBidbyHistory(oppHistory, agentHistory);
+		// Double score = nextOpponentBid.getMyUndiscountedUtil();
+		// biddingHistory.add(nextOpponentBid);
+		// BidDetails agentBid = generateRandomBidDetails();
+		// node.setBid(agentBid);
 
-		node.setBid(agentBid);
 		// TODO: change this with the time that we need till the end
 		int count = 0;
-		while (ac.determineAcceptabilityBid(nextOpponentBid) != Actions.Accept && count <= 5) {
-			nextOpponentBid = om.getBidbyHistory(biddingHistory);
-			biddingHistory.add(nextOpponentBid);
+		BidDetails nextOpponentBid, agentBid;
+		Double score;
+		do {
+
+			nextOpponentBid = this.om instanceof SmartOpponentOfferingModel
+					? ((SmartOpponentOfferingModel) this.om).getBidbyHistory(oppHistory, agentHistory)
+					: this.om.getBid(oppHistory);
+			oppHistory.add(nextOpponentBid);
 			// TODO: use getBid
 			// TODO: Change representation of the bid
 			agentBid = generateRandomBidDetails();
-			biddingHistory.add(agentBid);
+			agentHistory.add(agentBid);
 			// TODO: maybe do a an average on scores
 			// TODO: add perturbations and do a rollout multiple times
 			score = nextOpponentBid.getMyUndiscountedUtil();
 			count++;
-		}
+		} while (ac.determineAcceptabilityBid(nextOpponentBid) != Actions.Accept && count <= 5);
+
 		System.out.println(score);
 		while (iterNodeCopy != null) {
 			iterNodeCopy.setScore(iterNodeCopy.getScore() + score);
