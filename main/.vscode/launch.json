@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - RunTournament",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main"
+        },
+        {
+            "type": "java",
             "name": "Debug (Launch) - Current File",
             "request": "launch",
             "mainClass": "${file}"
@@ -68,6 +75,14 @@
             "mainClass": "misc.RunSession",
             "projectName": "main",
             "args": "lib\\test.xml logs\\last_run.csv"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "args": "lib\\tournament.xml logs\\loggedTournamentStatistics"
         }
     ]
 }
