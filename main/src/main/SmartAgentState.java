@@ -1,28 +1,26 @@
 package main;
 
 import genius.core.Bid;
+import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.SharedAgentState;
+import genius.core.utility.AdditiveUtilitySpace;
 
 public class SmartAgentState extends SharedAgentState {
-	private Bid opponentBestBid;
-	private Bid opponentPredictedBid;
+	private NegotiationSession session;
+	private UncertaintyUtilityEstimator uncertaintyEstimator;
 	
-	public void setOpponentBidPrediction(Bid predictedBid) {
-		opponentPredictedBid = predictedBid;
+	public SmartAgentState(NegotiationSession session){
+		this.session = session;
+		// this.uncertaintyEstimator = new UncertaintyUtilityEstimator(this.session);
 	}
-	
-	public Bid getOpponentBidPrediction() {
-		return opponentPredictedBid;
+
+	public UncertaintyUtilityEstimator getUncertaintyEstimator() {
+		return uncertaintyEstimator;
 	}
-	
-	public void setOpponentBestBid(Bid bestBid) {
-		this.opponentBestBid = bestBid;
+
+	public void setUncertaintyEstimator(UncertaintyUtilityEstimator uncertaintyEstimator) {
+		this.uncertaintyEstimator = uncertaintyEstimator;
 	}
-	
-	public Bid getBestOpponentBid() {
-		Bid tmp = opponentBestBid;
-		opponentBestBid = null;
-		return tmp;
-	}
+
 	
 }

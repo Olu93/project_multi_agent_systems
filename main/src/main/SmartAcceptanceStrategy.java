@@ -4,16 +4,31 @@ import genius.core.BidHistory;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.AcceptanceStrategy;
 import genius.core.boaframework.Actions;
+import genius.core.boaframework.NegotiationSession;
+import genius.core.uncertainty.ExperimentalUserModel;
 import genius.core.uncertainty.OutcomeComparison;
 import genius.core.uncertainty.UserModel;
+import math.Matrix;
+import misc.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 
 	private final ArrayList<BidDetails> bestBidProposals = new ArrayList<BidDetails>();
+	private UncertaintyUtilityEstimator uncertaintyEstimator;
+
+
+	@Override
+	protected void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
+		super.init(negotiationSession, parameters);
+		if(this.helper == null){
+			this.helper = new SmartAgentState(negotiationSession);
+		}
+	}
 
 	@Override
 	public Actions determineAcceptability() {
@@ -23,7 +38,12 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 	}
 	
 	public Actions determineAcceptabilityBid(BidDetails opponentBid) {
-		final Boolean isSmartOffering = SmartComponentNames.SMART_BIDDING_STRATEGY.toString().equalsIgnoreCase(offeringStrategy.getName());
+		// TODO: time based epsilon function
+		// TODO: Use only utility function. Uncertainty estimation is handled elsewhere
+		
+		// this.uncertaintyEstimator = new UncertaintyUtilityEstimator(negotiationSession); // TODO: Way to inefficient!!!
+
+		final Boolean isSmartOffering = offeringStrategy instanceof SmartOfferingStrategy;
 		final UserModel userModel = negotiationSession.getUserModel();
 		final boolean isUncertain = userModel == null;
 		final BidDetails agentNextBid = offeringStrategy.getNextBid();
@@ -58,7 +78,8 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 				System.out.println("Opponent bid is best bid so far!");
 				final BidDetails opponentNextBid = ((SmartOfferingStrategy) offeringStrategy)
 						.getOpponentBidPrediction();
-				if (isUncertain ? opponentBid.getMyUndiscountedUtil() < opponentNextBid.getMyUndiscountedUtil() : new OutcomeComparison(opponentBid, opponentNextBid).getComparisonResult() > 0) {
+				if (isUncertain ? opponentBid.getMyUndiscountedUtil() < opponentNextBid.getMyUndiscountedUtil()
+						: new OutcomeComparison(opponentBid, opponentNextBid).getComparisonResult() > 0) {
 					System.out.println("Opponent is going to bid better in the next!");
 					return Actions.Reject;
 				}

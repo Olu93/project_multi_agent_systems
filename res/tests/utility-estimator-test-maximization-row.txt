@@ -1,0 +1,57 @@
+With extended maximization row:
+===>   Bid: Bid[Food: Reis, Drinks: Water]
+True  Util: 0.39854557808928887
+Pred  Util: 0.3985
+       MSE: 2.077362223221896E-9
+Difference: 4.557808928884466E-5
+===>   Bid: Bid[Food: Reis, Drinks: Sprite]
+True  Util: 0.4661818593630963
+Pred  Util: 0.6992499999999999
+       MSE: 0.05432075817994349
+Difference: 0.23306814063690362
+===>   Bid: Bid[Food: Pasta, Drinks: Water]
+True  Util: 0.7294548749047703
+Pred  Util: 0.6992499999999999
+       MSE: 9.123344680128298E-4
+Difference: 0.030204874904770418
+===>   Bid: Bid[Food: Pasta, Drinks: Sprite]
+True  Util: 0.7970911561785777
+Pred  Util: 0.9999999999999999
+       MSE: 0.04117199890094629
+Difference: 0.20290884382142216
+===>   Bid: Bid[Food: Pasta, Drinks: Coke]
+True  Util: 1.0
+Pred  Util: 0.9999999999999999
+       MSE: 1.232595164407831E-32
+Difference: 1.1102230246251565E-16
+Avg MSE of prediction utility estimator: 0.01928101872525297
+Avg Difference of prediction utility estimator: 0.09324548749047704
+
+With normal maximization row (Missing last column):
+===>   Bid: Bid[Food: Reis, Drinks: Water]
+True  Util: 0.39854557808928887
+Pred  Util: 0.3985
+       MSE: 2.077362223221896E-9
+Difference: 4.557808928884466E-5
+===>   Bid: Bid[Food: Reis, Drinks: Sprite]
+True  Util: 0.4661818593630963
+Pred  Util: 0.6992499999999999
+       MSE: 0.05432075817994349
+Difference: 0.23306814063690362
+===>   Bid: Bid[Food: Pasta, Drinks: Water]
+True  Util: 0.7294548749047703
+Pred  Util: 0.6992499999999999
+       MSE: 9.123344680128298E-4
+Difference: 0.030204874904770418
+===>   Bid: Bid[Food: Pasta, Drinks: Sprite]
+True  Util: 0.7970911561785777
+Pred  Util: 0.9999999999999999
+       MSE: 0.04117199890094629
+Difference: 0.20290884382142216
+===>   Bid: Bid[Food: Pasta, Drinks: Coke]
+True  Util: 1.0
+Pred  Util: 0.9999999999999999
+       MSE: 1.232595164407831E-32
+Difference: 1.1102230246251565E-16
+Avg MSE of prediction utility estimator: 0.01928101872525297
+Avg Difference of prediction utility estimator: 0.09324548749047704

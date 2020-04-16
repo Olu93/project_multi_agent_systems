@@ -125,6 +125,10 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         Matrix unObservedX = ds.getX_star();
 
         Matrix[] prediction = predictGaussianProcess(observedX, observedY, unObservedX);
+        
+        // System.out.println("X: "+Arrays.toString(observedX.getArray()));
+        // System.out.println("Y: "+Arrays.toString(observedY.getArray()));
+        // System.out.println("X_star: "+Arrays.toString(unObservedX.getArray()));
 
         // System.out.println("Predictions:
         // "+Arrays.toString(prediction[0].getRowPackedCopy()));
@@ -149,7 +153,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         // System.out.println(nextBid.toStringCSV());
         return result;
     }
-
+    
     private Bid constructBid(Map<IssueDiscrete, List<Integer>> tmpList) {
         HashMap<Integer, Value> issueValues = (HashMap<Integer, Value>) tmpList.entrySet().stream()
                 .map(e -> new SimpleEntry<IssueDiscrete, Integer>(e.getKey(), e.getValue().get(0)))
@@ -158,7 +162,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         Bid result = new Bid(negotiationSession.getDomain(), issueValues);
         return result;
     }
-
+    
     @Override
     public boolean canUpdateOM() {
         // TODO Auto-generated method stub

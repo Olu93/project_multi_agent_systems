@@ -1,0 +1,44 @@
+Zeros - Weak - Party:
+Avg MSE of prediction utility estimator: 0.026863355747276774
+Avg Difference of prediction utility estimator: 0.13375391863276295
+Zeros - Weak - Laptop:
+Avg MSE of prediction utility estimator: 0.008367113396830194
+Avg Difference of prediction utility estimator: 0.07360432168664602
+Zeros - Weak - Test:
+Avg MSE of prediction utility estimator: 0.01928101872525297
+Avg Difference of prediction utility estimator: 0.09324548749047704
+
+Epsilon - Weak - Party:
+Avg MSE of prediction utility estimator: 0.019733482349449275
+Avg Difference of prediction utility estimator: 0.11926279118236126
+Epsilon - Weak - Laptop:
+Avg MSE of prediction utility estimator: 0.008340851725730236
+Avg Difference of prediction utility estimator: 0.07349523077755521
+Epsilon - Weak - Test:
+Avg MSE of prediction utility estimator: 0.019263583645874636
+Avg Difference of prediction utility estimator: 0.09320548749047704
+
+---
+
+Zeros - Strong - Party:
+Avg MSE of prediction utility estimator: 0.005871551900183078
+Avg Difference of prediction utility estimator: 0.05640795876323818
+Zeros - Strong - Laptop:
+Avg MSE of prediction utility estimator: 0.02937364641760549
+Avg Difference of prediction utility estimator: 0.13828660634237078
+Zeros - Strong - Test:
+Avg MSE of prediction utility estimator: 0.05459737503424313
+Avg Difference of prediction utility estimator: 0.15945469370714666
+
+Epsilon - Strong - Party:
+Avg MSE of prediction utility estimator: 0.004799361779487867
+Avg Difference of prediction utility estimator: 0.04764343452867785
+Epsilon - Strong - Laptop:
+Avg MSE of prediction utility estimator: 0.029240687975069356
+Avg Difference of prediction utility estimator: 0.13795933361509807
+Epsilon - Strong - Test:
+Avg MSE of prediction utility estimator: 0.019263583645874636
+Avg Difference of prediction utility estimator: 0.09320548749047704
+
+
+====> Epsilon improves the results

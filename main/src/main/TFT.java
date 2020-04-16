@@ -31,11 +31,11 @@ public class TFT extends OfferingStrategy {
         return ntft.determineNextBid();
     }
 
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	// @Override
+	// public String getName() {
+	// 	// TODO Auto-generated method stub
+	// 	return null;
+	// }
 
 
 //    public double getUtility(Bid bid) {
@@ -389,8 +389,8 @@ public class TFT extends OfferingStrategy {
 //        return negotiationSession.getUtilitySpace().getUtility(bid);
 //    }
 //
-//    @Override
-//    public String getName() {
-//        return "Copy Tit for Tat";
-//    }
+   @Override
+   public String getName() {
+       return "Copy Tit for Tat";
+   }
 }

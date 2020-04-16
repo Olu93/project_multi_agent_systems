@@ -1,4 +1,4 @@
-package main;
+package bilateralexamples;
 
 import java.util.List;
 
@@ -6,9 +6,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import agents.anac.y2019.kagent.boacomponents.BestBid;
-import agents.anac.y2019.kagent.boacomponents.HardHeadedFrequencyModel;
-import agents.anac.y2019.minf.etc.AC_Next;
+import bilateralexamples.boacomponents.AC_Next;
+import bilateralexamples.boacomponents.BestBid;
+import bilateralexamples.boacomponents.HardHeadedFrequencyModel;
+import bilateralexamples.boacomponents.TimeDependent_Offering;
 import genius.core.boaframework.AcceptanceStrategy;
 import genius.core.boaframework.BoaParty;
 import genius.core.boaframework.OMStrategy;
@@ -19,7 +20,6 @@ import genius.core.issue.ValueDiscrete;
 import genius.core.parties.NegotiationInfo;
 import genius.core.uncertainty.AdditiveUtilitySpaceFactory;
 import genius.core.utility.AbstractUtilitySpace;
-import negotiator.boaframework.offeringstrategy.other.TimeDependent_Offering;
 
 /**
  * This example shows how BOA components can be made into an independent
