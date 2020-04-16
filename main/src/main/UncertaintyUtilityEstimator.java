@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.rmi.CORBA.Util;
-
 import agents.anac.y2019.harddealer.math3.optim.MaxIter;
 import agents.anac.y2019.harddealer.math3.optim.PointValuePair;
 import agents.anac.y2019.harddealer.math3.optim.linear.LinearConstraint;
@@ -58,7 +56,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     private final Matrix oneHotEqualityBids;
     private final UserModel userModel;
     private final List<Issue> issues;
-    private final Boolean isVerbose = true;
+    private final Boolean isVerbose = false;
     private final Boolean hasStrongConstraints = true;
     private final Boolean hasEpsilon = true;
 

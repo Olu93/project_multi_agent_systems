@@ -26,6 +26,7 @@ public class MCTSStrategy extends OfferingStrategy {
 	GameTree tree;
 	private final Double DISCOUNT_FACTOR = 0.90;
 	private Double lowerBound = 0.95;
+	private final Boolean IS_VERBOSE = true;
 
 	public MCTSStrategy() {
 		if (this.omStrategy instanceof SmartOpponentOfferingModel) {
@@ -55,13 +56,13 @@ public class MCTSStrategy extends OfferingStrategy {
 		System.out.println("Starting Simulation");
 		for (int i = 0; i < 10; i++) {
 
-			System.out.println(i);
+			// System.out.println(i);
 			final Node selectedNode = selectNode(node);
 
 			// Node 1 (0) -> Node 2
 			// Node 1 (3) [1] -> Keep Node 1 -> No expansion
 			if (selectedNode.getNoVisits() >= selectedNode.getChildren().size()) {
-				System.err.println("Expansion: " + selectedNode.getId() + " - " + selectedNode.getNoVisits());
+				// System.err.println("Expansion: " + selectedNode.getId() + " - " + selectedNode.getNoVisits());
 				expandNode(selectedNode);
 			}
 
@@ -77,7 +78,6 @@ public class MCTSStrategy extends OfferingStrategy {
 
 		final Node bestChoiceNode = node.getBestChild();
 		tree.setRoot(bestChoiceNode);
-		System.out.println("===========> Best choice: " + bestChoiceNode.getBid());
 		System.out.println("===========> Best choice: " + bestChoiceNode.getId());
 		lowerBound = lowerBound - (negotiationSession.getTime()/3);
 
@@ -87,7 +87,8 @@ public class MCTSStrategy extends OfferingStrategy {
 	// node selection
 	private Node selectNode(final Node rootNode) {
 		Node currNode = rootNode;
-		System.out.println(currNode);
+
+		if(IS_VERBOSE) System.out.println(currNode);
 		while (currNode.getChildren().size() != 0) {
 			currNode = MCTSStrategy.getBestNode(currNode);
 		}
@@ -157,19 +158,24 @@ public class MCTSStrategy extends OfferingStrategy {
 		final List<Double> scores = new ArrayList<>();
 		Double avgScore = 0.0;
 		do {
+			if (negotiationSession.getTime() > 0.25) {
+				nextOpponentBid = this.om instanceof SmartOpponentOfferingModel
+						? ((SmartOpponentOfferingModel) this.om).getBidbyHistory(oppHistory, agentHistory)
+						: this.om.getBid(oppHistory);
+				
+			}else{
+				nextOpponentBid = getBidInRange(0.0, 0.5);
+			}
+			// System.out.println(nextOpponentBid.getBid());
 
-			nextOpponentBid = this.om instanceof SmartOpponentOfferingModel
-					? ((SmartOpponentOfferingModel) this.om).getBidbyHistory(oppHistory, agentHistory)
-					: this.om.getBid(oppHistory);
 			oppHistory.add(nextOpponentBid);
 			agentBid = getBidInRange(lowerBound, UPPER_BOUND);
 			agentHistory.add(agentBid);
-			scores.add(nextOpponentBid.getMyUndiscountedUtil() * Math.pow(DISCOUNT_FACTOR, count));
+			scores.add(negotiationSession.getUtilitySpace().getUtility(nextOpponentBid.getBid()) * Math.pow(DISCOUNT_FACTOR, count));
 			count++;
 		} while (ac.determineAcceptabilityBid(nextOpponentBid) != Actions.Accept && count <= 5);
 
 		avgScore = scores.parallelStream().mapToDouble(val -> val).average().getAsDouble();
-		System.out.println(scores);
 		// TODO: Average across multiple simulations
 		while (iterNodeCopy != null) {
 			// (((X1+X2)/2*2)+X3)/3

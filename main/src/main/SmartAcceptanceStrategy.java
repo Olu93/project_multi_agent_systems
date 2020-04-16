@@ -25,9 +25,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 	@Override
 	protected void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
 		super.init(negotiationSession, parameters);
-		if(this.helper == null){
-			this.helper = new SmartAgentState(negotiationSession);
-		}
+
 	}
 
 	@Override
@@ -60,16 +58,17 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 			return Actions.Reject;
 		}
 
-//		System.out.println("Checking availability of SmartOfferingStrategy... " + isSmartOffering);
+		System.out.println("Checking availability of SmartOfferingStrategy... " + isSmartOffering);
 		if (isUncertain ? agentNextBid.getMyUndiscountedUtil() <= opponentBid.getMyUndiscountedUtil()
 				: new OutcomeComparison(agentNextBid, opponentBid).getComparisonResult() >= 0) {
 			System.out.println("Next bid is going to be smaller than opponent bid!");
+			
 
 			if (isSmartOffering) {
 
 				if (isUncertain ? opponentBid.getMyUndiscountedUtil() < opponentBestBid.getMyUndiscountedUtil()
 						: new OutcomeComparison(opponentBid, opponentBestBid).getComparisonResult() > 0) {
-					System.out.println("Opponent bid is worse than a bid in his history!");
+					// System.out.println("Opponent bid is worse than a bid in his history!");
 					bestBidProposals.add(opponentBestBid);
 					((SmartOfferingStrategy) offeringStrategy).setOpponentBestBid(opponentBestBid.getBid());
 					return Actions.Reject;

@@ -48,6 +48,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
     }
 
+
     @Override
     public BidDetails getBid(final List<BidDetails> bidsInRange) {
         if (this.opponentBiddingHistory.size() == 0)
@@ -125,7 +126,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         Matrix unObservedX = ds.getX_star();
 
         Matrix[] prediction = predictGaussianProcess(observedX, observedY, unObservedX);
-        
+
         // System.out.println("X: "+Arrays.toString(observedX.getArray()));
         // System.out.println("Y: "+Arrays.toString(observedY.getArray()));
         // System.out.println("X_star: "+Arrays.toString(unObservedX.getArray()));
@@ -145,15 +146,18 @@ public class SmartOpponentOfferingModel extends OMStrategy {
                 .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
 
         Bid nextBid = constructBid(tmpList);
-        BidDetails result = new BidDetails(nextBid, negotiationSession.getUtilitySpace().getUtility(nextBid)); // TODO:
-                                                                                                               // Deal
-                                                                                                               // with
-                                                                                                               // preference
-                                                                                                               // uncertainty!
+        BidDetails result = new BidDetails(nextBid, negotiationSession.getUtilitySpace().getUtility(nextBid));
+
+        System.out.println(ds.setPredictedResult(nextBid));
+        // TODO:
+        // Deal
+        // with
+        // preference
+        // uncertainty!
         // System.out.println(nextBid.toStringCSV());
         return result;
     }
-    
+
     private Bid constructBid(Map<IssueDiscrete, List<Integer>> tmpList) {
         HashMap<Integer, Value> issueValues = (HashMap<Integer, Value>) tmpList.entrySet().stream()
                 .map(e -> new SimpleEntry<IssueDiscrete, Integer>(e.getKey(), e.getValue().get(0)))
@@ -162,7 +166,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         Bid result = new Bid(negotiationSession.getDomain(), issueValues);
         return result;
     }
-    
+
     @Override
     public boolean canUpdateOM() {
         // TODO Auto-generated method stub
@@ -215,31 +219,6 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
     private Matrix converHistoryToMatrix(final BidHistory bidHistory) {
         final List<Bid> lBids = bidHistory.getHistory().stream().map(bd -> bd.getBid()).collect(Collectors.toList());
-
-        // Reduction 1
-        // final HashMap<Issue, Matrix> oneHotMatrix = new HashMap<>();
-        // Integer noOfValues = null;
-        // List<Integer> issueValues = null;
-
-        // for (final IssueDiscrete issue : this.domainIssues) {
-        // issueValues = lBids.stream().map(bid -> bid.getValue(issue))
-        // .map(value -> issue.getValueIndex((ValueDiscrete) value))
-        // .collect(Collectors.toList());
-        // noOfValues = issue.getNumberOfValues();
-        // oneHotMatrix.put(issue, dummyEncode(noOfValues, issueValues));
-        // }
-
-        // Reduction 2
-        // Map<Issue,List<Integer>> valuesByIssue = this.domainIssues.stream()
-        // .map(issue -> new SimpleEntry<Issue,List<Integer>>(issue,
-        // extractAllValuesForIssue(lBids, issue)))
-        // .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-
-        // Map<Issue,Matrix> oneHotEncodedMatrixByIssue = this.domainIssues.stream()
-        // .map(issue -> new
-        // SimpleEntry<Issue,Matrix>(issue,dummyEncode(issue.getNumberOfValues(),
-        // valuesByIssue.get(issue))))
-        // .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
 
         final Map<Issue, Matrix> oneHotEncodedMatrixByIssue = this.domainIssues.stream() // Order might be lost
                 .map(issue -> new SimpleEntry<IssueDiscrete, List<Integer>>(issue,
@@ -336,6 +315,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         Matrix X;
         Matrix Y;
         Matrix X_star;
+        Bid predictedResult;
 
         public DataSet(Matrix x, Matrix y, Matrix x_star) {
             X = x;
@@ -365,6 +345,20 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
         public void setX_star(Matrix x_star) {
             X_star = x_star;
+        }
+
+        public Bid getPredictedResult() {
+            return predictedResult;
+        }
+
+        public DataSet setPredictedResult(Bid predictedResult) {
+            this.predictedResult = predictedResult;
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            return Utils.getRowString(X_star.getRowPackedCopy()) + " =>\n " + predictedResult;
         }
 
     }

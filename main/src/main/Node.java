@@ -44,7 +44,7 @@ public class Node {
 	}
 
 	public String getId() {
-		return id + ": "+noVisits+" - "+Utils.round(score, 2)+" - " + bid;
+		return id + ": "+noVisits+" - "+Utils.round(score, 5)+" - " + bid;
 	}
 
 	public void setNoVisits(Double noVisits) {

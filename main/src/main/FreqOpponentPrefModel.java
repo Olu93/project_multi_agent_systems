@@ -16,6 +16,7 @@ public class FreqOpponentPrefModel extends OpponentModel {
 	@Override
 	public void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
 		super.init(negotiationSession, parameters);
+		System.out.println("USING - SmartFreqOpponentModel");
 		//	TODO if fail, initialize HashMap here
 	}
 	
@@ -37,7 +38,7 @@ public class FreqOpponentPrefModel extends OpponentModel {
 	
 	@Override
 	public double getWeight(Issue issue) {
-		System.out.println("USEDGET_WHEIGHT HERE!");
+		// System.out.println("USEDGET_WHEIGHT HERE!");
 		Double sumOfEntropies = this.entropies.values().stream().mapToDouble(Math::exp).sum();
 		return softmax(this.entropies.get(issue), sumOfEntropies);
 	}
@@ -51,7 +52,7 @@ public class FreqOpponentPrefModel extends OpponentModel {
 			if (!this.frequencyHash.get(issue).containsKey(bid.getValue(issue))) {
 				this.frequencyHash.get(issue).put(bid.getValue(issue), 0);
 			}
-			System.out.println("SEXXXXXXXXXXXXXXXXXXTONIK2:");
+			// System.out.println("SEXXXXXXXXXXXXXXXXXXTONIK2:");
 //			System.out.println(issue);
 //			System.out.println(bid);
 //			System.out.println(bid.getValue(issue));
