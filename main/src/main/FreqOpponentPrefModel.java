@@ -12,12 +12,14 @@ import genius.core.issue.Value;
 
 public class FreqOpponentPrefModel extends OpponentModel {
 	private HashMap<Issue, Double> entropies = new HashMap<Issue, Double>();
-	private HashMap<Issue, HashMap<Value, Integer>> frequencyHash = new HashMap<Issue, HashMap<Value,Integer>>(); 
+	private HashMap<Issue, HashMap<Value, Integer>> frequencyHash = new HashMap<Issue, HashMap<Value,Integer>>();
+	private NegotiationSession session;
 	
 	@Override
 	public void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
 		super.init(negotiationSession, parameters);
 		System.out.println("USING - SmartFreqOpponentModel");
+		this.session = negotiationSession;
 	}
 	
 	private Double getEntropy(HashMap<Value, Integer> freq) {
@@ -44,6 +46,12 @@ public class FreqOpponentPrefModel extends OpponentModel {
 	}
 
 	@Override
+	public void updateModel(Bid opponentBid) {
+		// TODO Auto-generated method stub
+		this.updateModel(opponentBid, 0);
+	}
+
+	@Override
 	protected void updateModel(Bid bid, double time) {
 		for (Issue issue : bid.getIssues()) {
 			if (!this.frequencyHash.containsKey(issue)) {
@@ -67,7 +75,7 @@ public class FreqOpponentPrefModel extends OpponentModel {
 
 	@Override
 	public double[] getIssueWeights() {
-		List<Issue> issues = negotiationSession.getUtilitySpace().getDomain()
+		List<Issue> issues = this.session.getUtilitySpace().getDomain()
 				.getIssues();
 		double estimatedIssueWeights[] = new double[issues.size()];
 		int i = 0;

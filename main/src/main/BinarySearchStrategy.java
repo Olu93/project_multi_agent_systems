@@ -2,35 +2,41 @@ package main;
 
 import genius.core.Bid;
 import genius.core.BidIterator;
+import genius.core.analysis.BidPoint;
+import genius.core.analysis.BidSpace;
+import genius.core.analysis.ParetoFrontier;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
+import agents.ParetoFrontierPlus;
+
 public class BinarySearchStrategy extends OfferingStrategy {
-	Random rand;
+    Random rand;
     double maxUtilityForBinary;
     double ourMaxBidThatWeGotFromOpponent;
     SmartOpponentOfferingModel oms;
-    SmartAcceptanceStrategy ac;
 
-	public BinarySearchStrategy(AcceptanceStrategy acceptanceStrategy, OMStrategy opponentBidModel, OpponentModel opponentPrefModel) {
-		rand = new Random();
-	    maxUtilityForBinary = 1;
-	    ourMaxBidThatWeGotFromOpponent = 0.4;
-        oms = (SmartOpponentOfferingModel) opponentBidModel;
-        ac = (SmartAcceptanceStrategy) acceptanceStrategy;
-	}
-    
+    @Override
+    public void init(NegotiationSession negotiationSession, OpponentModel opponentModel, OMStrategy omStrategy,
+            Map<String, Double> parameters) throws Exception {
+        super.init(negotiationSession, opponentModel, omStrategy, parameters);
+        rand = new Random();
+        maxUtilityForBinary = 1;
+        ourMaxBidThatWeGotFromOpponent = 0.4;
+        oms = (SmartOpponentOfferingModel) omStrategy;
+    }
 
     @Override
     public BidDetails determineOpeningBid() {
         System.out.println("======================START 1st ROUND=============================");
         try {
             BidDetails maxBid = negotiationSession.getMaxBidinDomain();
-            System.out.println("maxBid: " +  maxBid);
+            System.out.println("maxBid: " + maxBid);
             return maxBid;
         } catch (Exception e) {
             e.printStackTrace();
@@ -41,22 +47,36 @@ public class BinarySearchStrategy extends OfferingStrategy {
     @Override
     public BidDetails determineNextBid() {
         Bid opponentLastBid = negotiationSession.getOpponentBidHistory().getLastBidDetails().getBid();
+        // try {
+        //     BidSpace tmp = new BidSpace(opponentModel.getOpponentUtilitySpace(),
+        //             this.negotiationSession.getUtilitySpace(),true);
+        //     List<BidPoint> tmp3 = tmp.getParetoFrontier();
+        //     BidPoint tmp2 = tmp.getKalaiSmorodinsky();
+        //     System.out.println("KALAI: "+tmp2.getBid());;
+        // } catch (Exception e) {
+        //     // TODO Auto-generated catch block
+        //     e.printStackTrace();
+        // }
         return determineNextBidFromInput(opponentLastBid, negotiationSession);
+        
     }
-    
-    public BidDetails determineNextBidFromInput(Bid opponentLastBid, NegotiationSession negotiationSession) {
-	    System.out.println("negotiationSession "+ negotiationSession);
 
-    	double myUtilityOfOpponentLastBid = negotiationSession.getUtilitySpace().getUtility(opponentLastBid);
+    public BidDetails determineNextBidFromInput(Bid opponentLastBid, NegotiationSession negotiationSession) {
+        System.out.println("negotiationSession " + negotiationSession);
+
+        double myUtilityOfOpponentLastBid = negotiationSession.getUtilitySpace().getUtility(opponentLastBid);
         System.out.println(negotiationSession.getOpponentBidHistory().getHistory());
         System.out.println(negotiationSession.getOpponentBidHistory().getLastBidDetails().getMyUndiscountedUtil());
 
-        if(negotiationSession.getOpponentBidHistory().getHistory().size() > 5) {
+        if (negotiationSession.getOpponentBidHistory().getHistory().size() > 5) {
             // opponentModel.updateModel(opponentLastBid, negotiationSession.getTime());
+            opponentModel.updateModel(opponentLastBid);
             System.out.println("Issue all 0 " + opponentLastBid.getIssues().get(0));
             System.out.println("Issue all 1 " + opponentLastBid.getIssues().get(1));
-            System.out.println("Issue all "+ opponentLastBid.getIssues());
+            System.out.println("Issue all " + opponentLastBid.getIssues());
             System.out.println("Issue Weight " + opponentModel.getWeight(opponentLastBid.getIssues().get(0)));
+
+            // tmp.
         }
 
         double proposeUtility;
