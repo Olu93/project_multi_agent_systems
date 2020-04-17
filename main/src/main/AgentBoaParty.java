@@ -10,6 +10,7 @@ import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
 import genius.core.parties.NegotiationInfo;
+import genius.core.utility.AbstractUtilitySpace;
 import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
 
 /**
@@ -17,7 +18,9 @@ import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
  */
 public class AgentBoaParty extends BoaParty{
 
-    @Override
+    private NegotiationInfo info;
+
+	@Override
     public String getDescription() {
         return "MCSTParty";
     }
@@ -42,7 +45,19 @@ public class AgentBoaParty extends BoaParty{
 				os,	osParams, 
 				om, noparams,
 				oms, noparams);
+		
+		System.out.println("!!!!!!!!!!!!!!START!!!!!!!!!!!!");
+		Boolean isUncertain = info.getUserModel() == null;
+		System.out.println(isUncertain ? "Preferences are certain!" : "Uncertain preferences detected!");
+		info.setUtilSpace((AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilityEstimator(info.getUserModel()))); 
+		this.info = info;
 		super.init(info);
+
 	}
-    
+
+	 @Override
+	 public AbstractUtilitySpace estimateUtilitySpace() {
+		Boolean isUncertain = info.getUserModel() == null;
+	 	return (AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilityEstimator(info.getUserModel()));
+	 }
 }

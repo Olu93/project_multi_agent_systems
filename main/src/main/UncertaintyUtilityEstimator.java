@@ -203,7 +203,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
         }
 
         final SimplexSolver solver = new SimplexSolver();
-        final PointValuePair solution = solver.optimize(new MaxIter(100), oFunc, new LinearConstraintSet(constraints),
+        final PointValuePair solution = solver.optimize(new MaxIter(1000), oFunc, new LinearConstraintSet(constraints),
                 GoalType.MINIMIZE, new NonNegativeConstraint(true));
         // system.out.println("Pred Weights:");
         // system.out.println(Arrays.toString(solution.getPoint()) + " : " + solution.getSecond());
@@ -282,8 +282,8 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
 
     @Override
     public double getUtility(final Bid bid) {
-    	System.out.println("CONTENT OF BID");
-    	System.out.println(bid);
+//    	System.out.println("CONTENT OF BID");
+//    	System.out.println(bid);
 //    	System.out.println("number of issues" + bid.getIssues().size());
 //    	System.out.println("number of values" + bid.getValues().size());
     	if (bid != null && bid.getValues().size() > 0) {

@@ -27,7 +27,7 @@ public class MCTSStrategy extends OfferingStrategy {
 	/**
 	 *
 	 */
-	private Bid opponentBestBid;
+//	private Bid opponentBestBid;
 
 	private static final double UPPER_BOUND = 1.0;
 	SmartAcceptanceStrategy ac;
@@ -37,17 +37,18 @@ public class MCTSStrategy extends OfferingStrategy {
 	private final Double DISCOUNT_FACTOR = 0.90;
 	private Double lowerBound = 1.0;
 	private final Boolean IS_VERBOSE = false;
-	private BinarySearchStrategy offerer;
+	BidDetails lastSetBid;
+//	private BinarySearchStrategy offerer;
 
-	public void setOpponentBestBid(Bid bestBid) {
-		this.opponentBestBid = bestBid;
-	}
-
-	public Bid getBestOpponentBid() {
-		Bid tmp = opponentBestBid;
-		opponentBestBid = null;
-		return tmp;
-	}
+//	public void setOpponentBestBid(Bid bestBid) {
+//		this.opponentBestBid = bestBid;
+//	}
+//
+//	public Bid getBestOpponentBid() {
+//		Bid tmp = opponentBestBid;
+//		opponentBestBid = null;
+//		return tmp;
+//	}
 
 	// #endregion
 
@@ -58,23 +59,27 @@ public class MCTSStrategy extends OfferingStrategy {
 		outcomeSpace = new SortedOutcomeSpace(negotiationSession.getUtilitySpace());
 		negotiationSession.setOutcomeSpace(outcomeSpace);
 		ac = new SmartAcceptanceStrategy(negotiationSession, this, opponentModel, parameters);
-		offerer = new BinarySearchStrategy();
-		offerer.init(negotiationSession, opponentModel, omStrategy, parameters);
+//		offerer = new BinarySearchStrategy();
+//		offerer.init(negotiationSession, opponentModel, omStrategy, parameters);
 	}
 
 	@Override
 	public BidDetails determineOpeningBid() {
-		return negotiationSession.getMaxBidinDomain();
+		lastSetBid = negotiationSession.getMaxBidinDomain();
+		return lastSetBid;
 	}
 
 	@Override
 	public BidDetails determineNextBid() {
-		opponentModel.updateModel(negotiationSession.getOpponentBidHistory().getLastBid());
+//		opponentModel.updateModel(negotiationSession.getOpponentBidHistory().getLastBid());
+//		System.out.println("SEX");
 		BidDetails nextBid = this.getNextBid();
-		if (nextBid != null) {
+		if (nextBid != null && !nextBid.equals(lastSetBid)) {
+			lastSetBid = nextBid;
 			this.setNextBid(null);
 			return nextBid;
 		}
+//		System.out.println("TONIK");
 		return enhanceTree(tree.getRoot());
 	}
 
@@ -113,7 +118,6 @@ public class MCTSStrategy extends OfferingStrategy {
 		tree.setRoot(bestChoiceNode);
 		System.out.println("===========> Best choice: " + bestChoiceNode.getId());
 		lowerBound = updateLowerBound();
-
 		return bestChoiceNode.getBid();
 	}
 
