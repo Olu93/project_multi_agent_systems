@@ -106,7 +106,7 @@ public class MCTSStrategy extends OfferingStrategy {
 		final Node bestChoiceNode = node.getBestChild();
 		tree.setRoot(bestChoiceNode);
 		System.out.println("===========> Best choice: " + bestChoiceNode.getId());
-		lowerBound = lowerBound - (negotiationSession.getTime() / 3);
+		lowerBound = 1 - (negotiationSession.getTime() / 5);
 
 		return bestChoiceNode.getBid();
 	}
