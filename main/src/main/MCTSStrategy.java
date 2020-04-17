@@ -33,7 +33,7 @@ public class MCTSStrategy extends OfferingStrategy {
 	GameTree tree = new GameTree();
 	OutcomeSpace outcomeSpace;
 	private final Double DISCOUNT_FACTOR = 0.90;
-	private Double lowerBound = 0.95;
+	private Double lowerBound = 1.0;
 	private final Boolean IS_VERBOSE = false;
 
 	public void setOpponentBestBid(Bid bestBid) {
@@ -106,7 +106,7 @@ public class MCTSStrategy extends OfferingStrategy {
 		final Node bestChoiceNode = node.getBestChild();
 		tree.setRoot(bestChoiceNode);
 		System.out.println("===========> Best choice: " + bestChoiceNode.getId());
-		lowerBound = lowerBound - (negotiationSession.getTime() / 3);
+		lowerBound = 1 - (negotiationSession.getTime() / 5);
 
 		return bestChoiceNode.getBid();
 	}
@@ -188,7 +188,7 @@ public class MCTSStrategy extends OfferingStrategy {
 		BidDetails agentNextBid;
 		do {
 			// if (negotiationSession.getTime() > 0.25) {
-			if (negotiationSession.getTime() > 0.10) {
+			if (negotiationSession.getTime() > 0.1) {
 				nextOpponentBid = this.omStrategy instanceof SmartOpponentOfferingModel
 						? ((SmartOpponentOfferingModel) this.omStrategy).getBidbyHistory(oppHistory, agentHistory)
 						: this.omStrategy.getBid(oppHistory);
@@ -201,8 +201,14 @@ public class MCTSStrategy extends OfferingStrategy {
 			oppHistory.add(nextOpponentBid);
 			agentCurrentBid = getBidInRange(lowerBound, UPPER_BOUND);
 			agentHistory.add(agentCurrentBid);
-			scores.add(negotiationSession.getUtilitySpace().getUtility(nextOpponentBid.getBid()) * Math.pow(DISCOUNT_FACTOR, count));
+			double opponentUtility = negotiationSession.getUtilitySpace().getUtility(nextOpponentBid.getBid());
+			System.out.println("3==============D");
+			scores.add(opponentUtility * Math.pow(DISCOUNT_FACTOR, count));
 			count++;
+			if(agentCurrentBid.getMyUndiscountedUtil() < .8){
+
+				System.out.println("FUCK");
+			}
 			agentNextBid = this.outcomeSpace.getBidNearUtility(this.negotiationSession.getOwnBidHistory().getLastBidDetails().getMyUndiscountedUtil());
 		} while (ac.determineAcceptabilityBid(nextOpponentBid, agentNextBid) != Actions.Accept && count <= 5);
 

@@ -68,7 +68,9 @@ public class RunTournament {
         System.out.println("============= RANKING =============");
         List<String> agentNames = extractedData.stream().map(row -> row.get("Agent 1").split("@")[0]).distinct()
                 .collect(Collectors.toList());
-        Map<String, Double> rank = agentNames.stream()
+        agentNames.stream()
+                .forEach(name -> printAllStatistics(name, extractedData));
+        agentNames.stream()
                 .map(name -> new SimpleEntry<>(name, getSumUtility(extractedData, name)))
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .peek(entry -> System.out.println(entry.getKey() + ":" + entry.getValue()))

@@ -1,6 +1,7 @@
 package main;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import genius.core.Bid;
@@ -17,7 +18,6 @@ public class FreqOpponentPrefModel extends OpponentModel {
 	public void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
 		super.init(negotiationSession, parameters);
 		System.out.println("USING - SmartFreqOpponentModel");
-		//	TODO if fail, initialize HashMap here
 	}
 	
 	private Double getEntropy(HashMap<Value, Integer> freq) {
@@ -62,8 +62,22 @@ public class FreqOpponentPrefModel extends OpponentModel {
 			this.frequencyHash.get(issue).put(bid.getValue(issue), incrementedValue);
 			this.entropies.put(issue, getEntropy(this.frequencyHash.get(issue)));
 		}
-		this.opponentUtilitySpace.setWeights(bid.getIssues(), getIssueWeights());
+		this.opponentUtilitySpace.setWeights(bid.getIssues(), this.getIssueWeights());
 	}
+
+	@Override
+	public double[] getIssueWeights() {
+		List<Issue> issues = negotiationSession.getUtilitySpace().getDomain()
+				.getIssues();
+		double estimatedIssueWeights[] = new double[issues.size()];
+		int i = 0;
+		for (Issue issue : issues) {
+			estimatedIssueWeights[i] = getWeight(issue);
+			i++;
+		}
+		return estimatedIssueWeights;
+	}
+
 	
 	@Override
 	public String getName() {

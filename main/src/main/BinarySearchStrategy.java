@@ -3,8 +3,7 @@ package main;
 import genius.core.Bid;
 import genius.core.BidIterator;
 import genius.core.bidding.BidDetails;
-import genius.core.boaframework.NegotiationSession;
-import genius.core.boaframework.OfferingStrategy;
+import genius.core.boaframework.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,13 +13,15 @@ public class BinarySearchStrategy extends OfferingStrategy {
 	Random rand;
     double maxUtilityForBinary;
     double ourMaxBidThatWeGotFromOpponent;
-    // SmartOpponentOfferingModel omStrategy;; 
-	
-	public BinarySearchStrategy() {
+    SmartOpponentOfferingModel oms;
+    SmartAcceptanceStrategy ac;
+
+	public BinarySearchStrategy(AcceptanceStrategy acceptanceStrategy, OMStrategy opponentBidModel, OpponentModel opponentPrefModel) {
 		rand = new Random();
 	    maxUtilityForBinary = 1;
-        ourMaxBidThatWeGotFromOpponent = 0.4;
-        // omStrategy = new SmartOpponentOfferingModel();
+	    ourMaxBidThatWeGotFromOpponent = 0.4;
+        oms = (SmartOpponentOfferingModel) opponentBidModel;
+        ac = (SmartAcceptanceStrategy) acceptanceStrategy;
 	}
     
 
@@ -39,43 +40,49 @@ public class BinarySearchStrategy extends OfferingStrategy {
 
     @Override
     public BidDetails determineNextBid() {
-
-        ((SmartOpponentOfferingModel) omStrategy).getBid(negotiationSession.getOpponentBidHistory().getHistory());
         Bid opponentLastBid = negotiationSession.getOpponentBidHistory().getLastBidDetails().getBid();
         return determineNextBidFromInput(opponentLastBid, negotiationSession);
     }
     
     public BidDetails determineNextBidFromInput(Bid opponentLastBid, NegotiationSession negotiationSession) {
-//	    System.out.println("negotiationSession "+ negotiationSession);
+	    System.out.println("negotiationSession "+ negotiationSession);
+
     	double myUtilityOfOpponentLastBid = negotiationSession.getUtilitySpace().getUtility(opponentLastBid);
-//        System.out.println(negotiationSession.getOpponentBidHistory().getHistory());
-//        System.out.println(negotiationSession.getOpponentBidHistory().getLastBidDetails().getMyUndiscountedUtil());
+        System.out.println(negotiationSession.getOpponentBidHistory().getHistory());
+        System.out.println(negotiationSession.getOpponentBidHistory().getLastBidDetails().getMyUndiscountedUtil());
+
+        if(negotiationSession.getOpponentBidHistory().getHistory().size() > 5) {
+            // opponentModel.updateModel(opponentLastBid, negotiationSession.getTime());
+            System.out.println("Issue all 0 " + opponentLastBid.getIssues().get(0));
+            System.out.println("Issue all 1 " + opponentLastBid.getIssues().get(1));
+            System.out.println("Issue all "+ opponentLastBid.getIssues());
+            System.out.println("Issue Weight " + opponentModel.getWeight(opponentLastBid.getIssues().get(0)));
+        }
+
         double proposeUtility;
         if(myUtilityOfOpponentLastBid > ourMaxBidThatWeGotFromOpponent){
+            System.out.println("Binary Tactic");
             ourMaxBidThatWeGotFromOpponent = myUtilityOfOpponentLastBid;
             maxUtilityForBinary = maxUtilityForBinary - (maxUtilityForBinary - myUtilityOfOpponentLastBid) / 2;
             proposeUtility = maxUtilityForBinary;
-//            System.out.println("Binary Tactic");
         }
         else{
             double targetUtility = maxUtilityForBinary - (maxUtilityForBinary - ourMaxBidThatWeGotFromOpponent) / 2;
-//            System.out.println("Counter the hardheaded");
-//            System.out.println("targetUtility: " + targetUtility);
-//            System.out.println("ourMaxBidThatWeGotFromOpponent: " + ourMaxBidThatWeGotFromOpponent);
+            System.out.println("Counter the hardheaded");
+            System.out.println("targetUtility: " + targetUtility);
+            System.out.println("ourMaxBidThatWeGotFromOpponent: " + ourMaxBidThatWeGotFromOpponent);
             proposeUtility = maxUtilityForBinary - (maxUtilityForBinary - targetUtility) * negotiationSession.getTime();
         }
-//        System.out.println(negotiationSession.getTime());
-
         ArrayList<BidDetails> myBids = new ArrayList<BidDetails>(getBidsOfUtility(proposeUtility, negotiationSession));
         Bid myBid = getBestBidForSelf(myBids, negotiationSession);
-//        System.out.println("maxUtilityForBinary: " + maxUtilityForBinary);
-//        System.out.println("proposeUtility: " + proposeUtility);
-//        System.out.println("myUtilityOfOpponentLastBid: " + myUtilityOfOpponentLastBid);
+        System.out.println("maxUtilityForBinary: " + maxUtilityForBinary);
+        System.out.println("proposeUtility: " + proposeUtility);
+        System.out.println("myUtilityOfOpponentLastBid: " + myUtilityOfOpponentLastBid);
         nextBid = new BidDetails(myBid, negotiationSession.getUtilitySpace().getUtility(myBid),
                 negotiationSession.getTime());
-//        System.out.println("nextBid: " + nextBid);
-//        System.out.println("myBid: " + myBid);
-//        System.out.println("===================================================");
+        System.out.println("nextBid: " + nextBid);
+        System.out.println("myBid: " + myBid);
+        System.out.println("=============================== " + negotiationSession.getTime() + " ===============================");
         return nextBid;
     }
 
