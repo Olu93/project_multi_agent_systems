@@ -1,7 +1,6 @@
 package main;
 
 import genius.core.Bid;
-import genius.core.BidHistory;
 import genius.core.BidIterator;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.AcceptanceStrategy;
@@ -21,9 +20,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
 
-public class MCTSStrategy extends OfferingStrategy {
+public class MCTSStrategyBinarySearch extends OfferingStrategy {
 	/**
 	 *
 	 */
@@ -57,7 +55,7 @@ public class MCTSStrategy extends OfferingStrategy {
 		super.init(negotiationSession, opponentModel, omStrategy, parameters);
 		outcomeSpace = new SortedOutcomeSpace(negotiationSession.getUtilitySpace());
 		negotiationSession.setOutcomeSpace(outcomeSpace);
-		ac = new SmartAcceptanceStrategy(negotiationSession, this, opponentModel, parameters);
+		ac = new SmartAcceptanceStrategy(negotiationSession, this, opponentModel ,parameters);
 		offerer = new BinarySearchStrategy();
 		offerer.init(negotiationSession, opponentModel, omStrategy, parameters);
 	}
@@ -69,7 +67,6 @@ public class MCTSStrategy extends OfferingStrategy {
 
 	@Override
 	public BidDetails determineNextBid() {
-		opponentModel.updateModel(negotiationSession.getOpponentBidHistory().getLastBid());
 		BidDetails nextBid = this.getNextBid();
 		if (nextBid != null) {
 			this.setNextBid(null);
@@ -112,23 +109,9 @@ public class MCTSStrategy extends OfferingStrategy {
 		final Node bestChoiceNode = node.getBestChild();
 		tree.setRoot(bestChoiceNode);
 		System.out.println("===========> Best choice: " + bestChoiceNode.getId());
-		lowerBound = updateLowerBound();
+		lowerBound = 1 - (negotiationSession.getTime() / 5);
 
 		return bestChoiceNode.getBid();
-	}
-
-	private double updateLowerBound() {
-		return 1 - (negotiationSession.getTime() / 5);
-	}
-
-	private double updateLowerBoundSigmoid() {
-		Double x = negotiationSession.getTime() * 100;
-		Double substract = 1 / (1 + Math.pow(Math.E, -0.1 * (x - 90)));
-		if (true)
-			System.out.println("Substracts: " + substract + " after " + Math.round(negotiationSession.getTime() * 100)
-					+ "% of the time");
-		System.out.println("Current lower bound: " + (1 - substract));
-		return 1 - substract;
 	}
 
 	// node selection
@@ -174,9 +157,9 @@ public class MCTSStrategy extends OfferingStrategy {
 	private void expandNode(final Node node) {
 		// System.out.println("I run from expandNode");
 		// TODO: beautify
-		node.addChild(new Node().setParent(node).setBid(chooseBid()))
-				.addChild(new Node().setParent(node).setBid(chooseBid()))
-				.addChild(new Node().setParent(node).setBid(chooseBid()));
+		node.addChild(new Node().setParent(node).setBid(getBidInRange(lowerBound, UPPER_BOUND)))
+				.addChild(new Node().setParent(node).setBid(getBidInRange(lowerBound, UPPER_BOUND)))
+				.addChild(new Node().setParent(node).setBid(getBidInRange(lowerBound, UPPER_BOUND)));
 
 	}
 
@@ -219,13 +202,12 @@ public class MCTSStrategy extends OfferingStrategy {
 			// System.out.println(nextOpponentBid.getBid());
 
 			oppHistory.add(nextOpponentBid);
-			agentCurrentBid = chooseBid();
+			agentCurrentBid = getBidInRange(lowerBound, UPPER_BOUND);
 			agentHistory.add(agentCurrentBid);
 			double opponentUtility = negotiationSession.getUtilitySpace().getUtility(nextOpponentBid.getBid());
 			scores.add(opponentUtility * Math.pow(DISCOUNT_FACTOR, count));
 			count++;
-			agentNextBid = this.outcomeSpace.getBidNearUtility(
-					this.negotiationSession.getOwnBidHistory().getLastBidDetails().getMyUndiscountedUtil());
+			agentNextBid = this.outcomeSpace.getBidNearUtility(this.negotiationSession.getOwnBidHistory().getLastBidDetails().getMyUndiscountedUtil());
 		} while (ac.determineAcceptabilityBid(nextOpponentBid, agentNextBid) != Actions.Accept && count <= 5);
 
 		avgScore = scores.parallelStream().mapToDouble(val -> val).average().getAsDouble();
@@ -249,36 +231,17 @@ public class MCTSStrategy extends OfferingStrategy {
 	// Nearest Bid
 	// Different Strategy
 	// Discretization
-	public BidDetails chooseBid() {
-		return getBidInRange(lowerBound, UPPER_BOUND);
-		// return getBestMutualBidInRange(lowerBound, UPPER_BOUND);
-	}
 
 	public BidDetails getBidInRange(Double lowerBound, Double upperBound) {
-		Random rand = new Random();
-		List<BidDetails> candidateBids = outcomeSpace.getBidsinRange(new Range(lowerBound, 1.0));
-		BidDetails result = candidateBids.size() > 0 ? candidateBids.get(rand.nextInt(candidateBids.size()))
-				: negotiationSession.getMaxBidinDomain();
-		return result;
-		// return offerer.determineNextBid();
+		// Random rand = new Random();
+		// List<BidDetails> candidateBids = outcomeSpace.getBidsinRange(new Range(lowerBound, 1.0));
+		// BidDetails result = candidateBids.size() > 0 ? candidateBids.get(rand.nextInt(candidateBids.size()))
+		// 		: negotiationSession.getMaxBidinDomain();
+		// return result;
+		return offerer.determineNextBid();
 	}
 
-	public BidDetails getBestMutualBidInRange(Double lowerBound, Double upperBound) {
-		Random rand = new Random();
-		List<BidDetails> candidateBids = outcomeSpace.getBidsinRange(new Range(lowerBound, 1.0)).stream()
-				.sorted((a,b) -> compareBids(a, b))
-				// .peek(bid -> System.out.println(opponentModel.getBidEvaluation(bid.getBid())))
-				.collect(Collectors.toList());
 
-		Integer size = candidateBids.size() > 5 ? 5 : candidateBids.size();
-		BidDetails result = candidateBids.size() > 0 ? candidateBids.subList(0, size).get(rand.nextInt(size))
-				: negotiationSession.getMaxBidinDomain();
-		return result;
-	}
-
-	private int compareBids(BidDetails a, BidDetails b){
-		return Double.compare(opponentModel.getBidEvaluation(a.getBid()), opponentModel.getBidEvaluation(b.getBid())) > 1 ? -1 : 1;
-	}
 
 	@Override
 	public String getName() {

@@ -92,47 +92,6 @@ public class BidEncoder {
         return result;
     }
 
-    private class IssueValuePair {
-        IssueDiscrete issue;
-        ValueDiscrete value;
-
-        public IssueValuePair(IssueDiscrete issue, ValueDiscrete value) {
-            this.issue = issue;
-            this.value = value;
-        }
-
-        public IssueDiscrete getIssue() {
-            return issue;
-        }
-
-        public void setIssue(IssueDiscrete issue) {
-            this.issue = issue;
-        }
-
-        public ValueDiscrete getValue() {
-            return value;
-        }
-
-        public void setValue(ValueDiscrete value) {
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return issue.getName() + ":" + value.getValue();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            // if(obj instanceof IssueValuePair == false) return false;
-            // IssueValuePair tmp = (IssueValuePair) obj;
-            return this.toString().contentEquals(obj.toString());
-        }
-        // @Override
-        // public int hashCode() {
-        // return (this.getIssue().getName() + this.getValue().getValue()).hashCode();
-        // }
-
-    }
+        
 
 }

@@ -46,7 +46,7 @@ public class SmartAgent extends BoaParty {
 		AcceptanceStrategy 	ac  = new SmartAcceptanceStrategy();
 		OpponentModel 		om  = new FreqOpponentPrefModel();
 		OMStrategy			oms = new SmartOpponentOfferingModel();
-		OfferingStrategy 	os  = new BinarySearchStrategy();
+		OfferingStrategy 	os  = new MCTSStrategy();
 		
 		// All component parameters can be set below.
 		Map<String, Double> noparams = Collections.emptyMap();

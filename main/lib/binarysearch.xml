@@ -11,16 +11,16 @@
 				classPath="genius.core.protocol.StackedAlternatingOffersProtocol"
 				protocolName="Stacked Alternating Offers Protocol for Multi-Lateral Negotiation (SAOPMN)" />
 			<partyRepItems>
-				<party classPath="../main/bin/main/AgentBoaParty.class">
+				<party classPath="../main/bin/main/BinarySearchParty.class">
 					<properties />
 				</party>
-				<party classPath="agents.anac.y2011.TheNegotiator.TheNegotiator" strategyParameters="">
-					<properties/>
+				<party classPath="agents.anac.y2011.BramAgent.BRAMAgent">
+					<properties />
 				</party>
 			</partyRepItems>
 			<partyProfileItems>
 				<item url="file:etc/templates/partydomain/party1_utility.xml" />
-				<item url="file:etc/templates/partydomain/party5_utility.xml" />
+				<item url="file:etc/templates/partydomain/party2_utility.xml" />
 			</partyProfileItems>
 			<repeats>1</repeats>
 			<numberOfPartiesPerSession>2</numberOfPartiesPerSession>

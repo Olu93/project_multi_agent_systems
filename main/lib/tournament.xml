@@ -17,6 +17,12 @@
 				<party classPath="../main/bin/main/AgentBoaParty.class">
 					<properties />
 				</party>
+				<party classPath="../main/bin/main/BSMCTS.class">
+					<properties />
+				</party>
+				<party classPath="../main/bin/main/BinarySearchParty.class">
+					<properties />
+				</party>
 				<party classPath="agents.anac.y2011.Nice_Tit_for_Tat.NiceTitForTat">
 					<properties />
                 </party>

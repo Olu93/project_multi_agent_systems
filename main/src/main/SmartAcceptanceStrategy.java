@@ -29,7 +29,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 	public SmartAcceptanceStrategy(NegotiationSession session, OfferingStrategy offeringStrategy,
 	OpponentModel opponentModel, Map<String, Double> parameters) {
 		this.negotiationSession = session;
-		this.omStrategy = ((MCTSStrategy) offeringStrategy).om;
+		this.omStrategy = offeringStrategy instanceof MCTSStrategy ? ((MCTSStrategy) offeringStrategy).om : null;
 
 		try {
 			this.init(negotiationSession, offeringStrategy, opponentModel, parameters);
@@ -107,7 +107,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 			}			
 			
 
-			System.out.println("Accepting bid!");
+			System.out.println("Accepting bid!" + opponentBid);
 			return Actions.Accept;
 		}
 		return reject();

@@ -42,6 +42,14 @@
         },
         {
             "type": "java",
+            "name": "Run BinarySearch",
+            "request": "launch",
+            "mainClass": "misc.RunSession",
+            "projectName": "main",
+            "args": "lib\\binarysearch.xml logs\\last_run.csv"
+        },
+        {
+            "type": "java",
             "name": "Run Test",
             "request": "launch",
             "mainClass": "misc.RunSession",

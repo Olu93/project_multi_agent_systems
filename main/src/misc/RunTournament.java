@@ -50,28 +50,27 @@ public class RunTournament {
 
         csvReader.close();
         // System.out.println(Arrays.toString(header));
-        printAllStatistics("AgentBoaParty", extractedData);
-        printAllStatistics("SmartAgent", extractedData);
-        printAllStatistics("NiceTitForTat", extractedData);
-        printAllStatistics("BoulwareNegotiationParty", extractedData);
-        printAllStatistics("ConcederNegotiationParty", extractedData);
-        printAllStatistics("BRAMAgent", extractedData);
-        printAllStatistics("KLH", extractedData);
-        printAllStatistics("IAMhaggler2012", extractedData);
-        printAllStatistics("BayesianAgent", extractedData);
+        // printAllStatistics("AgentBoaParty", extractedData);
+        // printAllStatistics("SmartAgent", extractedData);
+        // printAllStatistics("NiceTitForTat", extractedData);
+        // printAllStatistics("BoulwareNegotiationParty", extractedData);
+        // printAllStatistics("ConcederNegotiationParty", extractedData);
+        // printAllStatistics("BRAMAgent", extractedData);
+        // printAllStatistics("KLH", extractedData);
+        // printAllStatistics("IAMhaggler2012", extractedData);
+        // printAllStatistics("BayesianAgent", extractedData);
+        // printAllStatistics("BayesianAgent", extractedData);
 
         printRanking(extractedData);
     }
 
     private static void printRanking(List<DataLine> extractedData) {
         System.out.println("");
-        System.out.println("============= RANKING =============");
         List<String> agentNames = extractedData.stream().map(row -> row.get("Agent 1").split("@")[0]).distinct()
                 .collect(Collectors.toList());
-        agentNames.stream()
-                .forEach(name -> printAllStatistics(name, extractedData));
-        agentNames.stream()
-                .map(name -> new SimpleEntry<>(name, getSumUtility(extractedData, name)))
+        agentNames.stream().forEach(name -> printAllStatistics(name, extractedData));
+        System.out.println("============= RANKING =============");
+        agentNames.stream().map(name -> new SimpleEntry<>(name, getSumUtility(extractedData, name)))
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .peek(entry -> System.out.println(entry.getKey() + ":" + entry.getValue()))
                 .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
