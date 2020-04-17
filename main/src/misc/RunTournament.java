@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,49 +44,43 @@ public class RunTournament {
                 header = row.split(";");
                 continue;
             }
-            String[] data = row.split(";");
+            String[] data = row.replace(",", ".").split(";");
             extractedData.add(new DataLine(header, data));
         }
 
+        csvReader.close();
         // System.out.println(Arrays.toString(header));
-        System.out.println("==========================");
         printAllStatistics("AgentBoaParty", extractedData);
-        System.out.println("==========================");
+        printAllStatistics("SmartAgent", extractedData);
         printAllStatistics("NiceTitForTat", extractedData);
-        System.out.println("==========================");
         printAllStatistics("BoulwareNegotiationParty", extractedData);
-        System.out.println("==========================");
         printAllStatistics("ConcederNegotiationParty", extractedData);
-        System.out.println("==========================");
         printAllStatistics("BRAMAgent", extractedData);
-        System.out.println("==========================");
         printAllStatistics("KLH", extractedData);
-        System.out.println("==========================");
         printAllStatistics("IAMhaggler2012", extractedData);
-        System.out.println("==========================");
         printAllStatistics("BayesianAgent", extractedData);
 
-        System.out.println("==========================");
-        System.out.println("==========================");
-
         printRanking(extractedData);
-        csvReader.close();
     }
 
     private static void printRanking(List<DataLine> extractedData) {
-        List<String> agentNames = extractedData.stream().map(row -> row.get("Agent 1").split("@")[0])
+        System.out.println("");
+        System.out.println("============= RANKING =============");
+        List<String> agentNames = extractedData.stream().map(row -> row.get("Agent 1").split("@")[0]).distinct()
                 .collect(Collectors.toList());
         Map<String, Double> rank = agentNames.stream()
                 .map(name -> new SimpleEntry<>(name, getSumUtility(extractedData, name)))
-                .sorted(Map.Entry.comparingByValue())
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .peek(entry -> System.out.println(entry.getKey() + ":" + entry.getValue()))
                 .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
-        rank.entrySet().stream().peek(entry -> System.out.println(entry.getKey() + ":" + entry.getValue())).collect(Collectors.toList());
     }
 
     private static void printAllStatistics(String agent, List<DataLine> extractedData) {
         if (extractedData.stream().map(row -> row.get("Agent 1").split("@")[0]).filter(name -> name.contains(agent))
-                .collect(Collectors.toList()).size() < 1) return;
+                .collect(Collectors.toList()).size() < 1)
+            return;
 
+        System.out.println("==========================");
         System.out.println(agent + " played " + getNumberOfNegotiations(extractedData, agent) + " games");
         System.out.println("                Sum of " + agent + ": " + getSumUtility(extractedData, agent));
         System.out.println("    Perceveived Sum of " + agent + ": " + getSumPerceivedUtility(extractedData, agent));
@@ -117,28 +112,35 @@ public class RunTournament {
     }
 
     private static Double getSumPerceivedUtility(List<DataLine> data, String extract) {
-        return data.stream().filter(row -> row.get("Agent 1").contains(extract))
-                .mapToDouble(row -> Double.parseDouble(row.get("Perceived. Util. 1"))).sum()
-                + data.stream().filter(row -> row.get("Agent 2").contains(extract))
-                        .mapToDouble(row -> Double.parseDouble(row.get("Perceived. Util. 2"))).sum();
+        try {
+            return data.stream().filter(row -> row.get("Agent 1").contains(extract))
+                    .filter(row -> !row.get("Perceived. Util. 1").isEmpty())
+                    .mapToDouble(row -> Double.parseDouble(row.get("Perceived. Util. 1"))).sum()
+                    + data.stream().filter(row -> row.get("Agent 2").contains(extract))
+                            .filter(row -> !row.get("Perceived. Util. 2").isEmpty())
+                            .mapToDouble(row -> Double.parseDouble(row.get("Perceived. Util. 2"))).sum();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0.0;
     }
 
     private static Double getAvgAgreement(List<DataLine> data, String extract) {
         return data.stream().filter(row -> row.get("Agent 1").contains(extract) || row.get("Agent 2").contains(extract))
-                // .peek(System.out::println)
+                .filter(row -> !row.get("Agreement").isEmpty())
                 .mapToDouble(row -> row.get("Agreement").contains("Yes") ? 1 : 0).average().getAsDouble();
     }
 
     private static Double getAvgDistanceToPareto(List<DataLine> data, String extract) {
         return data.stream().filter(row -> row.get("Agent 1").contains(extract) || row.get("Agent 2").contains(extract))
-                // .peek(System.out::println)
+                .filter(row -> !row.get("Dist. to Pareto").isEmpty())
                 .mapToDouble(row -> Double.parseDouble(row.get("Dist. to Pareto"))).average().getAsDouble();
     }
 
     private static Double getAvgTimeToAgree(List<DataLine> data, String extract) {
         return data.stream().filter(row -> row.get("Agent 1").contains(extract) || row.get("Agent 2").contains(extract))
-                // .peek(System.out::println)
-                .mapToDouble(row -> Double.parseDouble(row.get("Round"))).average().getAsDouble();
+                .filter(row -> !row.get("Round").isEmpty()).mapToDouble(row -> Double.parseDouble(row.get("Round")))
+                .average().getAsDouble();
     }
 
     private static final Collector<Double, double[], Double> VARIANCE_COLLECTOR = Collector.of( // See

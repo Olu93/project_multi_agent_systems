@@ -20,32 +20,36 @@ public class BidEncoder {
 
     private List<IssueDiscrete> domainIssues;
     private NegotiationSession session;
-    private HashMap<ValueDiscrete, Integer> mappingValToInt = new HashMap<>();
+    private HashMap<IssueValuePair, Integer> mappingIVPToInt = new HashMap<>();
     private HashMap<Integer, IssueDiscrete> mappingIntToIssue = new HashMap<>();
-    private HashMap<Integer, ValueDiscrete> mappingIntToVal = new HashMap<>();
+    private HashMap<Integer, IssueValuePair> mappingIntToIVP = new HashMap<>();
 
     public BidEncoder(NegotiationSession session) {
         this.session = session;
         this.domainIssues = this.session.getIssues().parallelStream().map(value -> (IssueDiscrete) value)
                 .collect(Collectors.toList());
+        IssueValuePair ivp = null;
         Integer cnt = 0;
         for (int i = 0; i < this.domainIssues.size(); i++) {
             IssueDiscrete issue = (IssueDiscrete) this.domainIssues.get(i);
             for (int j = 0; j < issue.getNumberOfValues(); j++) {
-                mappingValToInt.put(issue.getValue(j), cnt);
-                mappingIntToVal.put(cnt, issue.getValue(j));
+                ivp = new IssueValuePair(issue, issue.getValue(j));
+                mappingIVPToInt.put(ivp, cnt);
+                mappingIntToIVP.put(cnt, ivp);
                 mappingIntToIssue.put(cnt, issue);
                 cnt++;
             }
         }
     }
 
-    public Integer getIndexByValue(Value val) {
-        return this.mappingValToInt.get(val);
+    public Integer getIndexByIVP(IssueValuePair val) {
+        IssueValuePair key = this.mappingIVPToInt.keySet().stream().filter(pair -> pair.equals(val)).findFirst()
+                .orElse(null);
+        return this.mappingIVPToInt.get(key);
     }
 
-    public Value getValueByIndex(Integer idx) {
-        return this.mappingIntToVal.get(idx);
+    public IssueValuePair getIVPByIndex(Integer idx) {
+        return this.mappingIntToIVP.get(idx);
     }
 
     public IssueDiscrete getIssueByIndex(Integer idx) {
@@ -54,16 +58,20 @@ public class BidEncoder {
 
     public Matrix encode(final BidHistory bidHistory) {
         List<Bid> lBids = bidHistory.getHistory().stream().map(b -> b.getBid()).collect(Collectors.toList());
-        Matrix fullMatrix = new Matrix(lBids.size(), mappingValToInt.size());
+        Matrix fullMatrix = new Matrix(lBids.size(), mappingIVPToInt.size());
         for (int i = 0; i < lBids.size(); i++) {
             for (int j = 0; j < lBids.get(i).getIssues().size(); j++) {
                 IssueDiscrete currIssue = (IssueDiscrete) lBids.get(i).getIssues().get(j);
                 ValueDiscrete val = (ValueDiscrete) lBids.get(i).getValue(currIssue);
-                Integer pos = this.getIndexByValue(val);
+                Integer pos = this.getIndexByIVP(new IssueValuePair(currIssue, val));
+                // if (pos > 21) {
+                // System.out.println("");
+                // }
                 fullMatrix.set(i, pos, 1);
             }
         }
         return fullMatrix;
+
     }
 
     public Bid decode(final Matrix oneHotRowMatrix) {
@@ -77,11 +85,54 @@ public class BidEncoder {
         }
         for (Integer idx : idxOnes) {
             IssueDiscrete issue = this.getIssueByIndex(idx);
-            Value val = this.getValueByIndex(idx);
+            Value val = this.getIVPByIndex(idx).getValue();
             bidValues.put(issue.getNumber(), val);
         }
         Bid result = new Bid(this.session.getDomain(), bidValues);
         return result;
+    }
+
+    private class IssueValuePair {
+        IssueDiscrete issue;
+        ValueDiscrete value;
+
+        public IssueValuePair(IssueDiscrete issue, ValueDiscrete value) {
+            this.issue = issue;
+            this.value = value;
+        }
+
+        public IssueDiscrete getIssue() {
+            return issue;
+        }
+
+        public void setIssue(IssueDiscrete issue) {
+            this.issue = issue;
+        }
+
+        public ValueDiscrete getValue() {
+            return value;
+        }
+
+        public void setValue(ValueDiscrete value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return issue.getName() + ":" + value.getValue();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            // if(obj instanceof IssueValuePair == false) return false;
+            // IssueValuePair tmp = (IssueValuePair) obj;
+            return this.toString().contentEquals(obj.toString());
+        }
+        // @Override
+        // public int hashCode() {
+        // return (this.getIssue().getName() + this.getValue().getValue()).hashCode();
+        // }
+
     }
 
 }

@@ -5,8 +5,12 @@ import genius.core.BidIterator;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.AcceptanceStrategy;
 import genius.core.boaframework.Actions;
+import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OfferingStrategy;
+import genius.core.boaframework.OpponentModel;
+import genius.core.boaframework.OutcomeSpace;
+import genius.core.boaframework.SortedOutcomeSpace;
 import genius.core.misc.Range;
 
 import java.util.ArrayList;
@@ -14,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class MCTSStrategy extends OfferingStrategy {
@@ -25,7 +30,8 @@ public class MCTSStrategy extends OfferingStrategy {
 	private static final double UPPER_BOUND = 1.0;
 	SmartAcceptanceStrategy ac;
 	OMStrategy om;
-	GameTree tree;
+	GameTree tree = new GameTree();
+	OutcomeSpace outcomeSpace;
 	private final Double DISCOUNT_FACTOR = 0.90;
 	private Double lowerBound = 0.95;
 	private final Boolean IS_VERBOSE = false;
@@ -33,25 +39,22 @@ public class MCTSStrategy extends OfferingStrategy {
 	public void setOpponentBestBid(Bid bestBid) {
 		this.opponentBestBid = bestBid;
 	}
-	
+
 	public Bid getBestOpponentBid() {
 		Bid tmp = opponentBestBid;
 		opponentBestBid = null;
 		return tmp;
-    }
-	//#endregion
-	public MCTSStrategy() {
-		if (this.omStrategy instanceof SmartOpponentOfferingModel) {
-			om = (SmartOpponentOfferingModel) this.omStrategy;
-		}
 	}
 
-	// TODO: I need both the opponent model strategy and the acceptance strategy in
-	// here
-	public MCTSStrategy(final AcceptanceStrategy acceptanceStrategy, final OMStrategy opponentBidModel) {
-		ac = (SmartAcceptanceStrategy) acceptanceStrategy;
-		om = (SmartOpponentOfferingModel) opponentBidModel;
-		tree = new GameTree();
+	// #endregion
+
+	@Override
+	public void init(NegotiationSession negotiationSession, OpponentModel opponentModel, OMStrategy omStrategy,
+			Map<String, Double> parameters) throws Exception {
+		super.init(negotiationSession, opponentModel, omStrategy, parameters);
+		outcomeSpace = new SortedOutcomeSpace(negotiationSession.getUtilitySpace());
+		negotiationSession.setOutcomeSpace(outcomeSpace);
+		ac = new SmartAcceptanceStrategy(negotiationSession, this, opponentModel ,parameters);
 	}
 
 	@Override
@@ -61,7 +64,18 @@ public class MCTSStrategy extends OfferingStrategy {
 
 	@Override
 	public BidDetails determineNextBid() {
+		BidDetails nextBid = this.getNextBid();
+		if (nextBid != null) {
+			this.setNextBid(null);
+			return nextBid;
+		}
 		return enhanceTree(tree.getRoot());
+	}
+
+	@Override
+	public BidDetails getNextBid() {
+		BidDetails previousOpponentBestBid = this.nextBid;
+		return previousOpponentBestBid;
 	}
 
 	public BidDetails enhanceTree(final Node node) {
@@ -74,7 +88,8 @@ public class MCTSStrategy extends OfferingStrategy {
 			// Node 1 (0) -> Node 2
 			// Node 1 (3) [1] -> Keep Node 1 -> No expansion
 			if (selectedNode.getNoVisits() >= selectedNode.getChildren().size()) {
-				// System.err.println("Expansion: " + selectedNode.getId() + " - " + selectedNode.getNoVisits());
+				// System.err.println("Expansion: " + selectedNode.getId() + " - " +
+				// selectedNode.getNoVisits());
 				expandNode(selectedNode);
 			}
 
@@ -91,7 +106,7 @@ public class MCTSStrategy extends OfferingStrategy {
 		final Node bestChoiceNode = node.getBestChild();
 		tree.setRoot(bestChoiceNode);
 		System.out.println("===========> Best choice: " + bestChoiceNode.getId());
-		lowerBound = lowerBound - (negotiationSession.getTime()/3);
+		lowerBound = lowerBound - (negotiationSession.getTime() / 3);
 
 		return bestChoiceNode.getBid();
 	}
@@ -100,7 +115,8 @@ public class MCTSStrategy extends OfferingStrategy {
 	private Node selectNode(final Node rootNode) {
 		Node currNode = rootNode;
 
-		if(IS_VERBOSE) System.out.println(currNode);
+		if (IS_VERBOSE)
+			System.out.println(currNode);
 		while (currNode.getChildren().size() != 0) {
 			currNode = MCTSStrategy.getBestNode(currNode);
 		}
@@ -166,27 +182,29 @@ public class MCTSStrategy extends OfferingStrategy {
 
 		// TODO: change this with the time that we need till the end
 		int count = 0;
-		BidDetails nextOpponentBid, agentBid;
+		BidDetails nextOpponentBid, agentCurrentBid;
 		final List<Double> scores = new ArrayList<>();
 		Double avgScore = 0.0;
+		BidDetails agentNextBid;
 		do {
 			// if (negotiationSession.getTime() > 0.25) {
-			if (negotiationSession.getTime() > 0.99) {
-				nextOpponentBid = this.om instanceof SmartOpponentOfferingModel
-						? ((SmartOpponentOfferingModel) this.om).getBidbyHistory(oppHistory, agentHistory)
-						: this.om.getBid(oppHistory);
-				
-			}else{
+			if (negotiationSession.getTime() > 0.10) {
+				nextOpponentBid = this.omStrategy instanceof SmartOpponentOfferingModel
+						? ((SmartOpponentOfferingModel) this.omStrategy).getBidbyHistory(oppHistory, agentHistory)
+						: this.omStrategy.getBid(oppHistory);
+
+			} else {
 				nextOpponentBid = getBidInRange(0.0, 0.5);
 			}
 			// System.out.println(nextOpponentBid.getBid());
 
 			oppHistory.add(nextOpponentBid);
-			agentBid = getBidInRange(lowerBound, UPPER_BOUND);
-			agentHistory.add(agentBid);
+			agentCurrentBid = getBidInRange(lowerBound, UPPER_BOUND);
+			agentHistory.add(agentCurrentBid);
 			scores.add(negotiationSession.getUtilitySpace().getUtility(nextOpponentBid.getBid()) * Math.pow(DISCOUNT_FACTOR, count));
 			count++;
-		} while (ac.determineAcceptabilityBid(nextOpponentBid) != Actions.Accept && count <= 5);
+			agentNextBid = this.outcomeSpace.getBidNearUtility(this.negotiationSession.getOwnBidHistory().getLastBidDetails().getMyUndiscountedUtil());
+		} while (ac.determineAcceptabilityBid(nextOpponentBid, agentNextBid) != Actions.Accept && count <= 5);
 
 		avgScore = scores.parallelStream().mapToDouble(val -> val).average().getAsDouble();
 		// TODO: Average across multiple simulations
@@ -212,21 +230,21 @@ public class MCTSStrategy extends OfferingStrategy {
 
 	public BidDetails getBidInRange(Double lowerBound, Double upperBound) {
 		Random rand = new Random();
-		List<BidDetails> candidateBids = new ArrayList<BidDetails>();
-        BidIterator myBidIterator = new BidIterator(negotiationSession.getUtilitySpace().getDomain());
-		while (myBidIterator.hasNext()) {
-            Bid b = myBidIterator.next();
-            try {
-                double util = negotiationSession.getUtilitySpace().getUtility(b);
-                if (util >= lowerBound && util <= upperBound) {
-                    candidateBids.add(new BidDetails(b, util));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-		// List<BidDetails> candidateBids = negotiationSession.getUtilitySpace()
-		// 		.getBidsinRange(new Range(lowerBound, 1.0));
+		// List<BidDetails> candidateBids = new ArrayList<BidDetails>();
+		// BidIterator myBidIterator = new
+		// BidIterator(negotiationSession.getUtilitySpace().getDomain());
+		// while (myBidIterator.hasNext()) {
+		// Bid b = myBidIterator.next();
+		// try {
+		// double util = negotiationSession.getUtilitySpace().getUtility(b);
+		// if (util >= lowerBound && util <= upperBound) {
+		// candidateBids.add(new BidDetails(b, util));
+		// }
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// }
+		List<BidDetails> candidateBids = outcomeSpace.getBidsinRange(new Range(lowerBound, 1.0));
 
 		BidDetails result = candidateBids.size() > 0 ? candidateBids.get(rand.nextInt(candidateBids.size()))
 				: negotiationSession.getMaxBidinDomain();
@@ -236,6 +254,10 @@ public class MCTSStrategy extends OfferingStrategy {
 	@Override
 	public String getName() {
 		return "MCTS Strategy";
+	}
+
+	public BidDetails getNextOpponentBid() {
+		return null;
 	}
 
 }

@@ -20,24 +20,24 @@
 				<party classPath="agents.anac.y2011.Nice_Tit_for_Tat.NiceTitForTat">
 					<properties />
                 </party>
-                <party classPath="negotiator.parties.BoulwareNegotiationParty">
-                    <properties />
-                </party>
-                <party classPath="negotiator.parties.ConcederNegotiationParty">
-                    <properties />
-                </party>
-                <party classPath="agents.anac.y2011.BramAgent.BRAMAgent">
-                    <properties />
-                </party>
-                <party classPath="agents.anac.y2011.HardHeaded.KLH">
-                    <properties />
-                </party>
-                <party classPath="agents.anac.y2012.IAMhaggler2012.IAMhaggler2012">
-                    <properties />
-                </party>
-                <party classPath="agents.BayesianAgent">
-                    <properties />
-                </party>
+				<party classPath="negotiator.parties.BoulwareNegotiationParty">
+					<properties />
+				</party>
+				<party classPath="negotiator.parties.ConcederNegotiationParty">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2011.BramAgent.BRAMAgent">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2011.HardHeaded.KLH">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2012.IAMhaggler2012.IAMhaggler2012">
+					<properties />
+				</party>
+				<party classPath="agents.BayesianAgent">
+					<properties />
+				</party>
 			</partyRepItems>
 			<partyProfileItems>
 				<item url="file:etc/templates/partydomain/party1_utility.xml" />

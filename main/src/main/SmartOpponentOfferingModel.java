@@ -6,7 +6,10 @@ import genius.core.bidding.BidDetails;
 import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OpponentModel;
+import genius.core.boaframework.OutcomeSpace;
+import genius.core.boaframework.SortedOutcomeSpace;
 import genius.core.issue.*;
+import genius.core.misc.Range;
 import math.Matrix;
 import misc.BidEncoder;
 import misc.Utils;
@@ -64,15 +67,28 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
     @Override
     public BidDetails getBid(final List<BidDetails> bidsInRange) {
+        return getBid();
+    }
+    
+    public BidDetails getBid() {
         if (this.opponentBiddingHistory.size() == 0)
-            return null;
-        System.out.println("====================");
-
-        // System.out.println("Starting the prediction process");
+            return this.negotiationSession.getMaxBidinDomain();
         List<BidDetails> o = this.opponentBiddingHistory.getHistory();
         System.out.println(o.get(o.size() - 1).getBid());
         List<BidDetails> a = this.myBiddingHistory.getHistory();
         return getBidbyHistory(o, a);
+    }
+
+    @Override
+    public BidDetails getBid(OutcomeSpace space, Range range) {
+        BidDetails tmp =super.getBid(space, range);
+        return tmp == null ? this.getBid() : tmp;
+    }
+
+    @Override
+    public BidDetails getBid(SortedOutcomeSpace space, double targetUtility) {
+        BidDetails tmp =super.getBid(space, targetUtility);
+        return tmp == null ? this.getBid() : tmp;
     }
 
     public DataSet getMatrixRepresentation(List<BidDetails> oppBidList, List<BidDetails> agBidList) {
@@ -175,8 +191,10 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
         Bid nextBid = this.encoder.decode(closestBid);
         BidDetails result = new BidDetails(nextBid, negotiationSession.getUtilitySpace().getUtility(nextBid));
-        System.out.println(Arrays.toString(prediction[0].getRowPackedCopy()));
-        System.out.println(ds.setPredictedResult(nextBid));
+        // System.out.println(Arrays.toString(prediction[0].getRowPackedCopy()));
+        // System.out.println(ds.setPredictedResult(nextBid));
+
+
         // TODO:
         // Deal
         // with

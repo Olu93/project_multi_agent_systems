@@ -109,7 +109,8 @@ public class RunSession extends Runner {
         SessionManager manager = new SessionManager(sessionConfig, partyList, session, executor);
         ConsoleHelper.useConsoleOut(true);
         
-		manager.runAndWait();
+        manager.runAndWait();
+        // sessionsInfo.
 		// setPrinting(true, config.isPrintEnabled());
 		System.out.println("Runner completed succesfully.");  
     }
