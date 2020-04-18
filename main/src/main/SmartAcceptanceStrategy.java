@@ -18,7 +18,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 	// NOTE: Does very poor if the own bid is weak.
 	private final ArrayList<BidDetails> prevBestBidProposals = new ArrayList<BidDetails>();
 	private OMStrategy omStrategy;
-	private Boolean IS_VERBOSE = false;
+	private Boolean IS_VERBOSE = true;
 
 	@Override
 	public void init(NegotiationSession negotiationSession, OfferingStrategy offeringStrategy,
@@ -82,6 +82,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 		// smartOfferingStrategy is done, accepts way too easily
 		double utilityAgentBid = negotiationSession.getUtilitySpace().getUtility(agentNextBid.getBid());
 		double utilityOpponentBid = negotiationSession.getUtilitySpace().getUtility(opponentBid.getBid());
+		double utilityOpponentBestBid = negotiationSession.getUtilitySpace().getUtility(opponentBestBid.getBid());
 
 		// System.out.println("Agent: " + agentNextBid.getBid());
 		// System.out.println("Opponent: " + opponentBid.getBid());
@@ -89,7 +90,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 		if(IS_VERBOSE) System.out.println("Opponent bid: " + utilityOpponentBid);
 		if (utilityAgentBid <= utilityOpponentBid + epsilon && utilityAgentBid > epsilon) { // TODO why the second?
 			if(IS_VERBOSE) System.out.println("Next bid is going to be smaller than opponent bid!");
-			if (utilityOpponentBid < opponentBestBid.getMyUndiscountedUtil()) {
+			if (utilityOpponentBid < utilityOpponentBestBid) {
 				if(IS_VERBOSE) System.out.println("Opponent bid is worse than a bid in his history!");
 				prevBestBidProposals.add(opponentBestBid);
 				offeringStrategy.setNextBid(opponentBestBid);

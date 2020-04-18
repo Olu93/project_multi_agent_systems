@@ -47,17 +47,17 @@ public class AgentBoaParty extends BoaParty{
 				oms, noparams);
 		
 		System.out.println("!!!!!!!!!!!!!!START!!!!!!!!!!!!");
-		Boolean isUncertain = info.getUserModel() == null;
-		System.out.println(isUncertain ? "Preferences are certain!" : "Uncertain preferences detected!");
-		info.setUtilSpace((AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilityEstimator(info.getUserModel()))); 
+		// info.setUtilSpace((AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilityEstimator(info.getUserModel()))); 
 		this.info = info;
 		super.init(info);
-
+		
 	}
-
-	 @Override
-	 public AbstractUtilitySpace estimateUtilitySpace() {
+	
+	@Override
+	public AbstractUtilitySpace estimateUtilitySpace() {
 		Boolean isUncertain = info.getUserModel() == null;
-	 	return (AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilityEstimator(info.getUserModel()));
+		System.out.println(isUncertain ? "Preferences are certain!" : "Uncertain preferences detected!");
+		 return (AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilityEstimator(info.getUserModel()));
+		//  return info.getUtilitySpace();
 	 }
 }
