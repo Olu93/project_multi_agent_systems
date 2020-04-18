@@ -57,7 +57,7 @@ public class AgentBoaParty extends BoaParty{
 	public AbstractUtilitySpace estimateUtilitySpace() {
 		Boolean isUncertain = info.getUserModel() == null;
 		System.out.println(isUncertain ? "Preferences are certain!" : "Uncertain preferences detected!");
-		 return (AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilityEstimator(info.getUserModel()));
+		 return (AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilitySpace(info.getUserModel()));
 		//  return info.getUtilitySpace();
 	 }
 }

@@ -7,18 +7,18 @@ import genius.core.utility.AdditiveUtilitySpace;
 
 public class SmartAgentState extends SharedAgentState {
 	private NegotiationSession session;
-	private UncertaintyUtilityEstimator uncertaintyEstimator;
+	private UncertaintyUtilitySpace uncertaintyEstimator;
 	
 	public SmartAgentState(NegotiationSession session){
 		this.session = session;
 		// this.uncertaintyEstimator = new UncertaintyUtilityEstimator(this.session);
 	}
 
-	public UncertaintyUtilityEstimator getUncertaintyEstimator() {
+	public UncertaintyUtilitySpace getUncertaintyEstimator() {
 		return uncertaintyEstimator;
 	}
 
-	public void setUncertaintyEstimator(UncertaintyUtilityEstimator uncertaintyEstimator) {
+	public void setUncertaintyEstimator(UncertaintyUtilitySpace uncertaintyEstimator) {
 		this.uncertaintyEstimator = uncertaintyEstimator;
 	}
 

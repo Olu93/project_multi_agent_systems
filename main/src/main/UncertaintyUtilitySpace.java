@@ -48,8 +48,12 @@ import simplex.TwoPhaseSimplex;
 /**
  * Test
  */
-public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
+public class UncertaintyUtilitySpace extends AdditiveUtilitySpace {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 8769632363299414230L;
     private final BidRanking rankings;
     // private final HashMap<IssueDiscrete, Double> weights;
     private final Matrix weightsMatrix;
@@ -64,7 +68,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     private final Boolean hasStrongConstraints = true;
     private final Boolean hasEpsilon = true;
 
-    public UncertaintyUtilityEstimator(final UserModel userModel) {
+    public UncertaintyUtilitySpace(final UserModel userModel) {
         super(userModel.getDomain());
 		// this.fEvaluators = fEvaluators;
 		// normalizeWeights();
