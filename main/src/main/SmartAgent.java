@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import agents.anac.y2013.TheFawkes.TheFawkes;
 import agents.anac.y2019.harddealer.HardDealer_BS;
 import genius.core.boaframework.AcceptanceStrategy;
 import genius.core.boaframework.BoaParty;
@@ -23,6 +24,8 @@ import negotiator.boaframework.offeringstrategy.anac2012.BRAMAgent2_Offering;
 import negotiator.boaframework.offeringstrategy.anac2010.IAMhaggler2010_Offering;
 import negotiator.boaframework.omstrategy.BestBid;
 import negotiator.boaframework.omstrategy.NTFTstrategy;
+import negotiator.boaframework.omstrategy.TheFawkes_OMS;
+import negotiator.boaframework.opponentmodel.HardHeadedFrequencyModel;
 
 /**
  * SmartAgent
@@ -45,8 +48,8 @@ public class SmartAgent extends BoaParty {
 		// The choice for each component is made here
 		// AcceptanceStrategy 	ac  = new AC_HardHeaded();
 		AcceptanceStrategy 	ac  = new SmartAcceptanceStrategy();
-		OpponentModel 		om  = new FreqOpponentPrefModel();
-		OMStrategy			oms = new NTFTstrategy();
+		OpponentModel 		om  = new HardHeadedFrequencyModel();
+		OMStrategy			oms = new TheFawkes_OMS();
 		OfferingStrategy 	os  = new MCTSStrategy();
 		
 		// All component parameters can be set below.

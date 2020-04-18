@@ -21,7 +21,7 @@ public class FreqOpponentPrefModel extends OpponentModel {
 	private HashMap<IssueDiscrete, Double> invEntropies = new HashMap<IssueDiscrete, Double>();
 	private NegotiationSession session;
 	private List<IssueDiscrete> domainIssues;
-	private final Boolean IS_VERBOSE = true;
+	private final Boolean IS_VERBOSE = false;
 
 	@Override
 	public void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
