@@ -31,8 +31,8 @@
 				</party>
 			</partyRepItems>
 			<partyProfileItems>
-				<item url="file:etc/templates/partydomain/party3_utility.xml" />
-				<item url="file:etc/templates/partydomain/party4_utility.xml" />
+				<item url="file:etc/templates/Domain16/Domain16_util1.xml" />
+				<item url="file:etc/templates/Domain16/Domain16_util2.xml" />
 			</partyProfileItems>
 			<repeats>1</repeats>
 			<numberOfPartiesPerSession>2</numberOfPartiesPerSession>
