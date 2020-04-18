@@ -53,7 +53,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         // .flatMap(issue -> issue.getValues().stream())
         // .collect(Collectors.toList()); // (is1v1, i1v2, i2v1) <- i1v2? => 1
 
-        this.encoder = BidEncoder.getInstance(negotiationSession);
+        this.encoder = new BidEncoder(negotiationSession);
 
         // this.issueTypes = this.domainIssues.stream().map(issue -> new
         // AbstractMap.SimpleEntry<Issue, ISSUETYPE>(issue,

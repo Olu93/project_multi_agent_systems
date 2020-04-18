@@ -18,47 +18,40 @@ import math.Matrix;
  */
 public class BidEncoder {
 
-	private static final BidEncoder instance = new BidEncoder();
-
 	private List<IssueDiscrete> domainIssues;
 	private NegotiationSession session;
 	private HashMap<IssueValuePair, Integer> mappingIVPToInt = new HashMap<>();
 	private HashMap<Integer, IssueDiscrete> mappingIntToIssue = new HashMap<>();
 	private HashMap<Integer, IssueValuePair> mappingIntToIVP = new HashMap<>();
 
-	private BidEncoder() {
-		;
+	public BidEncoder(NegotiationSession session) {
+		this.session = session;
+		if (this.session.getUserModel() != null) {
+			System.out.println("BidEncoder - UNCERTAIN MODE");
+			this.domainIssues = this.session.getUserModel().getBidRanking().getMaximalBid().getIssues()
+					.parallelStream().map(value -> (IssueDiscrete) value).collect(Collectors.toList());
+		} else {
+			System.out.println("BidEncoder - CERTAIN MODE");
+			this.domainIssues = this.session.getIssues().parallelStream().map(value -> (IssueDiscrete) value)
+					.collect(Collectors.toList());
+		}
+		IssueValuePair ivp = null;
+		Integer cnt = 0;
+		for (int i = 0; i < this.domainIssues.size(); i++) {
+			IssueDiscrete issue = (IssueDiscrete) this.domainIssues.get(i);
+			for (int j = 0; j < issue.getNumberOfValues(); j++) {
+				ivp = new IssueValuePair(issue, issue.getValue(j));
+				this.mappingIVPToInt.put(ivp, cnt);
+				this.mappingIntToIVP.put(cnt, ivp);
+				this.mappingIntToIssue.put(cnt, issue);
+				cnt++;
+				System.out.println("Current IVP: " + ivp.toString());
+			}
+		}
+		System.out.println("Initialized BidEncoder");
 	}
 
-	public static BidEncoder getInstance(NegotiationSession session) {
-		if (instance != null) {
-			instance.session = session;
-			if (instance.session.getUserModel() != null) {
-				System.out.println("BidEncoder - UNCERTAIN MODE");
-				instance.domainIssues = instance.session.getUserModel().getBidRanking().getMaximalBid().getIssues()
-						.parallelStream().map(value -> (IssueDiscrete) value).collect(Collectors.toList());
-			} else {
-				System.out.println("BidEncoder - CERTAIN MODE");
-				instance.domainIssues = instance.session.getIssues().parallelStream()
-						.map(value -> (IssueDiscrete) value).collect(Collectors.toList());
-			}
-			IssueValuePair ivp = null;
-			Integer cnt = 0;
-			for (int i = 0; i < instance.domainIssues.size(); i++) {
-				IssueDiscrete issue = (IssueDiscrete) instance.domainIssues.get(i);
-				for (int j = 0; j < issue.getNumberOfValues(); j++) {
-					ivp = new IssueValuePair(issue, issue.getValue(j));
-					instance.mappingIVPToInt.put(ivp, cnt);
-					instance.mappingIntToIVP.put(cnt, ivp);
-					instance.mappingIntToIssue.put(cnt, issue);
-					cnt++;
-					System.out.println("Current IVP: " + ivp.toString());
-				}
-			}
-			System.out.println("Initialized BidEncoder");
-		}
-		return instance;
-	}
+
 
 	public Integer getIndexByIVP(IssueValuePair val) {
 		IssueValuePair key = this.mappingIVPToInt.keySet().stream().filter(pair -> pair.equals(val)).findFirst()
@@ -76,8 +69,8 @@ public class BidEncoder {
 	}
 
 	public List<Integer> getIndicesByIssue(IssueDiscrete issue) {
-		 List<Integer> tmp = this.mappingIVPToInt.keySet().stream().filter(ivp -> ivp.getIssue() == issue)
-				.map(ivp -> instance.getIndexByIVP(ivp)).collect(Collectors.toList());
+		List<Integer> tmp = this.mappingIVPToInt.keySet().stream().filter(ivp -> ivp.getIssue() == issue)
+				.map(ivp -> this.getIndexByIVP(ivp)).collect(Collectors.toList());
 		return tmp;
 	}
 

@@ -27,7 +27,7 @@ public class MCTSStrategy extends OfferingStrategy {
 	/**
 	 *
 	 */
-//	private Bid opponentBestBid;
+	// private Bid opponentBestBid;
 
 	private static final double UPPER_BOUND = 1.0;
 	SmartAcceptanceStrategy ac;
@@ -38,19 +38,19 @@ public class MCTSStrategy extends OfferingStrategy {
 	private Double lowerBound = 1.0;
 	private final Boolean IS_VERBOSE = false;
 	BidDetails lastSetBid;
-	private final Integer SIMULATION_FREQUENCY = 1;
-	private final Integer SIMULATION_DEPTH = 1;
-//	private BinarySearchStrategy offerer;
+	private final Integer SIMULATION_FREQUENCY = 8;
+	private final Integer SIMULATION_DEPTH = 4;
+	// private BinarySearchStrategy offerer;
 
-//	public void setOpponentBestBid(Bid bestBid) {
-//		this.opponentBestBid = bestBid;
-//	}
-//
-//	public Bid getBestOpponentBid() {
-//		Bid tmp = opponentBestBid;
-//		opponentBestBid = null;
-//		return tmp;
-//	}
+	// public void setOpponentBestBid(Bid bestBid) {
+	// this.opponentBestBid = bestBid;
+	// }
+	//
+	// public Bid getBestOpponentBid() {
+	// Bid tmp = opponentBestBid;
+	// opponentBestBid = null;
+	// return tmp;
+	// }
 
 	// #endregion
 
@@ -61,27 +61,27 @@ public class MCTSStrategy extends OfferingStrategy {
 		outcomeSpace = new SortedOutcomeSpace(negotiationSession.getUtilitySpace());
 		negotiationSession.setOutcomeSpace(outcomeSpace);
 		ac = new SmartAcceptanceStrategy(negotiationSession, this, opponentModel, parameters);
-//		offerer = new BinarySearchStrategy();
-//		offerer.init(negotiationSession, opponentModel, omStrategy, parameters);
+		// offerer = new BinarySearchStrategy();
+		// offerer.init(negotiationSession, opponentModel, omStrategy, parameters);
 	}
 
 	@Override
 	public BidDetails determineOpeningBid() {
-		lastSetBid = negotiationSession.getMaxBidinDomain();
+		BidDetails lastSetBid = negotiationSession.getOutcomeSpace().getMaxBidPossible();
 		return lastSetBid;
 	}
 
 	@Override
 	public BidDetails determineNextBid() {
-//		opponentModel.updateModel(negotiationSession.getOpponentBidHistory().getLastBid());
-//		System.out.println("SEX");
+		// opponentModel.updateModel(negotiationSession.getOpponentBidHistory().getLastBid());
+		// System.out.println("SEX");
 		BidDetails nextBid = this.getNextBid();
 		if (nextBid != null && !nextBid.equals(lastSetBid)) {
 			lastSetBid = nextBid;
 			this.setNextBid(null);
-			return nextBid;
+			return lastSetBid;
 		}
-//		System.out.println("TONIK");
+		// System.out.println("TONIK");
 		return enhanceTree(tree.getRoot());
 	}
 
@@ -230,9 +230,11 @@ public class MCTSStrategy extends OfferingStrategy {
 			double opponentUtility = negotiationSession.getUtilitySpace().getUtility(nextOpponentBid.getBid());
 			scores.add(opponentUtility * Math.pow(DISCOUNT_FACTOR, count));
 			count++;
-			double agentUtility = this.negotiationSession.getUtilitySpace().getUtility(this.negotiationSession.getOwnBidHistory().getLastBidDetails().getBid());
+			double agentUtility = this.negotiationSession.getUtilitySpace()
+					.getUtility(this.negotiationSession.getOwnBidHistory().getLastBidDetails().getBid());
 			agentNextBid = this.outcomeSpace.getBidNearUtility(agentUtility);
-		} while (ac.determineAcceptabilityBid(nextOpponentBid, agentNextBid) != Actions.Accept && count <= SIMULATION_DEPTH);
+		} while (ac.determineAcceptabilityBid(nextOpponentBid, agentNextBid) != Actions.Accept
+				&& count <= SIMULATION_DEPTH);
 
 		avgScore = scores.parallelStream().mapToDouble(val -> val).average().getAsDouble();
 		// TODO: Average across multiple simulations
@@ -272,8 +274,9 @@ public class MCTSStrategy extends OfferingStrategy {
 	public BidDetails getBestMutualBidInRange(Double lowerBound, Double upperBound) {
 		Random rand = new Random();
 		List<BidDetails> candidateBids = outcomeSpace.getBidsinRange(new Range(lowerBound, 1.0)).stream()
-				.sorted((a,b) -> compareBids(a, b))
-				// .peek(bid -> System.out.println(opponentModel.getBidEvaluation(bid.getBid())))
+				.sorted((a, b) -> compareBids(a, b))
+				// .peek(bid ->
+				// System.out.println(opponentModel.getBidEvaluation(bid.getBid())))
 				.collect(Collectors.toList());
 
 		Integer size = candidateBids.size() > 5 ? 5 : candidateBids.size();
@@ -282,8 +285,9 @@ public class MCTSStrategy extends OfferingStrategy {
 		return result;
 	}
 
-	private int compareBids(BidDetails a, BidDetails b){
-		return Double.compare(opponentModel.getBidEvaluation(a.getBid()), opponentModel.getBidEvaluation(b.getBid())) > 1 ? -1 : 1;
+	private int compareBids(BidDetails a, BidDetails b) {
+		return Double.compare(opponentModel.getBidEvaluation(a.getBid()),
+				opponentModel.getBidEvaluation(b.getBid())) > 1 ? -1 : 1;
 	}
 
 	@Override

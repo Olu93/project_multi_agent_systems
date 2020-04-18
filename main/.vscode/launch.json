@@ -78,7 +78,6 @@
             "request": "launch",
             "mainClass": "misc.RunTournament",
             "projectName": "main",
-            "console": "externalTerminal",
             "args": "lib\\tournament.xml logs\\loggedTournamentStatistics"
         }
     ]
