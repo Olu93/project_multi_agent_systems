@@ -17,21 +17,18 @@
 				<party classPath="../main/bin/main/AgentBoaParty.class">
 					<properties />
 				</party>
-				<party classPath="../main/bin/main/BSMCTS.class">
-					<properties />
-				</party>
-				<party classPath="../main/bin/main/BinarySearchParty.class">
-					<properties />
-				</party>
+				<party classPath="agents.anac.y2014.Atlas.Atlas" strategyParameters="">
+                	<properties/>
+            	</party>
+            	<party classPath="agents.anac.y2015.ParsAgent.ParsAgent" strategyParameters="">
+                	<properties/>
+            	</party>
 				<party classPath="agents.anac.y2011.Nice_Tit_for_Tat.NiceTitForTat">
 					<properties />
                 </party>
-				<party classPath="negotiator.parties.BoulwareNegotiationParty">
-					<properties />
-				</party>
-				<party classPath="negotiator.parties.ConcederNegotiationParty">
-					<properties />
-				</party>
+				<party classPath="agents.anac.y2015.RandomDance.RandomDance" strategyParameters="">
+                	<properties/>
+            	</party>
 				<party classPath="agents.anac.y2011.BramAgent.BRAMAgent">
 					<properties />
 				</party>
@@ -49,8 +46,8 @@
 				</party>
 			</partyRepItems>
 			<partyProfileItems>
-				<item url="file:etc/templates/partydomain/party1_utility.xml" />
-				<item url="file:etc/templates/partydomain/party2_utility.xml" />
+				<item url="file:etc/templates/partydomain/party1_utility_u50.xml" />
+				<item url="file:etc/templates/partydomain/party2_utility_u50.xml" />
 			</partyProfileItems>
 			<repeats>1</repeats>
 			<numberOfPartiesPerSession>2</numberOfPartiesPerSession>

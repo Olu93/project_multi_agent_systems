@@ -18,7 +18,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 	// NOTE: Does very poor if the own bid is weak.
 	private final ArrayList<BidDetails> prevBestBidProposals = new ArrayList<BidDetails>();
 	private OMStrategy omStrategy;
-	private Boolean IS_VERBOSE = true;
+	private Boolean IS_VERBOSE = false;
 
 	@Override
 	public void init(NegotiationSession negotiationSession, OfferingStrategy offeringStrategy,
