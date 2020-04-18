@@ -2,5 +2,6 @@
 /etc/
 /log/
 /logs/
+/sourcepath/
 settings.json
 !/lib/*.xml

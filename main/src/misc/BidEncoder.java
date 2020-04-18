@@ -18,42 +18,46 @@ import math.Matrix;
  */
 public class BidEncoder {
 
+	private static final BidEncoder instance = new BidEncoder();
+
 	private List<IssueDiscrete> domainIssues;
 	private NegotiationSession session;
 	private HashMap<IssueValuePair, Integer> mappingIVPToInt = new HashMap<>();
 	private HashMap<Integer, IssueDiscrete> mappingIntToIssue = new HashMap<>();
 	private HashMap<Integer, IssueValuePair> mappingIntToIVP = new HashMap<>();
 
-	public BidEncoder(NegotiationSession session) {
-		this.session = session;
-		if (this.session.getUserModel() == null) {
-			System.out.println(this.session.getUserModel().getBidRanking().toString());
-			System.out.println(this.session.getUserModel().getBidRanking().getMaximalBid().toString());
-			System.out.println(this.session.getUserModel().getBidRanking().getMaximalBid().getIssues().toString());
-//			System.out.println(this.session.getUserModel());
-			this.domainIssues = this.session.getUserModel().getBidRanking().getMaximalBid().getIssues().parallelStream()
-					.map(value -> (IssueDiscrete) value).collect(Collectors.toList());
-		} else {
-			this.domainIssues = this.session.getIssues().parallelStream().map(value -> (IssueDiscrete) value)
-					.collect(Collectors.toList());
-		}
+	private BidEncoder() {
+		;
+	}
 
-		System.out.println("SEX2");
-		System.out.println(this.domainIssues.toString());
-		IssueValuePair ivp = null;
-		Integer cnt = 0;
-		for (int i = 0; i < this.domainIssues.size(); i++) {
-			IssueDiscrete issue = (IssueDiscrete) this.domainIssues.get(i);
-			for (int j = 0; j < issue.getNumberOfValues(); j++) {
-				ivp = new IssueValuePair(issue, issue.getValue(j));
-				mappingIVPToInt.put(ivp, cnt);
-				mappingIntToIVP.put(cnt, ivp);
-				mappingIntToIssue.put(cnt, issue);
-				cnt++;
-				System.out.println("TONIK22");
-				System.out.println(ivp.toString());
+	public static BidEncoder getInstance(NegotiationSession session) {
+		if (instance != null) {
+			instance.session = session;
+			if (instance.session.getUserModel() != null) {
+				System.out.println("BidEncoder - UNCERTAIN MODE");
+				instance.domainIssues = instance.session.getUserModel().getBidRanking().getMaximalBid().getIssues()
+						.parallelStream().map(value -> (IssueDiscrete) value).collect(Collectors.toList());
+			} else {
+				System.out.println("BidEncoder - CERTAIN MODE");
+				instance.domainIssues = instance.session.getIssues().parallelStream()
+						.map(value -> (IssueDiscrete) value).collect(Collectors.toList());
 			}
+			IssueValuePair ivp = null;
+			Integer cnt = 0;
+			for (int i = 0; i < instance.domainIssues.size(); i++) {
+				IssueDiscrete issue = (IssueDiscrete) instance.domainIssues.get(i);
+				for (int j = 0; j < issue.getNumberOfValues(); j++) {
+					ivp = new IssueValuePair(issue, issue.getValue(j));
+					instance.mappingIVPToInt.put(ivp, cnt);
+					instance.mappingIntToIVP.put(cnt, ivp);
+					instance.mappingIntToIssue.put(cnt, issue);
+					cnt++;
+					System.out.println("Current IVP: " + ivp.toString());
+				}
+			}
+			System.out.println("Initialized BidEncoder");
 		}
+		return instance;
 	}
 
 	public Integer getIndexByIVP(IssueValuePair val) {
@@ -67,7 +71,14 @@ public class BidEncoder {
 	}
 
 	public IssueDiscrete getIssueByIndex(Integer idx) {
-		return this.mappingIntToIssue.get(idx);
+		IssueDiscrete issue = this.mappingIntToIssue.get(idx);
+		return issue;
+	}
+
+	public List<Integer> getIndicesByIssue(IssueDiscrete issue) {
+		 List<Integer> tmp = this.mappingIVPToInt.keySet().stream().filter(ivp -> ivp.getIssue() == issue)
+				.map(ivp -> instance.getIndexByIVP(ivp)).collect(Collectors.toList());
+		return tmp;
 	}
 
 	public Matrix encode(final BidHistory bidHistory) {
@@ -78,11 +89,6 @@ public class BidEncoder {
 				IssueDiscrete currIssue = (IssueDiscrete) lBids.get(i).getIssues().get(j);
 				ValueDiscrete val = (ValueDiscrete) lBids.get(i).getValue(currIssue);
 				Integer pos = this.getIndexByIVP(new IssueValuePair(currIssue, val));
-				System.out.println(currIssue.toString() + " " + val.toString());
-				System.out.println(pos);
-				// if (pos > 21) {
-				// System.out.println("");
-				// }
 				fullMatrix.set(i, pos, 1);
 			}
 		}
@@ -106,6 +112,14 @@ public class BidEncoder {
 		}
 		Bid result = new Bid(this.session.getDomain(), bidValues);
 		return result;
+	}
+
+	public List<IssueDiscrete> getDomainIssues() {
+		return domainIssues;
+	}
+
+	public void setDomainIssues(List<IssueDiscrete> domainIssues) {
+		this.domainIssues = domainIssues;
 	}
 
 }

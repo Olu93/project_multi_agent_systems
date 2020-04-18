@@ -38,6 +38,8 @@ public class MCTSStrategy extends OfferingStrategy {
 	private Double lowerBound = 1.0;
 	private final Boolean IS_VERBOSE = false;
 	BidDetails lastSetBid;
+	private final Integer SIMULATION_FREQUENCY = 1;
+	private final Integer SIMULATION_DEPTH = 1;
 //	private BinarySearchStrategy offerer;
 
 //	public void setOpponentBestBid(Bid bestBid) {
@@ -91,7 +93,7 @@ public class MCTSStrategy extends OfferingStrategy {
 
 	public BidDetails enhanceTree(final Node node) {
 		System.out.println("Starting Simulation");
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < SIMULATION_FREQUENCY; i++) {
 
 			// System.out.println(i);
 			final Node selectedNode = selectNode(node);
@@ -228,9 +230,9 @@ public class MCTSStrategy extends OfferingStrategy {
 			double opponentUtility = negotiationSession.getUtilitySpace().getUtility(nextOpponentBid.getBid());
 			scores.add(opponentUtility * Math.pow(DISCOUNT_FACTOR, count));
 			count++;
-			agentNextBid = this.outcomeSpace.getBidNearUtility(
-					this.negotiationSession.getOwnBidHistory().getLastBidDetails().getMyUndiscountedUtil());
-		} while (ac.determineAcceptabilityBid(nextOpponentBid, agentNextBid) != Actions.Accept && count <= 5);
+			double agentUtility = this.negotiationSession.getUtilitySpace().getUtility(this.negotiationSession.getOwnBidHistory().getLastBidDetails().getBid());
+			agentNextBid = this.outcomeSpace.getBidNearUtility(agentUtility);
+		} while (ac.determineAcceptabilityBid(nextOpponentBid, agentNextBid) != Actions.Accept && count <= SIMULATION_DEPTH);
 
 		avgScore = scores.parallelStream().mapToDouble(val -> val).average().getAsDouble();
 		// TODO: Average across multiple simulations

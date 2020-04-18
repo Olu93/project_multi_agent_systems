@@ -37,7 +37,6 @@ public class SmartOpponentOfferingModel extends OMStrategy {
     private HashMap<Issue, Matrix> issueStatistics;
     private Double[] issueWeights;
     private Map<Issue, ISSUETYPE> issueTypes;
-    private List<IssueDiscrete> domainIssues;
     private List<ValueDiscrete> listOfAllPossibleValues;
     private BidEncoder encoder;
 
@@ -47,8 +46,6 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         super.init(negotiationSession, model, parameters);
         this.myBiddingHistory = negotiationSession.getOwnBidHistory();
         this.opponentBiddingHistory = negotiationSession.getOpponentBidHistory();
-        this.domainIssues = negotiationSession.getIssues().parallelStream().map(value -> (IssueDiscrete) value)
-                .collect(Collectors.toList());
 
         // this.listOfAllPossibleValues = negotiationSession.getIssues()
         // .stream()
@@ -56,7 +53,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         // .flatMap(issue -> issue.getValues().stream())
         // .collect(Collectors.toList()); // (is1v1, i1v2, i2v1) <- i1v2? => 1
 
-        this.encoder = new BidEncoder(negotiationSession);
+        this.encoder = BidEncoder.getInstance(negotiationSession);
 
         // this.issueTypes = this.domainIssues.stream().map(issue -> new
         // AbstractMap.SimpleEntry<Issue, ISSUETYPE>(issue,
@@ -69,7 +66,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
     public BidDetails getBid(final List<BidDetails> bidsInRange) {
         return getBid();
     }
-    
+
     public BidDetails getBid() {
         if (this.opponentBiddingHistory.size() == 0)
             return this.negotiationSession.getMaxBidinDomain();
@@ -81,13 +78,13 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
     @Override
     public BidDetails getBid(OutcomeSpace space, Range range) {
-        BidDetails tmp =super.getBid(space, range);
+        BidDetails tmp = super.getBid(space, range);
         return tmp == null ? this.getBid() : tmp;
     }
 
     @Override
     public BidDetails getBid(SortedOutcomeSpace space, double targetUtility) {
-        BidDetails tmp =super.getBid(space, targetUtility);
+        BidDetails tmp = super.getBid(space, targetUtility);
         return tmp == null ? this.getBid() : tmp;
     }
 
@@ -151,8 +148,8 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         // BidHistory newX = new BidHistory(tmp.subList(tmp.size() - 1, tmp.size()));
         DataSet ds = getMatrixRepresentation(oppBidList, agBidList);
         AtomicInteger ai = new AtomicInteger();
-        List<Integer> sizes = this.domainIssues.stream().map(issue -> issue.getNumberOfValues()).map(ai::addAndGet)
-                .collect(Collectors.toList());
+        List<Integer> sizes = this.encoder.getDomainIssues().stream().map(issue -> issue.getNumberOfValues())
+                .map(ai::addAndGet).collect(Collectors.toList());
         sizes.add(0, 0);
 
         // Matrix observedXa = converHistoryToMatrix(slicedX);
@@ -193,7 +190,6 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         BidDetails result = new BidDetails(nextBid, negotiationSession.getUtilitySpace().getUtility(nextBid));
         // System.out.println(Arrays.toString(prediction[0].getRowPackedCopy()));
         // System.out.println(ds.setPredictedResult(nextBid));
-
 
         // TODO:
         // Deal
@@ -244,22 +240,25 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         double[] row = prediction.getRowPackedCopy();
         HashMap<IssueDiscrete, Integer> highestIdx = new HashMap<>();
         HashMap<IssueDiscrete, Double> highestVal = new HashMap<>();
-        for (IssueDiscrete issueDiscrete : this.domainIssues) {
-            // highestIdx.put(issueDiscrete, 0);
-            highestVal.put(issueDiscrete, 0.0);
-        }
+        List<Integer> currIndices = null;
         Double currentValue = null;
         IssueDiscrete tmpIssueDiscrete = null;
         Matrix oneHotRow = new Matrix(1, row.length);
-        for (int i = 0; i < row.length; i++) {
-            currentValue = row[i];
-            tmpIssueDiscrete = this.encoder.getIssueByIndex(i);
-            if (highestVal.get(tmpIssueDiscrete).compareTo(currentValue) <= 0) {
-                highestIdx.put(tmpIssueDiscrete, i);
-                highestVal.put(tmpIssueDiscrete, currentValue);
+
+        for (IssueDiscrete issue : this.encoder.getDomainIssues()) {
+            highestIdx.put(issue, this.encoder.getIndicesByIssue(issue).get(0));
+            highestVal.put(issue, 0.0);
+            currIndices = this.encoder.getIndicesByIssue(issue);
+            for (Integer i : currIndices) {
+                currentValue = row[i];
+                tmpIssueDiscrete = this.encoder.getIssueByIndex(i);
+                if (highestVal.get(tmpIssueDiscrete).compareTo(currentValue) <= 0) {
+                    highestIdx.put(tmpIssueDiscrete, i);
+                    highestVal.put(tmpIssueDiscrete, currentValue);
+                }
             }
-        }
-        for (IssueDiscrete issue : this.domainIssues) {
+            if (highestIdx == null || oneHotRow == null || highestIdx.get(issue) == null)
+                System.out.println("Something");
             oneHotRow.set(0, highestIdx.get(issue), 1);
         }
         return oneHotRow;
@@ -357,7 +356,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
     }
 
     private List<Double> extractFullRow(final Integer row, final Map<Issue, Matrix> oneHotMatrix) {
-        return this.domainIssues.stream().map(issue -> oneHotMatrix.get(issue).getArray()[row])
+        return this.encoder.getDomainIssues().stream().map(issue -> oneHotMatrix.get(issue).getArray()[row])
                 .flatMapToDouble(Arrays::stream).boxed().collect(Collectors.toList());
     }
 

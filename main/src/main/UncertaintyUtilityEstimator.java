@@ -64,6 +64,9 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     private final Boolean hasEpsilon = true;
 
     public UncertaintyUtilityEstimator(final UserModel userModel) {
+        // super(domain);
+		// this.fEvaluators = fEvaluators;
+		// normalizeWeights();
         this.userModel = userModel;
         this.rankings = userModel.getBidRanking();
         this.issues = this.userModel.getDomain().getIssues();
@@ -281,7 +284,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     }
 
     @Override
-    public double getUtility(final Bid bid) {
+    public double getUtility(Bid bid) {
 //    	System.out.println("CONTENT OF BID");
 //    	System.out.println(bid);
 //    	System.out.println("number of issues" + bid.getIssues().size());
@@ -289,7 +292,6 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     	if (bid != null && bid.getValues().size() > 0) {
 	        final Matrix oneHotEncodedRankings = Utils.getDummyEncoding(this.issues, Arrays.asList(bid));
 	        final Matrix prediction = oneHotEncodedRankings.times(this.getWeights().transpose());
-	        System.out.println("OVERRIDE SUCCESSFUL");
 	        return prediction.get(0, 0);
     	}
 //    	// default utility function in case of null bid
