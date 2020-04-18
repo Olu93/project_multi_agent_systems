@@ -38,6 +38,12 @@
 				<party classPath="agents.BayesianAgent">
 					<properties />
 				</party>
+				<party classPath="agents.anac.y2011.TheNegotiator.TheNegotiator" strategyParameters="">
+					<properties/>
+				</party>
+				<party classPath="agents.anac.y2010.AgentSmith.AgentSmith" strategyParameters="">
+					<properties/>
+				</party>
 			</partyRepItems>
 			<partyProfileItems>
 				<item url="file:etc/templates/partydomain/party1_utility.xml" />
