@@ -38,8 +38,8 @@ public class MCTSStrategy extends OfferingStrategy {
 	private Double lowerBound = 1.0;
 	private final Boolean IS_VERBOSE = false;
 	BidDetails lastSetBid;
-	private final Integer SIMULATION_FREQUENCY = 8;
-	private final Integer SIMULATION_DEPTH = 4;
+	private final Integer SIMULATION_FREQUENCY = 50;
+	private final Integer SIMULATION_DEPTH = 5;
 	// private BinarySearchStrategy offerer;
 
 	// public void setOpponentBestBid(Bid bestBid) {

@@ -358,4 +358,22 @@ public class UncertaintyUtilitySpace extends AdditiveUtilitySpace {
 
     }
 
+    @Override
+    public UtilitySpace copy() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String isComplete() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public SimpleElement toXML() throws IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

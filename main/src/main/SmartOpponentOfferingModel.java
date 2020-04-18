@@ -39,6 +39,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
     private Map<Issue, ISSUETYPE> issueTypes;
     private List<ValueDiscrete> listOfAllPossibleValues;
     private BidEncoder encoder;
+    private final Boolean IS_VERBOSE = true;
 
     @Override
     public void init(final NegotiationSession negotiationSession, final OpponentModel model,
@@ -190,13 +191,14 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         BidDetails result = new BidDetails(nextBid, negotiationSession.getUtilitySpace().getUtility(nextBid));
         // System.out.println(Arrays.toString(prediction[0].getRowPackedCopy()));
         // System.out.println(ds.setPredictedResult(nextBid));
-
+        
         // TODO:
         // Deal
         // with
         // preference
         // uncertainty!
         // System.out.println(nextBid.toStringCSV());
+        if(IS_VERBOSE) System.out.println("Predicted Bid: "+nextBid);
         return result;
     }
 
@@ -374,6 +376,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
         Matrix predictedY = K_star.times(K_stable.inverse()).times(observedY);
         Matrix variances = K_star_star.minus(K_star.times(K_stable.inverse()).times(K_star.transpose()));
         Matrix[] results = { predictedY, variances };
+        if(IS_VERBOSE) System.out.println("Prediction: "+Utils.getRowString(predictedY.getRowPackedCopy()));
         return results;
     }
 

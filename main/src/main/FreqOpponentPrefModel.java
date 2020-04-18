@@ -21,6 +21,7 @@ public class FreqOpponentPrefModel extends OpponentModel {
 	private HashMap<IssueDiscrete, Double> invEntropies = new HashMap<IssueDiscrete, Double>();
 	private NegotiationSession session;
 	private List<IssueDiscrete> domainIssues;
+	private final Boolean IS_VERBOSE = true;
 
 	@Override
 	public void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
@@ -33,6 +34,8 @@ public class FreqOpponentPrefModel extends OpponentModel {
 			issueDiscrete.getValues().forEach(value -> frequencies.put(new IssueValuePair(issueDiscrete, value), 0.0));
 			invEntropies.put(issueDiscrete, 0.0);
 		}
+		this.opponentUtilitySpace = this.session.getUserModel() == null ? this.opponentUtilitySpace
+				: new UncertaintyUtilitySpace(this.negotiationSession.getUserModel());
 	}
 
 	private Double getEntropy(IssueDiscrete issue, HashMap<IssueValuePair, Double> frequencyHash) {
@@ -47,7 +50,7 @@ public class FreqOpponentPrefModel extends OpponentModel {
 			entropy += tmp;
 		}
 
-		return 1-entropy;
+		return 1 - entropy;
 	}
 
 	private Double softmax(Double entropy, Double sumOfEntropies) {
@@ -57,7 +60,8 @@ public class FreqOpponentPrefModel extends OpponentModel {
 	@Override
 	public double getWeight(Issue issue) {
 		// System.out.println("USEDGET_WHEIGHT HERE!");
-		// Double sumOfEntropies = this.entropies.values().stream().mapToDouble(Math::exp).sum();
+		// Double sumOfEntropies =
+		// this.entropies.values().stream().mapToDouble(Math::exp).sum();
 		return this.invEntropies.get(issue);
 		// return this.entropies.get(issue);
 	}
@@ -73,11 +77,12 @@ public class FreqOpponentPrefModel extends OpponentModel {
 		for (IssueValuePair ivp : this.frequencies.keySet()) {
 			IssueDiscrete issue = ivp.getIssue();
 			if (bid.containsValue(issue, ivp.getValue())) {
-				frequencies.put(ivp, frequencies.get(ivp) + (1000*session.getTime()));
+				frequencies.put(ivp, frequencies.get(ivp) + (1000 * session.getTime()));
 				this.invEntropies.put(issue, getEntropy(issue, frequencies));
 			}
 
 		}
+		System.out.println(bid.getIssues());
 		this.opponentUtilitySpace.setWeights(bid.getIssues(), this.getIssueWeights());
 	}
 
@@ -90,7 +95,8 @@ public class FreqOpponentPrefModel extends OpponentModel {
 			estimatedIssueWeights[i] = getWeight(issue);
 			i++;
 		}
-		// System.out.println(Arrays.toString(estimatedIssueWeights));
+		if (IS_VERBOSE)
+			System.out.println("Issue weights: " + Arrays.toString(estimatedIssueWeights));
 		return estimatedIssueWeights;
 	}
 

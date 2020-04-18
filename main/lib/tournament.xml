@@ -11,12 +11,12 @@
 				classPath="genius.core.protocol.StackedAlternatingOffersProtocol"
 				protocolName="Stacked Alternating Offers Protocol for Multi-Lateral Negotiation (SAOPMN)" />
 			<partyRepItems>
-				<!-- <party classPath="../main/bin/main/SmartAgent.class">
-					<properties />
-				</party> -->
-				<party classPath="../main/bin/main/AgentBoaParty.class">
+				<party classPath="../main/bin/main/SmartAgent.class">
 					<properties />
 				</party>
+				<!-- <party classPath="../main/bin/main/AgentBoaParty.class">
+					<properties />
+				</party> -->
 				<party classPath="../main/bin/main/BSMCTS.class">
 					<properties />
 				</party>
