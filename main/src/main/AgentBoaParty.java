@@ -16,48 +16,48 @@ import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
 /**
  * SmartAgent
  */
-public class AgentBoaParty extends BoaParty{
+public class AgentBoaParty extends BoaParty {
 
-    private NegotiationInfo info;
+	private NegotiationInfo info;
 
 	@Override
-    public String getDescription() {
-        return "MCSTParty";
-    }
+	public String getDescription() {
+		return "MCSTParty";
+	}
 
-    @Override
-	public void init(NegotiationInfo info) 
-	{
+	@Override
+	public void init(NegotiationInfo info) {
 		// The choice for each component is made here
-		AcceptanceStrategy 	ac  = new SmartAcceptanceStrategy();
-		OpponentModel 		om  = new FreqOpponentPrefModel();
-		OMStrategy			oms = new SmartOpponentOfferingModel();
-		OfferingStrategy 	os  = new MCTSStrategy(); // TODO remove params 
-		
+		AcceptanceStrategy ac = new SmartAcceptanceStrategy();
+		OpponentModel om = new FreqOpponentPrefModel();
+		OMStrategy oms = new SmartOpponentOfferingModel();
+		OfferingStrategy os = new MCTSStrategy(); // TODO remove params
+
 		// All component parameters can be set below.
 		Map<String, Double> noparams = Collections.emptyMap();
 		Map<String, Double> osParams = new HashMap<String, Double>();
-		// Set the concession parameter "e" for the offering strategy to yield Boulware-like behavior
+		// Set the concession parameter "e" for the offering strategy to yield
+		// Boulware-like behavior
 		osParams.put("e", 0.2);
-		
+
 		// Initialize all the components of this party to the choices defined above
-		configure(ac, noparams, 
-				os,	osParams, 
-				om, noparams,
-				oms, noparams);
-		
+		configure(ac, noparams, os, osParams, om, noparams, oms, noparams);
+
 		System.out.println("!!!!!!!!!!!!!!START!!!!!!!!!!!!");
-		// info.setUtilSpace((AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilityEstimator(info.getUserModel()))); 
+		// info.setUtilSpace((AbstractUtilitySpace) (isUncertain ?
+		// info.getUtilitySpace() : new
+		// UncertaintyUtilityEstimator(info.getUserModel())));
 		this.info = info;
 		super.init(info);
-		
+
 	}
-	
+
 	@Override
 	public AbstractUtilitySpace estimateUtilitySpace() {
 		Boolean isUncertain = info.getUserModel() == null;
 		System.out.println(isUncertain ? "Preferences are certain!" : "Uncertain preferences detected!");
-		 return (AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilitySpace(info.getUserModel()));
-		//  return info.getUtilitySpace();
-	 }
+		return (AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace()
+				: new UncertaintyUtilitySpace(info.getUserModel()));
+		// return info.getUtilitySpace();
+	}
 }
