@@ -19,7 +19,7 @@
 				</party>
 			</partyRepItems>
 			<partyProfileItems>
-				<item url="file:etc/templates/partydomain/party1_utility.xml" />
+				<item url="file:etc/templates/partydomain/party1_utility_u20.xml" />
 				<item url="file:etc/templates/partydomain/party2_utility.xml" />
 			</partyProfileItems>
 			<repeats>1</repeats>

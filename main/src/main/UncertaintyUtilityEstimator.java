@@ -36,6 +36,7 @@ import genius.core.uncertainty.ExperimentalUserModel;
 import genius.core.uncertainty.UserModel;
 import genius.core.utility.AbstractUtilitySpace;
 import genius.core.utility.AdditiveUtilitySpace;
+import genius.core.utility.CustomUtilitySpace;
 import genius.core.utility.Evaluator;
 import genius.core.utility.UtilitySpace;
 import genius.core.xml.SimpleElement;
@@ -64,7 +65,7 @@ public class UncertaintyUtilityEstimator extends AdditiveUtilitySpace {
     private final Boolean hasEpsilon = true;
 
     public UncertaintyUtilityEstimator(final UserModel userModel) {
-        // super(domain);
+        super(userModel.getDomain());
 		// this.fEvaluators = fEvaluators;
 		// normalizeWeights();
         this.userModel = userModel;
