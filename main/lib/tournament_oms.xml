@@ -14,8 +14,11 @@
 				<party classPath="../main/bin/main/CarlosBoaParty.class">
 					<properties />
 				</party>
-				<party classPath="../main/bin/main/CarlosBoaParty.class" strategyParameters="">
-					<properties/>
+				<party classPath="../main/bin/main/CarlosBestBid.class">
+					<properties />
+				</party>
+				<party classPath="../main/bin/main/CarlosRandomBid.class">
+					<properties />
 				</party>
 			</partyRepItems>
 			<partyProfileItems>

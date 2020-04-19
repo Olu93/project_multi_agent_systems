@@ -6,40 +6,36 @@ import java.util.Map;
 
 import genius.core.boaframework.AcceptanceStrategy;
 import genius.core.boaframework.BoaParty;
+import genius.core.boaframework.NoModel;
 import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
 import genius.core.parties.NegotiationInfo;
 import genius.core.utility.AbstractUtilitySpace;
 import main.helper.UncertaintyUtilitySpace;
-import negotiator.boaframework.omstrategy.TheFawkes_OMS;
-import negotiator.boaframework.opponentmodel.HardHeadedFrequencyModel;
+import negotiator.boaframework.omstrategy.BestBid;
+import negotiator.boaframework.omstrategy.NullStrategy;
 
 /**
  * SmartAgent
  */
-public class SmartAgent extends BoaParty {
-	// TODO: Fix setTilSpace not working (or remove this code)
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
+public class CarlosRandomBid extends BoaParty {
+
 	private NegotiationInfo info;
-	
+
 	@Override
 	public String getDescription() {
-		return "SmartAgentParty";
+		return "MCSTParty";
 	}
 
 	@Override
 	public void init(NegotiationInfo info) {
 		// The choice for each component is made here
-		// AcceptanceStrategy 	ac  = new AC_HardHeaded();
-		AcceptanceStrategy 	ac  = new CarlosAcceptanceStrategy();
-		OpponentModel 		om  = new HardHeadedFrequencyModel();
-		OMStrategy			oms = new CarlosOpponentBiddingStrategy();
-		OfferingStrategy 	os  = new CarlosBiddingStrategyStrategies();
-		
+		AcceptanceStrategy ac = new CarlosAcceptanceStrategy();
+		OpponentModel om = new CarlosOpponentModel();
+		OMStrategy oms = new NullStrategy();
+		OfferingStrategy os = new CarlosBiddingStrategy(); // TODO remove params
+
 		// All component parameters can be set below.
 		Map<String, Double> noparams = Collections.emptyMap();
 		Map<String, Double> osParams = new HashMap<String, Double>();
@@ -51,18 +47,16 @@ public class SmartAgent extends BoaParty {
 		configure(ac, noparams, os, osParams, om, noparams, oms, noparams);
 
 		System.out.println("!!!!!!!!!!!!!!START!!!!!!!!!!!!");
-		Boolean isUncertain = info.getUserModel() == null;
-		System.out.println(isUncertain ? "Preferences are certain!" : "Uncertain preferences detected!");
-		info.setUtilSpace((AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilitySpace(info.getUserModel()))); 
 		this.info = info;
 		super.init(info);
 
 	}
 
-	 @Override
-	 public AbstractUtilitySpace estimateUtilitySpace() {
+	@Override
+	public AbstractUtilitySpace estimateUtilitySpace() {
 		Boolean isUncertain = info.getUserModel() == null;
-	 	return (AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace() : new UncertaintyUtilitySpace(info.getUserModel()));
-	 }
-
+		System.out.println(isUncertain ? "Preferences are certain!" : "Uncertain preferences detected!");
+		return (AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace()
+				: new UncertaintyUtilitySpace(info.getUserModel()));
+	}
 }

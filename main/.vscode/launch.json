@@ -147,12 +147,48 @@
         },
         {
             "type": "java",
-            "name": "TOURNAMENT_tournament_bestbid",
+            "name": "TOURNAMENT_tournament_with_oms",
             "request": "launch",
             "mainClass": "misc.RunTournament",
             "projectName": "main",
             "console": "externalTerminal",
-            "args": "lib\\tournament_bestbid.xml logs\\tournament_bestbid"
+            "args": "lib\\tournament_with_oms.xml logs\\tournament_with_oms"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT_tournament_bestbid_vs_all",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "console": "externalTerminal",
+            "args": "lib\\tournament_bestbid_vs_all.xml logs\\tournament_bestbid_vs_all"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT_tournament_oms_with_all",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "console": "externalTerminal",
+            "args": "lib\\tournament_oms_with_all.xml logs\\tournament_oms_with_all"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT_tournament_oms",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "console": "externalTerminal",
+            "args": "lib\\tournament_oms.xml logs\\tournament_oms"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT_tournament_random_vs_all",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "console": "externalTerminal",
+            "args": "lib\\tournament_random_vs_all.xml logs\\tournament_bestbid_random_vs_all"
         },
         {
             "type": "java",
@@ -166,7 +202,7 @@
     ],
     "compounds": [
         {
-            "name": "Compound",
+            "name": "All tournaments",
             "configurations": [
                 "TOURNAMENT_tournament",
                 "TOURNAMENT_tournament_domain_16",
@@ -178,6 +214,16 @@
                 "TOURNAMENT_tournament_u50",
                 "TOURNAMENT_tournament_bestbid",
                 "TOURNAMENT_tournament_laptop_u10"
+            ]
+        },
+        {
+            "name": "OMS",
+            "configurations": [
+                "TOURNAMENT_tournament",
+                "TOURNAMENT_tournament_bestbid_vs_all",
+                "TOURNAMENT_tournament_random_vs_all",
+                "TOURNAMENT_tournament_oms",
+                "TOURNAMENT_tournament_oms_with_all",
             ]
         }
     ]

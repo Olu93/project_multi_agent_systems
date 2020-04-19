@@ -11,18 +11,30 @@
 				classPath="genius.core.protocol.StackedAlternatingOffersProtocol"
 				protocolName="Stacked Alternating Offers Protocol for Multi-Lateral Negotiation (SAOPMN)" />
 			<partyRepItems>
-				<party classPath="../main/bin/main/CarlosBoaParty.class">
+				<party classPath="../main/bin/main/CarlosRandomBid.class">
 					<properties />
 				</party>
-				<party classPath="../main/bin/main/CarlosBestBid.class">
+				<party classPath="agents.anac.y2011.Nice_Tit_for_Tat.NiceTitForTat">
 					<properties />
+                </party>
+				<party classPath="agents.anac.y2015.RandomDance.RandomDance" strategyParameters="">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2011.HardHeaded.KLH">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2012.IAMhaggler2012.IAMhaggler2012">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2011.TheNegotiator.TheNegotiator" strategyParameters="">
+					<properties/>
 				</party>
 			</partyRepItems>
 			<partyProfileItems>
-				<item url="file:etc/templates/partydomain/party3_utility.xml" />
-				<item url="file:etc/templates/partydomain/party4_utility.xml" />
+				<item url="file:etc/templates/partydomain/party1_utility.xml" />
+				<item url="file:etc/templates/partydomain/party2_utility.xml" />
 			</partyProfileItems>
-			<repeats>15</repeats>
+			<repeats>1</repeats>
 			<numberOfPartiesPerSession>2</numberOfPartiesPerSession>
 			<repetitionAllowed>false</repetitionAllowed>
 			<persistentDataType>DISABLED</persistentDataType>

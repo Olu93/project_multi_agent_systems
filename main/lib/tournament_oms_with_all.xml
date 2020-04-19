@@ -14,7 +14,25 @@
 				<party classPath="../main/bin/main/CarlosBoaParty.class">
 					<properties />
 				</party>
-				<party classPath="../main/bin/main/CarlosBoaParty.class" strategyParameters="">
+				<party classPath="../main/bin/main/CarlosBestBid.class">
+					<properties />
+				</party>
+				<party classPath="../main/bin/main/CarlosRandomBid.class">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2011.Nice_Tit_for_Tat.NiceTitForTat">
+					<properties />
+                </party>
+				<party classPath="agents.anac.y2015.RandomDance.RandomDance" strategyParameters="">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2011.HardHeaded.KLH">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2012.IAMhaggler2012.IAMhaggler2012">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2011.TheNegotiator.TheNegotiator" strategyParameters="">
 					<properties/>
 				</party>
 			</partyRepItems>
