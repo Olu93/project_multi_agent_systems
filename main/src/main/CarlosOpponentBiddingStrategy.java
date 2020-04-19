@@ -107,7 +107,6 @@ public class CarlosOpponentBiddingStrategy extends OMStrategy {
         double mean = predictedUtilities.getRowPackedCopy()[predictedUtilities.getRowDimension() - 1];
         double var = variances.get(variances.getRowDimension() - 1, variances.getColumnDimension() - 1);
 
-        // double sampleUtility = this.random.nextGaussian() * Math.sqrt(var) + mean;
         double sampleUtility = mean;
         BidDetails sampledBid = this.negotiationSession.getOutcomeSpace().getBidNearUtility(sampleUtility);
 

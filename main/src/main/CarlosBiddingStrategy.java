@@ -35,7 +35,7 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 	private Double lowerBound = 1.0;
 	private final Boolean IS_VERBOSE = false;
 	BidDetails lastSetBid;
-	private final Integer SIMULATION_FREQUENCY = 20;
+	private final Integer SIMULATION_FREQUENCY = 40;
 	private final Integer SIMULATION_DEPTH = 5;
 	private Double prevBestBidUtility = 0.0;
 
@@ -96,7 +96,8 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		tree.setRoot(bestChoiceNode);
 		System.out.println("===========> Best choice: " + bestChoiceNode.getId());
 
-		lowerBound = didConcede() ? updateLowerBound() : lowerBound;
+//		lowerBound = didConcede() ? updateLowerBound() : lowerBound;
+		lowerBound = updateLowerBound();
 		return bestChoiceNode.getBid();
 	}
 
@@ -174,8 +175,6 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 
 	// rollout and backpropagation
 	private void rolloutSimBackprop(final Node node) {
-		// TODO: make reset method
-		// TODO: Actions might be strategies
 		Node iterNodeCopy = node;
 		final List<BidDetails> oppHistory = new ArrayList<BidDetails>();
 		final List<BidDetails> agentHistory = new ArrayList<BidDetails>();
