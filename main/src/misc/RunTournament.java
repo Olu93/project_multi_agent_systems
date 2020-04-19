@@ -49,18 +49,7 @@ public class RunTournament {
         }
 
         csvReader.close();
-        // System.out.println(Arrays.toString(header));
-        // printAllStatistics("AgentBoaParty", extractedData);
-        // printAllStatistics("SmartAgent", extractedData);
-        // printAllStatistics("NiceTitForTat", extractedData);
-        // printAllStatistics("BoulwareNegotiationParty", extractedData);
-        // printAllStatistics("ConcederNegotiationParty", extractedData);
-        // printAllStatistics("BRAMAgent", extractedData);
-        // printAllStatistics("KLH", extractedData);
-        // printAllStatistics("IAMhaggler2012", extractedData);
-        // printAllStatistics("BayesianAgent", extractedData);
-        // printAllStatistics("BayesianAgent", extractedData);
-
+        
         printRanking(extractedData);
     }
 

@@ -38,7 +38,7 @@ public class MCTSStrategy extends OfferingStrategy {
 	private Double lowerBound = 1.0;
 	private final Boolean IS_VERBOSE = false;
 	BidDetails lastSetBid;
-	private final Integer SIMULATION_FREQUENCY = 8;
+	private final Integer SIMULATION_FREQUENCY = 20;
 	private final Integer SIMULATION_DEPTH = 4;
 	// private BinarySearchStrategy offerer;
 
@@ -181,6 +181,8 @@ public class MCTSStrategy extends OfferingStrategy {
 		// System.out.println("I run from expandNode");
 		// TODO: beautify
 		node.addChild(new Node().setParent(node).setBid(chooseBid()))
+				.addChild(new Node().setParent(node).setBid(chooseBid()))
+				.addChild(new Node().setParent(node).setBid(chooseBid()))
 				.addChild(new Node().setParent(node).setBid(chooseBid()))
 				.addChild(new Node().setParent(node).setBid(chooseBid()));
 

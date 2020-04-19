@@ -29,10 +29,25 @@
 				<party classPath="agents.anac.y2011.TheNegotiator.TheNegotiator" strategyParameters="">
 					<properties/>
 				</party>
+				<party classPath="agents.anac.y2015.ParsAgent.ParsAgent" strategyParameters="">
+                	<properties/>
+            	</party>
+            	<party classPath="agents.anac.y2016.agentsmith.AgentSmith2016" strategyParameters="">
+                	<properties/>
+            	</party>
+            	<party classPath="agents.anac.y2015.Atlas3.Atlas3" strategyParameters="">
+                	<properties/>
+            	</party>
+            	<party classPath="agents.anac.y2011.Gahboninho.Gahboninho" strategyParameters="">
+                	<properties/>
+            	</party>
+            	<party classPath="agents.anac.y2011.BramAgent.BRAMAgent" strategyParameters="">
+                	<properties/>
+            	</party>
 			</partyRepItems>
 			<partyProfileItems>
-				<item url="file:etc/templates/partydomain/party3_utility.xml" />
-				<item url="file:etc/templates/partydomain/party4_utility.xml" />
+				<item url="file:etc/templates/partydomain/party1_utility.xml" />
+				<item url="file:etc/templates/partydomain/party2_utility.xml" />
 			</partyProfileItems>
 			<repeats>1</repeats>
 			<numberOfPartiesPerSession>2</numberOfPartiesPerSession>
