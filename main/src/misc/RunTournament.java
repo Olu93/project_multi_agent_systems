@@ -2,18 +2,19 @@ package misc;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -49,46 +50,42 @@ public class RunTournament {
         }
 
         csvReader.close();
-        // System.out.println(Arrays.toString(header));
-        // printAllStatistics("AgentBoaParty", extractedData);
-        // printAllStatistics("SmartAgent", extractedData);
-        // printAllStatistics("NiceTitForTat", extractedData);
-        // printAllStatistics("BoulwareNegotiationParty", extractedData);
-        // printAllStatistics("ConcederNegotiationParty", extractedData);
-        // printAllStatistics("BRAMAgent", extractedData);
-        // printAllStatistics("KLH", extractedData);
-        // printAllStatistics("IAMhaggler2012", extractedData);
-        // printAllStatistics("BayesianAgent", extractedData);
-        // printAllStatistics("BayesianAgent", extractedData);
+        FileWriter fileWriter = new FileWriter(args[1] + ".txt");
+        PrintWriter printWriter = new PrintWriter(fileWriter);
 
-        printRanking(extractedData);
+        printRanking(extractedData, printWriter);
     }
 
-    private static void printRanking(List<DataLine> extractedData) {
+    private static void printRanking(List<DataLine> extractedData, PrintWriter printWriter) {
         System.out.println("");
         List<String> agentNames = extractedData.stream().map(row -> row.get("Agent 1").split("@")[0]).distinct()
                 .collect(Collectors.toList());
-        agentNames.stream().forEach(name -> printAllStatistics(name, extractedData));
+        agentNames.stream().forEach(name -> printWriter.println(printAllStatistics(name, extractedData)));
         System.out.println("============= RANKING =============");
+        printWriter.println("============= RANKING =============");
         agentNames.stream().map(name -> new SimpleEntry<>(name, getSumUtility(extractedData, name)))
                 .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
                 .peek(entry -> System.out.println(entry.getKey() + ":" + entry.getValue()))
+                .peek(entry -> printWriter.println(entry.getKey() + ":" + entry.getValue()))
                 .collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+        printWriter.close();
     }
 
-    private static void printAllStatistics(String agent, List<DataLine> extractedData) {
+    private static String printAllStatistics(String agent, List<DataLine> extractedData) {
         if (extractedData.stream().map(row -> row.get("Agent 1").split("@")[0]).filter(name -> name.contains(agent))
                 .collect(Collectors.toList()).size() < 1)
-            return;
+            return "";
 
-        System.out.println("==========================");
-        System.out.println(agent + " played " + getNumberOfNegotiations(extractedData, agent) + " games");
-        System.out.println("                Sum of " + agent + ": " + getSumUtility(extractedData, agent));
-        System.out.println("    Perceveived Sum of " + agent + ": " + getSumPerceivedUtility(extractedData, agent));
-        System.out.println("         Robustness of " + agent + ": " + getUtilityRobustness(extractedData, agent));
-        System.out.println("     Avg. Agreement of " + agent + ": " + getAvgAgreement(extractedData, agent));
-        System.out.println("Avg. ParetoDistance of " + agent + ": " + getAvgDistanceToPareto(extractedData, agent));
-        System.out.println("Avg. Agreement time of " + agent + ": " + getAvgTimeToAgree(extractedData, agent));
+        String result = "==========================" + "\n" + agent + " played "
+                + getNumberOfNegotiations(extractedData, agent) + " games" + "\n" + "                Sum of " + agent
+                + ": " + getSumUtility(extractedData, agent) + "\n" + "    Perceveived Sum of " + agent + ": "
+                + getSumPerceivedUtility(extractedData, agent) + "\n" + "         Robustness of " + agent + ": "
+                + getUtilityRobustness(extractedData, agent) + "\n" + "     Avg. Agreement of " + agent + ": "
+                + getAvgAgreement(extractedData, agent) + "\n" + "Avg. ParetoDistance of " + agent + ": "
+                + getAvgDistanceToPareto(extractedData, agent) + "\n" + "Avg. Agreement time of " + agent + ": "
+                + getAvgTimeToAgree(extractedData, agent) + "\n";
+        System.out.println(result);
+        return result;
     }
 
     private static Double getSumUtility(List<DataLine> data, String extract) {
