@@ -165,11 +165,9 @@ public class RunTournament {
     );
 
     private static class DataLine {
-        String[] header;
         Map<String, String> innerMap = new HashMap<>();
 
         public DataLine(String[] header, String[] values) {
-            this.header = header;
             this.innerMap = IntStream.range(0, header.length).boxed()
                     .map(i -> new Pair<>(header[i].trim(), values[i].trim().replace(",", ".")))
                     .map(pair -> new SimpleEntry<>(pair.getFirst(), pair.getSecond()))

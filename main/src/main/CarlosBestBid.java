@@ -12,7 +12,6 @@ import genius.core.boaframework.OpponentModel;
 import genius.core.parties.NegotiationInfo;
 import genius.core.utility.AbstractUtilitySpace;
 import main.helper.UncertaintyUtilitySpace;
-import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
 import negotiator.boaframework.omstrategy.BestBid;
 
 /**
@@ -46,9 +45,6 @@ public class CarlosBestBid extends BoaParty {
 		configure(ac, noparams, os, osParams, om, noparams, oms, noparams);
 
 		System.out.println("!!!!!!!!!!!!!!START!!!!!!!!!!!!");
-		// info.setUtilSpace((AbstractUtilitySpace) (isUncertain ?
-		// info.getUtilitySpace() : new
-		// UncertaintyUtilityEstimator(info.getUserModel())));
 		this.info = info;
 		super.init(info);
 
@@ -60,6 +56,5 @@ public class CarlosBestBid extends BoaParty {
 		System.out.println(isUncertain ? "Preferences are certain!" : "Uncertain preferences detected!");
 		return (AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace()
 				: new UncertaintyUtilitySpace(info.getUserModel()));
-		// return info.getUtilitySpace();
 	}
 }

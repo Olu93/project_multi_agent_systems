@@ -5,15 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import genius.core.Bid;
 import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.OpponentModel;
 import genius.core.issue.Issue;
 import genius.core.issue.IssueDiscrete;
-import genius.core.issue.Value;
-import genius.core.issue.ValueDiscrete;
 import main.helper.IssueValuePair;
 import main.helper.UncertaintyUtilitySpace;
 
@@ -60,16 +57,11 @@ public class CarlosOpponentModel extends OpponentModel {
 
 	@Override
 	public double getWeight(Issue issue) {
-		// System.out.println("USEDGET_WHEIGHT HERE!");
-		// Double sumOfEntropies =
-		// this.entropies.values().stream().mapToDouble(Math::exp).sum();
 		return this.invEntropies.get(issue);
-		// return this.entropies.get(issue);
 	}
 
 	@Override
 	public void updateModel(Bid opponentBid) {
-		// TODO Auto-generated method stub
 		this.updateModel(opponentBid, 0);
 	}
 

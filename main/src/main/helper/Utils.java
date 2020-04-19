@@ -2,19 +2,18 @@ package main.helper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import genius.core.Bid;
 import genius.core.issue.Issue;
 import genius.core.issue.IssueDiscrete;
 import genius.core.issue.ValueDiscrete;
-import math.Matrix;
+import agents.Jama.Matrix;
 
 /**
  * Utils

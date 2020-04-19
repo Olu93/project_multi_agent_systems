@@ -12,7 +12,6 @@ import genius.core.boaframework.OpponentModel;
 import genius.core.parties.NegotiationInfo;
 import genius.core.utility.AbstractUtilitySpace;
 import main.helper.UncertaintyUtilitySpace;
-import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
 
 /**
  * SmartAgent
@@ -45,9 +44,6 @@ public class CarlosBoaParty extends BoaParty {
 		configure(ac, noparams, os, osParams, om, noparams, oms, noparams);
 
 		System.out.println("!!!!!!!!!!!!!!START!!!!!!!!!!!!");
-		// info.setUtilSpace((AbstractUtilitySpace) (isUncertain ?
-		// info.getUtilitySpace() : new
-		// UncertaintyUtilityEstimator(info.getUserModel())));
 		this.info = info;
 		super.init(info);
 

@@ -1,5 +1,11 @@
 package main;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import agents.anac.y2011.TheNegotiator.Pair;
 import genius.core.Bid;
 import genius.core.BidHistory;
 import genius.core.bidding.BidDetails;
@@ -8,26 +14,10 @@ import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OpponentModel;
 import genius.core.boaframework.OutcomeSpace;
 import genius.core.boaframework.SortedOutcomeSpace;
-import genius.core.issue.*;
+import genius.core.issue.IssueDiscrete;
 import genius.core.misc.Range;
 import main.helper.BidEncoder;
-import main.helper.Utils;
-import math.Matrix;
-
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import agents.anac.y2011.TheNegotiator.Pair;
-import agents.anac.y2015.agenth.BidHistory.Entry;
+import agents.Jama.Matrix;
 
 /**
  * SmartOpponentOfferingModel
@@ -119,8 +109,6 @@ public class CarlosOpponentBiddingStrategy extends OMStrategy {
 
         double sampleUtility = this.random.nextGaussian() * Math.sqrt(var) + mean;
         BidDetails sampledBid = this.negotiationSession.getOutcomeSpace().getBidNearUtility(sampleUtility);
-        // System.out.println(Arrays.toString(prediction[0].getRowPackedCopy()));
-        // System.out.println(ds.setPredictedResult(nextBid));
 
         if (IS_VERBOSE)
             System.out.println("Predicted Bid: " + sampledBid + "\n" + sampledBid.getBid());
@@ -128,25 +116,7 @@ public class CarlosOpponentBiddingStrategy extends OMStrategy {
     }
 
     public Pair<Matrix, Matrix> getMatrixRepresentation(List<BidDetails> oppBidList, List<BidDetails> agBidList) {
-        // System.out.println("");
-        // System.out.println("==========New Round=======================");
 
-        // TODOs: Use skip instead
-        // if (asize < osize) {
-        // agent.add(0, agent.get(0));
-        // asize = agent.size();
-        // }
-
-        // BidHistory slicedXOpponent = new BidHistory(opponent.subList(0, osize > 1 ?
-        // osize - 1 : osize)); // Xo
-        // BidHistory shiftedOpponentBidHistory = new BidHistory(opponent.subList(osize
-        // > 1 ? 1 : 0, osize)); // Y
-
-        // BidHistory newXOpponent = new BidHistory(opponent.subList(osize - 1, osize));
-        // // X*
-        // BidHistory newXAgent = new BidHistory(agent.subList(asize - 1, asize));
-        // BidHistory slicedXAgent = new BidHistory(agent.subList(0, asize > 1 ? asize -
-        // 1 : asize)); // Xa
         BidHistory bidHistoryOpp = new BidHistory(oppBidList);
         BidHistory bidHistoryAg = new BidHistory(agBidList);
         Matrix observedXOpponent = this.encoder.encode(bidHistoryOpp);
@@ -169,22 +139,6 @@ public class CarlosOpponentBiddingStrategy extends OMStrategy {
         for (int i = 0; i < numRow; i++) {
             Y.set(0, i, this.opponentBiddingHistory.get(i + 1).getMyUndiscountedUtil());
         }
-
-        // Matrix Y = this.encoder.encode(shiftedOpponentBidHistory);
-        // Matrix opponentX_star = this.encoder.encode(newXOpponent);
-        // Matrix agentX_star = this.encoder.encode(newXAgent);
-
-        // Matrix X_star = new Matrix(1, numCol + 1);
-        // X_star.setMatrix(0, 0, 0, shift - 1, opponentX_star);
-        // X_star.setMatrix(0, 0, shift, numCol - 1, agentX_star);
-        // X_star.set(0, numCol, 1.0);
-        // if (IS_VERBOSE) {
-        // System.out.println("Encoded bids for gaussian process!");
-        // System.out.println("X:");
-        // Utils.printMatrix(X);
-        // System.out.println("Y:");
-        // Utils.printMatrix(Y);
-        // }
 
         return new Pair<Matrix, Matrix>(X, Y);
     }
@@ -271,11 +225,7 @@ public class CarlosOpponentBiddingStrategy extends OMStrategy {
         Matrix aSquared = A.times(A.transpose());
         Matrix bSquared = B.times(B.transpose());
         Matrix interaction = A.times(B.transpose()).times(2);
-        // Double aSquared = A.norm2();
-        // Double bSquared = B.norm2();
-        // Double interaction = A.times(B.transpose()).times(2).get(0, 0);
         double distance = aSquared.plus(bSquared).minus(interaction).get(0, 0);
-        // double[][] distance = aSquared.plus(bSquared).minus(interaction).getArray();
         return distance;
     }
 
@@ -284,12 +234,6 @@ public class CarlosOpponentBiddingStrategy extends OMStrategy {
         Matrix Y;
         Matrix X_star;
         Bid predictedResult;
-
-        public DataSet(Matrix x, Matrix y, Matrix x_star) {
-            X = x;
-            Y = y;
-            X_star = x_star;
-        }
 
         public DataSet() {
         }
@@ -331,8 +275,6 @@ public class CarlosOpponentBiddingStrategy extends OMStrategy {
 
         @Override
         public String toString() {
-            // return Arrays.toString(X_star.getRowPackedCopy()) + " =>\n " +
-            // predictedResult;
             return predictedResult + "";
         }
 

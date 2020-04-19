@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import agents.anac.y2013.TheFawkes.TheFawkes;
-import agents.anac.y2019.harddealer.HardDealer_BS;
 import genius.core.boaframework.AcceptanceStrategy;
 import genius.core.boaframework.BoaParty;
 import genius.core.boaframework.OMStrategy;
@@ -14,17 +12,6 @@ import genius.core.boaframework.OpponentModel;
 import genius.core.parties.NegotiationInfo;
 import genius.core.utility.AbstractUtilitySpace;
 import main.helper.UncertaintyUtilitySpace;
-import negotiator.boaframework.acceptanceconditions.anac2010.AC_IAMHaggler2010;
-import negotiator.boaframework.acceptanceconditions.anac2011.AC_HardHeaded;
-import negotiator.boaframework.acceptanceconditions.anac2011.AC_TheNegotiator;
-import negotiator.boaframework.offeringstrategy.*;
-import negotiator.boaframework.acceptanceconditions.anac2012.AC_BRAMAgent2;
-import negotiator.boaframework.offeringstrategy.anac2011.HardHeaded_Offering;
-import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
-import negotiator.boaframework.offeringstrategy.anac2012.BRAMAgent2_Offering;
-import negotiator.boaframework.offeringstrategy.anac2010.IAMhaggler2010_Offering;
-import negotiator.boaframework.omstrategy.BestBid;
-import negotiator.boaframework.omstrategy.NTFTstrategy;
 import negotiator.boaframework.omstrategy.TheFawkes_OMS;
 import negotiator.boaframework.opponentmodel.HardHeadedFrequencyModel;
 

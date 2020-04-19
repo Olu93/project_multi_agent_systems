@@ -44,13 +44,6 @@ public class CarlosAcceptanceStrategy extends AcceptanceStrategy {
 
 	@Override
 	public Actions determineAcceptability() {
-		// TODO: time based epsilon function
-		// TODO: Use only utility function. Uncertainty estimation is handled elsewhere
-
-		// this.uncertaintyEstimator = new
-		// UncertaintyUtilityEstimator(negotiationSession); // TODO: Way to
-		// inefficient!!!
-
 		final BidDetails opponentBid = negotiationSession.getOpponentBidHistory().getLastBidDetails();
 		final BidDetails agentNextBid = offeringStrategy.determineNextBid();
 		return determineAcceptabilityBid(opponentBid, agentNextBid);
@@ -59,8 +52,6 @@ public class CarlosAcceptanceStrategy extends AcceptanceStrategy {
 	public Actions determineAcceptabilityBid(BidDetails opponentBid, BidDetails agentNextBid) {
 		if(IS_VERBOSE) System.out.println("START DETERMINE ACCEPTABILITY: ");
 		final BidHistory opponentHistory = negotiationSession.getOpponentBidHistory();
-		// opponentHistory.getHistory().removeIf(bid -> bestBidProposals.contains(bid));
-		// <= Leads to permanent history change!!!
 		final List<BidDetails> candidateBids = opponentHistory.getHistory().parallelStream()
 				.filter(bid -> !prevBestBidProposals.contains(bid)).collect(Collectors.toList());
 		final BidDetails opponentBestBid = new BidHistory(candidateBids).getBestBidDetails();
@@ -76,14 +67,11 @@ public class CarlosAcceptanceStrategy extends AcceptanceStrategy {
 			System.out.println("END REACHED");
 			return Actions.Reject;
 		}
-		// Possibly temporary addition of extra requirement to proceed. Until
-		// smartOfferingStrategy is done, accepts way too easily
+
 		double utilityAgentBid = negotiationSession.getUtilitySpace().getUtility(agentNextBid.getBid());
 		double utilityOpponentBid = negotiationSession.getUtilitySpace().getUtility(opponentBid.getBid());
 		double utilityOpponentBestBid = negotiationSession.getUtilitySpace().getUtility(opponentBestBid.getBid());
 
-		// System.out.println("Agent: " + agentNextBid.getBid());
-		// System.out.println("Opponent: " + opponentBid.getBid());
 		if(IS_VERBOSE) System.out.println("Agent next bid: " + utilityAgentBid);
 		if(IS_VERBOSE) System.out.println("Opponent bid: " + utilityOpponentBid);
 		if (utilityAgentBid <= utilityOpponentBid + epsilon && utilityAgentBid > epsilon) { // TODO why the second?

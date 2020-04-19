@@ -4,16 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import agents.anac.y2019.harddealer.math3.optim.MaxIter;
 import agents.anac.y2019.harddealer.math3.optim.PointValuePair;
@@ -24,25 +17,17 @@ import agents.anac.y2019.harddealer.math3.optim.linear.NonNegativeConstraint;
 import agents.anac.y2019.harddealer.math3.optim.linear.Relationship;
 import agents.anac.y2019.harddealer.math3.optim.linear.SimplexSolver;
 import agents.anac.y2019.harddealer.math3.optim.nonlinear.scalar.GoalType;
-
 import genius.core.Bid;
-import genius.core.boaframework.NegotiationSession;
 import genius.core.issue.Issue;
 import genius.core.issue.IssueDiscrete;
-import genius.core.issue.Objective;
-import genius.core.issue.ValueDiscrete;
 import genius.core.uncertainty.BidRanking;
 import genius.core.uncertainty.ExperimentalUserModel;
 import genius.core.uncertainty.UserModel;
-import genius.core.utility.AbstractUtilitySpace;
 import genius.core.utility.AdditiveUtilitySpace;
-import genius.core.utility.CustomUtilitySpace;
-import genius.core.utility.Evaluator;
 import genius.core.utility.UtilitySpace;
 import genius.core.xml.SimpleElement;
-import math.Matrix;
+import agents.Jama.Matrix;
 import simplex.Simplex;
-import simplex.TwoPhaseSimplex;
 
 /**
  * Test

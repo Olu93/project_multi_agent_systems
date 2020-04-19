@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import genius.core.Bid;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.Actions;
 import genius.core.boaframework.NegotiationSession;
@@ -39,17 +38,6 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 	private final Integer SIMULATION_FREQUENCY = 20;
 	private final Integer SIMULATION_DEPTH = 5;
 	private Double prevBestBidUtility = 0.0;
-	// private BinarySearchStrategy offerer;
-
-	// public void setOpponentBestBid(Bid bestBid) {
-	// this.opponentBestBid = bestBid;
-	// }
-	//
-	// public Bid getBestOpponentBid() {
-	// Bid tmp = opponentBestBid;
-	// opponentBestBid = null;
-	// return tmp;
-	// }
 
 	// #endregion
 
@@ -60,8 +48,6 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		outcomeSpace = new SortedOutcomeSpace(negotiationSession.getUtilitySpace());
 		negotiationSession.setOutcomeSpace(outcomeSpace);
 		ac = new CarlosAcceptanceStrategy(negotiationSession, this, opponentModel, parameters);
-		// offerer = new BinarySearchStrategy();
-		// offerer.init(negotiationSession, opponentModel, omStrategy, parameters);
 	}
 
 	@Override
@@ -72,15 +58,12 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 
 	@Override
 	public BidDetails determineNextBid() {
-		// opponentModel.updateModel(negotiationSession.getOpponentBidHistory().getLastBid());
-		// System.out.println("SEX");
 		BidDetails nextBid = this.getNextBid();
 		if (nextBid != null && !nextBid.equals(lastSetBid)) {
 			lastSetBid = nextBid;
 			this.setNextBid(null);
 			return lastSetBid;
 		}
-		// System.out.println("TONIK");
 		return enhanceTree(tree.getRoot());
 	}
 
@@ -94,20 +77,14 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		System.out.println("Starting Simulation");
 		for (int i = 0; i < SIMULATION_FREQUENCY; i++) {
 
-			// System.out.println(i);
 			final Node selectedNode = selectNode(node);
 
-			// Node 1 (0) -> Node 2
-			// Node 1 (3) [1] -> Keep Node 1 -> No expansion
+
 			if (selectedNode.getNoVisits() >= selectedNode.getChildren().size()) {
-				// System.err.println("Expansion: " + selectedNode.getId() + " - " +
-				// selectedNode.getNoVisits());
 				expandNode(selectedNode);
 			}
 
 			Node explorationCandidate = selectedNode;
-			// No expansion -> Take randomly Node 2
-			// No expansion -> Take randomly Node 3
 			if (explorationCandidate.getChildren().size() > 0) {
 				explorationCandidate = selectedNode.getRandomChild();
 			}
@@ -125,10 +102,6 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 
 	private Boolean didConcede() {
 		BidDetails bestBid = this.negotiationSession.getOpponentBidHistory().getBestBidDetails();
-		// BidDetails lastBid =
-		// this.negotiationSession.getOpponentBidHistory().getLastBidDetails();
-		// BidDetails firstBid =
-		// this.negotiationSession.getOpponentBidHistory().getFirstBidDetails();
 		Double bestBidUtility = bestBid.getMyUndiscountedUtil();
 		double newBar = this.prevBestBidUtility + 0.01;
 		boolean tmp = bestBidUtility > newBar;
@@ -193,8 +166,6 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 
 	// node expansion
 	private void expandNode(final Node node) {
-		// System.out.println("I run from expandNode");
-		// TODO: beautify
 		node.addChild(new Node().setParent(node).setBid(chooseBid()))
 				.addChild(new Node().setParent(node).setBid(chooseBid()))
 				.addChild(new Node().setParent(node).setBid(chooseBid()));
@@ -210,18 +181,7 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		final List<BidDetails> agentHistory = new ArrayList<BidDetails>();
 		oppHistory.add(this.negotiationSession.getOpponentBidHistory().getLastBidDetails());
 		agentHistory.add(this.negotiationSession.getOpponentBidHistory().getLastBidDetails());
-		// if (biddingHistory.size() <= 1) {
-		// biddingHistory.add(negotiationSession.getMinBidinDomain());
-		// biddingHistory.add(negotiationSession.getMinBidinDomain());
-		// }
 
-		// BidDetails nextOpponentBid = om.getBidbyHistory(oppHistory, agentHistory);
-		// Double score = nextOpponentBid.getMyUndiscountedUtil();
-		// biddingHistory.add(nextOpponentBid);
-		// BidDetails agentBid = generateRandomBidDetails();
-		// node.setBid(agentBid);
-
-		// TODO: change this with the time that we need till the end
 		int count = 0;
 		BidDetails nextOpponentBid, agentCurrentBid;
 		final List<Double> scores = new ArrayList<>();
@@ -248,9 +208,7 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 				&& count <= SIMULATION_DEPTH);
 
 		avgScore = scores.parallelStream().mapToDouble(val -> val).average().getAsDouble();
-		// TODO: Average across multiple simulations
 		while (iterNodeCopy != null) {
-			// (((X1+X2)/2*2)+X3)/3
 			double backpropVal = (iterNodeCopy.getScore() * iterNodeCopy.getNoVisits() + avgScore)
 					/ (iterNodeCopy.getNoVisits() + 1);
 			iterNodeCopy.setScore(backpropVal);
@@ -259,18 +217,9 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		}
 	}
 
-	private BidDetails generateRandomBidDetails() {
-		final Bid bid = negotiationSession.getDomain().getRandomBid(new Random());
-		final BidDetails agentBid = new BidDetails(bid, negotiationSession.getUtilitySpace().getUtility(bid));
-		return agentBid;
-	}
 
-	// Nearest Bid
-	// Different Strategy
-	// Discretization
 	public BidDetails chooseBid() {
 		return getBidInRange(lowerBound, UPPER_BOUND);
-		// return getBestMutualBidInRange(lowerBound, UPPER_BOUND);
 	}
 
 	public BidDetails getBidInRange(Double lowerBound, Double upperBound) {
@@ -286,8 +235,6 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		Random rand = new Random();
 		List<BidDetails> candidateBids = outcomeSpace.getBidsinRange(new Range(lowerBound, 1.0)).stream()
 				.sorted((a, b) -> compareBids(a, b))
-				// .peek(bid ->
-				// System.out.println(opponentModel.getBidEvaluation(bid.getBid())))
 				.collect(Collectors.toList());
 
 		Integer size = candidateBids.size() > 5 ? 5 : candidateBids.size();
@@ -306,8 +253,5 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		return CarlosComponentNames.SMART_BIDDING_STRATEGY.toString();
 	}
 
-	public BidDetails getNextOpponentBid() {
-		return null;
-	}
 
 }

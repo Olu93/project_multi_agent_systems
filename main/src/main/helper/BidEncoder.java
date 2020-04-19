@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import agents.Jama.Matrix;
 import genius.core.Bid;
 import genius.core.BidHistory;
 import genius.core.boaframework.NegotiationSession;
 import genius.core.issue.IssueDiscrete;
 import genius.core.issue.Value;
 import genius.core.issue.ValueDiscrete;
-import math.Matrix;
 
 /**
  * LookUpTable
