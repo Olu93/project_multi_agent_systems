@@ -23,13 +23,14 @@ public class BidEncoder {
 	private HashMap<IssueValuePair, Integer> mappingIVPToInt = new HashMap<>();
 	private HashMap<Integer, IssueDiscrete> mappingIntToIssue = new HashMap<>();
 	private HashMap<Integer, IssueValuePair> mappingIntToIVP = new HashMap<>();
+	private final boolean IS_VERBOSE = false;
 
 	public BidEncoder(NegotiationSession session) {
 		this.session = session;
 		if (this.session.getUserModel() != null) {
 			System.out.println("BidEncoder - UNCERTAIN MODE");
-			this.domainIssues = this.session.getUserModel().getBidRanking().getMaximalBid().getIssues()
-					.parallelStream().map(value -> (IssueDiscrete) value).collect(Collectors.toList());
+			this.domainIssues = this.session.getUserModel().getBidRanking().getMaximalBid().getIssues().parallelStream()
+					.map(value -> (IssueDiscrete) value).collect(Collectors.toList());
 		} else {
 			System.out.println("BidEncoder - CERTAIN MODE");
 			this.domainIssues = this.session.getIssues().parallelStream().map(value -> (IssueDiscrete) value)
@@ -45,13 +46,12 @@ public class BidEncoder {
 				this.mappingIntToIVP.put(cnt, ivp);
 				this.mappingIntToIssue.put(cnt, issue);
 				cnt++;
-				System.out.println("Current IVP: " + ivp.toString());
+				if (IS_VERBOSE)
+					System.out.println("Current IVP: " + ivp.toString());
 			}
 		}
 		System.out.println("Initialized BidEncoder");
 	}
-
-
 
 	public Integer getIndexByIVP(IssueValuePair val) {
 		IssueValuePair key = this.mappingIVPToInt.keySet().stream().filter(pair -> pair.equals(val)).findFirst()

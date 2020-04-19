@@ -109,7 +109,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 			}			
 			
 
-			System.out.println("Accepting bid!" + opponentBid);
+			if(IS_VERBOSE) System.out.println("Accepting bid!" + opponentBid);
 			return Actions.Accept;
 		}
 		return reject();

@@ -16,13 +16,13 @@ import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
 /**
  * SmartAgent
  */
-public class AgentBoaParty extends BoaParty {
+public class CarlosBoaParty extends BoaParty {
 
 	private NegotiationInfo info;
 
 	@Override
 	public String getDescription() {
-		return "MCSTParty";
+		return "Uses Monte Carlo Search Tree";
 	}
 
 	@Override

@@ -40,6 +40,7 @@ public class MCTSStrategy extends OfferingStrategy {
 	BidDetails lastSetBid;
 	private final Integer SIMULATION_FREQUENCY = 20;
 	private final Integer SIMULATION_DEPTH = 5;
+	private Double prevBestBidUtility = 0.0;
 	// private BinarySearchStrategy offerer;
 
 	// public void setOpponentBestBid(Bid bestBid) {
@@ -119,11 +120,27 @@ public class MCTSStrategy extends OfferingStrategy {
 		final Node bestChoiceNode = node.getBestChild();
 		tree.setRoot(bestChoiceNode);
 		System.out.println("===========> Best choice: " + bestChoiceNode.getId());
-		lowerBound = updateLowerBound();
+
+		lowerBound = didConcede() ? updateLowerBound() : lowerBound;
 		return bestChoiceNode.getBid();
 	}
 
+	private Boolean didConcede() {
+		BidDetails bestBid = this.negotiationSession.getOpponentBidHistory().getBestBidDetails();
+		// BidDetails lastBid =
+		// this.negotiationSession.getOpponentBidHistory().getLastBidDetails();
+		// BidDetails firstBid =
+		// this.negotiationSession.getOpponentBidHistory().getFirstBidDetails();
+		Double bestBidUtility = bestBid.getMyUndiscountedUtil();
+		double newBar = this.prevBestBidUtility + 0.01;
+		boolean tmp = bestBidUtility > newBar;
+		if (tmp)
+			this.prevBestBidUtility = bestBidUtility;
+		return tmp;
+	}
+
 	private double updateLowerBound() {
+
 		return 1 - (negotiationSession.getTime() / 5);
 	}
 
@@ -193,8 +210,8 @@ public class MCTSStrategy extends OfferingStrategy {
 		Node iterNodeCopy = node;
 		final List<BidDetails> oppHistory = new ArrayList<BidDetails>();
 		final List<BidDetails> agentHistory = new ArrayList<BidDetails>();
-		oppHistory.addAll(negotiationSession.getOpponentBidHistory().getHistory());
-		agentHistory.addAll(negotiationSession.getOwnBidHistory().getHistory());
+		oppHistory.add(this.negotiationSession.getOpponentBidHistory().getLastBidDetails());
+		agentHistory.add(this.negotiationSession.getOpponentBidHistory().getLastBidDetails());
 		// if (biddingHistory.size() <= 1) {
 		// biddingHistory.add(negotiationSession.getMinBidinDomain());
 		// biddingHistory.add(negotiationSession.getMinBidinDomain());
@@ -214,18 +231,17 @@ public class MCTSStrategy extends OfferingStrategy {
 		BidDetails agentNextBid;
 		do {
 			// if (negotiationSession.getTime() > 0.25) {
-			if (negotiationSession.getTime() > 0.1) {
+			if (negotiationSession.getTime() > 0.0) {
 				nextOpponentBid = this.omStrategy instanceof SmartOpponentOfferingModel
 						? ((SmartOpponentOfferingModel) this.omStrategy).getBidbyHistory(oppHistory, agentHistory)
 						: this.omStrategy.getBid(oppHistory);
-
 			} else {
 				nextOpponentBid = getBidInRange(0.0, 0.5);
 			}
 			// System.out.println(nextOpponentBid.getBid());
 
-			oppHistory.add(nextOpponentBid);
 			agentCurrentBid = chooseBid();
+			oppHistory.add(nextOpponentBid);
 			agentHistory.add(agentCurrentBid);
 			double opponentUtility = negotiationSession.getUtilitySpace().getUtility(nextOpponentBid.getBid());
 			scores.add(opponentUtility * Math.pow(DISCOUNT_FACTOR, count));
