@@ -174,8 +174,6 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 
 	// rollout and backpropagation
 	private void rolloutSimBackprop(final Node node) {
-		// TODO: make reset method
-		// TODO: Actions might be strategies
 		Node iterNodeCopy = node;
 		final List<BidDetails> oppHistory = new ArrayList<BidDetails>();
 		final List<BidDetails> agentHistory = new ArrayList<BidDetails>();
