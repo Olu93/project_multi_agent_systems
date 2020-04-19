@@ -79,6 +79,7 @@ public class CarlosOpponentModel extends OpponentModel {
 		this.opponentUtilitySpace.setWeights(bid.getIssues(), this.getIssueWeights());
 	}
 
+	// Getting estimated opponent issue weights, based on bidding frequency.
 	@Override
 	public double[] getIssueWeights() {
 		List<Issue> issues = this.session.getUtilitySpace().getDomain().getIssues();

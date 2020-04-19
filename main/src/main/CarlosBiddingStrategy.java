@@ -73,37 +73,45 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		return previousOpponentBestBid;
 	}
 
+	// Central method in which multiple iterations of the MCTS algorithms are performed.
 	public BidDetails enhanceTree(final Node node) {
-		System.out.println("Starting Simulation");
+		if (IS_VERBOSE) System.out.println("Starting Simulation");
 		for (int i = 0; i < SIMULATION_FREQUENCY; i++) {
-
+			// The selection step of the algorithm
 			final Node selectedNode = selectNode(node);
 
-
+			// If the number of visits of the node is greater than or equal to the number of children
+			// expand the node.
 			if (selectedNode.getNoVisits() >= selectedNode.getChildren().size()) {
 				expandNode(selectedNode);
 			}
 
+			// Select a random leaf node to explore.
 			Node explorationCandidate = selectedNode;
 			if (explorationCandidate.getChildren().size() > 0) {
 				explorationCandidate = selectedNode.getRandomChild();
 			}
+			// Rollout will be performed from the selected leaf node.
 			rolloutSimBackprop(explorationCandidate);
 
 		}
-
+		
+		// Select the child of the root with the maximum score.
 		final Node bestChoiceNode = node.getBestChild();
 		tree.setRoot(bestChoiceNode);
-		System.out.println("===========> Best choice: " + bestChoiceNode.getId());
+		if (IS_VERBOSE) System.out.println("===========> Best choice: " + bestChoiceNode.getId());
 
+		// Update the lower bound.
 		if(this.negotiationSession.getUserModel() == null){
 			lowerBound = didConcede() ? updateLowerBound() : lowerBound;
 		}else{
 			lowerBound = updateLowerBound();
 		}
+		
 		return bestChoiceNode.getBid();
 	}
 
+	// Check if the opponent concedes.
 	private Boolean didConcede() {
 		BidDetails bestBid = this.negotiationSession.getOpponentBidHistory().getBestBidDetails();
 		Double bestBidUtility = bestBid.getMyUndiscountedUtil();
@@ -157,6 +165,7 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		return (score / nodeVisits) + Math.sqrt(c * (Math.log(parentVisits) / nodeVisits));
 	}
 
+	// Choose the best node according to the UCB1.
 	public static Node getBestNode(final Node node) {
 
 		final Double finalParentVisits = node.getParent() != null ? node.getParent().getNoVisits() : 0.0;
@@ -168,7 +177,7 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 				Comparator.comparing(c -> calculateUCB1(c.getNoVisits(), finalParentVisits, c.getScore())));
 	}
 
-	// node expansion
+	// Node expansion
 	private void expandNode(final Node node) {
 		node.addChild(new Node().setParent(node).setBid(chooseBid()))
 				.addChild(new Node().setParent(node).setBid(chooseBid()))
@@ -176,7 +185,7 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 
 	}
 
-	// rollout and backpropagation
+	// Rollout and backpropagation
 	private void rolloutSimBackprop(final Node node) {
 		Node iterNodeCopy = node;
 		final List<BidDetails> oppHistory = new ArrayList<BidDetails>();
@@ -189,13 +198,11 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		final List<Double> scores = new ArrayList<>();
 		Double avgScore = 0.0;
 		BidDetails agentNextBid;
+		// Simulate several negotiation steps.
 		do {
-			// if (negotiationSession.getTime() > 0.25) {
 			nextOpponentBid = this.omStrategy instanceof CarlosOpponentBiddingStrategy
 					? ((CarlosOpponentBiddingStrategy) this.omStrategy).getBidbyHistory(oppHistory, agentHistory)
 					: this.omStrategy.getBid(oppHistory);
-
-			// System.out.println(nextOpponentBid.getBid());
 
 			agentCurrentBid = chooseBid();
 			oppHistory.add(nextOpponentBid);
@@ -230,7 +237,6 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		BidDetails result = candidateBids.size() > 0 ? candidateBids.get(rand.nextInt(candidateBids.size()))
 				: negotiationSession.getMaxBidinDomain();
 		return result;
-		// return offerer.determineNextBid();
 	}
 
 	public BidDetails getBestMutualBidInRange(Double lowerBound, Double upperBound) {

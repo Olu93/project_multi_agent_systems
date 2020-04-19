@@ -91,6 +91,7 @@ public class CarlosOpponentBiddingStrategy extends OMStrategy {
         return tmp == null ? this.getBid() : tmp;
     }
 
+    // Predict the next opponent bid from the opponent bid history and the agent bid history.
     public BidDetails getBidbyHistory(List<BidDetails> oppBidList, List<BidDetails> agBidList) {
         updateModel();
         int currentSize = this.opponentBiddingHistory.size();
@@ -101,6 +102,7 @@ public class CarlosOpponentBiddingStrategy extends OMStrategy {
         Matrix observedY = ds.getY().transpose(); // TODO: Consider gaussian regression per issue.
         Matrix unObservedX = getMatrixRepresentation(oppBidList, agBidList).getFirst();
 
+        // Using the Gaussian process regression method to generate the prediction.
         Matrix[] prediction = predictGaussianProcess(observedX, observedY, unObservedX);
         Matrix predictedUtilities = prediction[0];
         Matrix variances = prediction[1];
@@ -194,7 +196,6 @@ public class CarlosOpponentBiddingStrategy extends OMStrategy {
     }
 
     private Matrix computeCovarianceMatrix(Matrix A, Matrix B) {
-        // Double distance = euclidianDistance(A, B);
         Integer rowLenA = A.getRowDimension();
         Integer rowLenB = B.getRowDimension();
         Integer colLenA = A.getColumnDimension() - 1;

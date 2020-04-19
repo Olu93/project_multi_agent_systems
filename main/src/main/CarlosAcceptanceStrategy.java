@@ -49,6 +49,9 @@ public class CarlosAcceptanceStrategy extends AcceptanceStrategy {
 		return determineAcceptabilityBid(opponentBid, agentNextBid);
 	}
 
+	// Receives a bid and returns whether the agent will accept the bid. 
+	// First takes time concessions into account, then takes opponent bidding history into account,
+	// and finally takes estimated opponent strategy into account.
 	public Actions determineAcceptabilityBid(BidDetails opponentBid, BidDetails agentNextBid) {
 		if(IS_VERBOSE) System.out.println("START DETERMINE ACCEPTABILITY: ");
 		final BidHistory opponentHistory = negotiationSession.getOpponentBidHistory();
@@ -74,9 +77,12 @@ public class CarlosAcceptanceStrategy extends AcceptanceStrategy {
 
 		if(IS_VERBOSE) System.out.println("Agent next bid: " + utilityAgentBid);
 		if(IS_VERBOSE) System.out.println("Opponent bid: " + utilityOpponentBid);
-		if (utilityAgentBid <= utilityOpponentBid + epsilon && utilityAgentBid > epsilon) { // TODO why the second?
+		
+		// Factoring in whether the opponent bid is worse than our next bid, taking time concession into account through epsilon value.
+		if (utilityAgentBid <= utilityOpponentBid + epsilon && utilityAgentBid > epsilon) {
 			if(IS_VERBOSE) System.out.println("Next bid is going to be smaller than opponent bid!");
 			
+			// Factoring in whether there is a better opponent bid in their history
 			if (utilityOpponentBid < utilityOpponentBestBid && opponentHistory.size() > 1) {
 				if(IS_VERBOSE) System.out.println("Opponent bid is worse than a bid in his history!");
 				prevBestBidProposals.add(opponentBestBid);
@@ -86,6 +92,7 @@ public class CarlosAcceptanceStrategy extends AcceptanceStrategy {
 
 			if(IS_VERBOSE) System.out.println("Opponent bid is best bid so far!");
 			
+			// Factoring in whether the opponent is predicted to produce a better next bid.
 			if(this.omStrategy != null){
 				double oppnentNextBid = this.omStrategy.getBid(negotiationSession.getOpponentBidHistory().getHistory()).getMyUndiscountedUtil();
 				if (utilityOpponentBid < oppnentNextBid) {
