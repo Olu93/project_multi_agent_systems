@@ -43,7 +43,6 @@ public class CarlosBoaParty extends BoaParty {
 		// Initialize all the components of this party to the choices defined above
 		configure(ac, noparams, os, osParams, om, noparams, oms, noparams);
 
-		System.out.println("!!!!!!!!!!!!!!START!!!!!!!!!!!!");
 		this.info = info;
 		super.init(info);
 
@@ -52,9 +51,7 @@ public class CarlosBoaParty extends BoaParty {
 	@Override
 	public AbstractUtilitySpace estimateUtilitySpace() {
 		Boolean isUncertain = info.getUserModel() == null;
-		System.out.println(isUncertain ? "Preferences are certain!" : "Uncertain preferences detected!");
 		return (AbstractUtilitySpace) (isUncertain ? info.getUtilitySpace()
 				: new UncertaintyUtilitySpace(info.getUserModel()));
-		// return info.getUtilitySpace();
 	}
 }

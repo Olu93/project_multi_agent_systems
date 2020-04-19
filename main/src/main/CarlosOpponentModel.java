@@ -24,7 +24,6 @@ public class CarlosOpponentModel extends OpponentModel {
 	@Override
 	public void init(NegotiationSession negotiationSession, Map<String, Double> parameters) {
 		super.init(negotiationSession, parameters);
-		System.out.println("USING - SmartFreqOpponentModel");
 		this.session = negotiationSession;
 		this.domainIssues = negotiationSession.getIssues().stream().map(issue -> (IssueDiscrete) issue)
 				.collect(Collectors.toList());
@@ -75,7 +74,6 @@ public class CarlosOpponentModel extends OpponentModel {
 			}
 
 		}
-		System.out.println(bid.getIssues());
 		this.opponentUtilitySpace.setWeights(bid.getIssues(), this.getIssueWeights());
 	}
 
