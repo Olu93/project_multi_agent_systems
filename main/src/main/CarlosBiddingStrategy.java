@@ -303,7 +303,7 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 
 	@Override
 	public String getName() {
-		return "MCTS Strategy";
+		return CarlosComponentNames.SMART_BIDDING_STRATEGY.toString();
 	}
 
 	public BidDetails getNextOpponentBid() {

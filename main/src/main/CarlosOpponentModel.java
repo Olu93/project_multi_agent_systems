@@ -113,7 +113,7 @@ public class CarlosOpponentModel extends OpponentModel {
 
 	@Override
 	public String getName() {
-		return "FreqOpponentPrefModel";
+		return CarlosComponentNames.SMART_OPPONENT_MODEL.toString();
 	}
 
 }

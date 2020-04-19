@@ -32,7 +32,7 @@
 			</partyRepItems>
 			<partyProfileItems>
 				<item url="file:etc/templates/anac/y2011/Laptop/laptop_seller_utility_u10.xml" />
-				<item url="file:etc/templates/anac/y2011/Laptop/laptop_buyer_utility_u10.xml" />
+				<item url="file:etc/templates/anac/y2011/Laptop/laptop_buyer_utility.xml" />
 			</partyProfileItems>
 			<repeats>1</repeats>
 			<numberOfPartiesPerSession>2</numberOfPartiesPerSession>

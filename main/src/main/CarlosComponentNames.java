@@ -10,13 +10,13 @@ public enum CarlosComponentNames {
     public String toString() {
         switch (this) {
             case SMART_OPPONENT_MODEL:
-                return "Smart Opponent Model";
+                return "Carlos Opponent Model - Frequency-Based";
             case SMART_BIDDING_STRATEGY:
-                return "Smart Bidding Strategy";
+                return "Carlos Bidding Strategy - MCTS";
             case SMART_OPPONENT_BIDDING_STRATEGY:
-                return "Smart Opponent Bidding Strategy";
+                return "Carlos Opponent Bidding Strategy - Gaussian Process";
             case SMART_ACCEPTANCE_STRATEGY:
-                return "Smart Acceptance Bidding Strategy";
+                return "Carlos Acceptance Bidding Strategy - Heuristic";
         }
         return null;
     }

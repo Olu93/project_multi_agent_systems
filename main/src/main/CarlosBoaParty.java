@@ -23,7 +23,7 @@ public class CarlosBoaParty extends BoaParty {
 
 	@Override
 	public String getDescription() {
-		return "Uses Monte Carlo Search Tree";
+		return "Monte Carlo Tree Search";
 	}
 
 	@Override
