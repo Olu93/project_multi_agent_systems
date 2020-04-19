@@ -66,6 +66,7 @@
             "args": "lib\\test_uncertain.xml logs\\last_run.csv"
         },
         {
+            "type": "java",
             "name": "Run Laptop",
             "request": "launch",
             "mainClass": "misc.RunSession",
@@ -74,11 +75,100 @@
         },
         {
             "type": "java",
-            "name": "TOURNAMENT",
+            "name": "TOURNAMENT_tournament",
             "request": "launch",
             "mainClass": "misc.RunTournament",
             "projectName": "main",
-            "args": "lib\\tournament.xml logs\\loggedTournamentStatistics"
+            "console": "externalTerminal",
+            "args": "lib\\tournament.xml logs\\tournament"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT_tournament_domain_16",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "console": "externalTerminal",
+            "args": "lib\\tournament_domain_16.xml logs\\tournament_domain_16"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT_tournament_laptop_u10",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "console": "externalTerminal",
+            "args": "lib\\tournament_laptop_u10.xml logs\\tournament_laptop_u10"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT_tournament_pie",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "console": "externalTerminal",
+            "args": "lib\\tournament_pie.xml logs\\tournament_pie"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT_tournament_smart_grid",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "console": "externalTerminal",
+            "args": "lib\\tournament_smart_grid.xml logs\\tournament_smart_grid"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT_tournament_u10",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "console": "externalTerminal",
+            "args": "lib\\tournament_u10.xml logs\\tournament_u10"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT_tournament_u20",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "console": "externalTerminal",
+            "args": "lib\\tournament_u20.xml logs\\tournament_u20"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT_tournament_u50",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "console": "externalTerminal",
+            "args": "lib\\tournament_u50.xml logs\\tournament_u50"
+        },
+        {
+            "type": "java",
+            "name": "TOURNAMENT_tournament_laptop_u10",
+            "request": "launch",
+            "mainClass": "misc.RunTournament",
+            "projectName": "main",
+            "console": "externalTerminal",
+            "args": "lib\\tournament_laptop_u10.xml logs\\tournament_laptop_u10"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Compound",
+            "configurations": [
+                "TOURNAMENT_tournament",
+                "TOURNAMENT_tournament_domain_16",
+                "TOURNAMENT_tournament_laptop_u10",
+                "TOURNAMENT_tournament_pie",
+                "TOURNAMENT_tournament_smart_grid",
+                "TOURNAMENT_tournament_u10",
+                "TOURNAMENT_tournament_u20",
+                "TOURNAMENT_tournament_u50",
+                "TOURNAMENT_tournament_laptop_u10"
+            ]
         }
     ]
 }
