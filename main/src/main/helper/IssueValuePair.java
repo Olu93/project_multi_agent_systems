@@ -1,4 +1,4 @@
-package misc;
+package main.helper;
 
 import genius.core.issue.Issue;
 import genius.core.issue.IssueDiscrete;

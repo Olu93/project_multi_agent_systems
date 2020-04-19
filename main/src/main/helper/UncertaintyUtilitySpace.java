@@ -1,4 +1,4 @@
-package main;
+package main.helper;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +41,6 @@ import genius.core.utility.Evaluator;
 import genius.core.utility.UtilitySpace;
 import genius.core.xml.SimpleElement;
 import math.Matrix;
-import misc.Utils;
 import simplex.Simplex;
 import simplex.TwoPhaseSimplex;
 

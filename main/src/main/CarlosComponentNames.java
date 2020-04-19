@@ -3,7 +3,7 @@ package main;
 /**
  * SmartConstants
  */
-public enum SmartComponentNames {
+public enum CarlosComponentNames {
 
     SMART_OPPONENT_MODEL, SMART_BIDDING_STRATEGY, SMART_OPPONENT_BIDDING_STRATEGY, SMART_ACCEPTANCE_STRATEGY;
 

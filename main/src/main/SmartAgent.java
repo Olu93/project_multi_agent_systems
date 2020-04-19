@@ -13,6 +13,7 @@ import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
 import genius.core.parties.NegotiationInfo;
 import genius.core.utility.AbstractUtilitySpace;
+import main.helper.UncertaintyUtilitySpace;
 import negotiator.boaframework.acceptanceconditions.anac2010.AC_IAMHaggler2010;
 import negotiator.boaframework.acceptanceconditions.anac2011.AC_HardHeaded;
 import negotiator.boaframework.acceptanceconditions.anac2011.AC_TheNegotiator;
@@ -47,10 +48,10 @@ public class SmartAgent extends BoaParty {
 	public void init(NegotiationInfo info) {
 		// The choice for each component is made here
 		// AcceptanceStrategy 	ac  = new AC_HardHeaded();
-		AcceptanceStrategy 	ac  = new SmartAcceptanceStrategy();
+		AcceptanceStrategy 	ac  = new CarlosAcceptanceStrategy();
 		OpponentModel 		om  = new HardHeadedFrequencyModel();
 		OMStrategy			oms = new TheFawkes_OMS();
-		OfferingStrategy 	os  = new MCTSStrategy();
+		OfferingStrategy 	os  = new CarlosBiddingStrategy();
 		
 		// All component parameters can be set below.
 		Map<String, Double> noparams = Collections.emptyMap();

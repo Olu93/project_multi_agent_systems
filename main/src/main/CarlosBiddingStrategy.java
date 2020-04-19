@@ -1,10 +1,15 @@
 package main;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.stream.Collectors;
+
 import genius.core.Bid;
-import genius.core.BidHistory;
-import genius.core.BidIterator;
 import genius.core.bidding.BidDetails;
-import genius.core.boaframework.AcceptanceStrategy;
 import genius.core.boaframework.Actions;
 import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.OMStrategy;
@@ -13,24 +18,17 @@ import genius.core.boaframework.OpponentModel;
 import genius.core.boaframework.OutcomeSpace;
 import genius.core.boaframework.SortedOutcomeSpace;
 import genius.core.misc.Range;
+import main.mcts.GameTree;
+import main.mcts.Node;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.stream.Collectors;
-
-public class MCTSStrategy extends OfferingStrategy {
+public class CarlosBiddingStrategy extends OfferingStrategy {
 	/**
 	 *
 	 */
 	// private Bid opponentBestBid;
 
 	private static final double UPPER_BOUND = 1.0;
-	SmartAcceptanceStrategy ac;
+	CarlosAcceptanceStrategy ac;
 	OMStrategy om;
 	GameTree tree = new GameTree();
 	OutcomeSpace outcomeSpace;
@@ -61,7 +59,7 @@ public class MCTSStrategy extends OfferingStrategy {
 		super.init(negotiationSession, opponentModel, omStrategy, parameters);
 		outcomeSpace = new SortedOutcomeSpace(negotiationSession.getUtilitySpace());
 		negotiationSession.setOutcomeSpace(outcomeSpace);
-		ac = new SmartAcceptanceStrategy(negotiationSession, this, opponentModel, parameters);
+		ac = new CarlosAcceptanceStrategy(negotiationSession, this, opponentModel, parameters);
 		// offerer = new BinarySearchStrategy();
 		// offerer.init(negotiationSession, opponentModel, omStrategy, parameters);
 	}
@@ -161,7 +159,7 @@ public class MCTSStrategy extends OfferingStrategy {
 		if (IS_VERBOSE)
 			System.out.println(currNode);
 		while (currNode.getChildren().size() != 0) {
-			currNode = MCTSStrategy.getBestNode(currNode);
+			currNode = CarlosBiddingStrategy.getBestNode(currNode);
 		}
 
 		return currNode;
@@ -231,13 +229,10 @@ public class MCTSStrategy extends OfferingStrategy {
 		BidDetails agentNextBid;
 		do {
 			// if (negotiationSession.getTime() > 0.25) {
-			if (negotiationSession.getTime() > 0.0) {
-				nextOpponentBid = this.omStrategy instanceof SmartOpponentOfferingModel
-						? ((SmartOpponentOfferingModel) this.omStrategy).getBidbyHistory(oppHistory, agentHistory)
-						: this.omStrategy.getBid(oppHistory);
-			} else {
-				nextOpponentBid = getBidInRange(0.0, 0.5);
-			}
+			nextOpponentBid = this.omStrategy instanceof CarlosOpponentBiddingStrategy
+					? ((CarlosOpponentBiddingStrategy) this.omStrategy).getBidbyHistory(oppHistory, agentHistory)
+					: this.omStrategy.getBid(oppHistory);
+
 			// System.out.println(nextOpponentBid.getBid());
 
 			agentCurrentBid = chooseBid();

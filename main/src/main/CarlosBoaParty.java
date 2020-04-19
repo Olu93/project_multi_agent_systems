@@ -11,6 +11,7 @@ import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
 import genius.core.parties.NegotiationInfo;
 import genius.core.utility.AbstractUtilitySpace;
+import main.helper.UncertaintyUtilitySpace;
 import negotiator.boaframework.offeringstrategy.anac2011.NiceTitForTat_Offering;
 
 /**
@@ -28,10 +29,10 @@ public class CarlosBoaParty extends BoaParty {
 	@Override
 	public void init(NegotiationInfo info) {
 		// The choice for each component is made here
-		AcceptanceStrategy ac = new SmartAcceptanceStrategy();
-		OpponentModel om = new FreqOpponentPrefModel();
-		OMStrategy oms = new SmartOpponentOfferingModel();
-		OfferingStrategy os = new MCTSStrategy(); // TODO remove params
+		AcceptanceStrategy ac = new CarlosAcceptanceStrategy();
+		OpponentModel om = new CarlosOpponentModel();
+		OMStrategy oms = new CarlosOpponentBiddingStrategy();
+		OfferingStrategy os = new CarlosBiddingStrategy(); // TODO remove params
 
 		// All component parameters can be set below.
 		Map<String, Double> noparams = Collections.emptyMap();

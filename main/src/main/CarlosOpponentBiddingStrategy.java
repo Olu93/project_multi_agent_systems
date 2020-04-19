@@ -10,9 +10,9 @@ import genius.core.boaframework.OutcomeSpace;
 import genius.core.boaframework.SortedOutcomeSpace;
 import genius.core.issue.*;
 import genius.core.misc.Range;
+import main.helper.BidEncoder;
+import main.helper.Utils;
 import math.Matrix;
-import misc.BidEncoder;
-import misc.Utils;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import agents.anac.y2015.agenth.BidHistory.Entry;
 /**
  * SmartOpponentOfferingModel
  */
-public class SmartOpponentOfferingModel extends OMStrategy {
+public class CarlosOpponentBiddingStrategy extends OMStrategy {
 
     private List<BidDetails> opponentBiddingHistory;
     private List<BidDetails> myBiddingHistory;
@@ -197,7 +197,7 @@ public class SmartOpponentOfferingModel extends OMStrategy {
 
     @Override
     public String getName() {
-        return SmartComponentNames.SMART_OPPONENT_BIDDING_STRATEGY.toString();
+        return CarlosComponentNames.SMART_OPPONENT_BIDDING_STRATEGY.toString();
     }
 
     private Matrix getClosestOneHotRow(Matrix prediction) {

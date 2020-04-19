@@ -14,7 +14,7 @@ import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
 
-public class SmartAcceptanceStrategy extends AcceptanceStrategy {
+public class CarlosAcceptanceStrategy extends AcceptanceStrategy {
 	// NOTE: Does very poor if the own bid is weak.
 	private final ArrayList<BidDetails> prevBestBidProposals = new ArrayList<BidDetails>();
 	private OMStrategy omStrategy;
@@ -26,10 +26,10 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 		super.init(negotiationSession, offeringStrategy, opponentModel, parameters);
 	}
 
-	public SmartAcceptanceStrategy(NegotiationSession session, OfferingStrategy offeringStrategy,
+	public CarlosAcceptanceStrategy(NegotiationSession session, OfferingStrategy offeringStrategy,
 	OpponentModel opponentModel, Map<String, Double> parameters) {
 		this.negotiationSession = session;
-		this.omStrategy = offeringStrategy instanceof MCTSStrategy ? ((MCTSStrategy) offeringStrategy).om : null;
+		this.omStrategy = offeringStrategy instanceof CarlosBiddingStrategy ? ((CarlosBiddingStrategy) offeringStrategy).om : null;
 
 		try {
 			this.init(negotiationSession, offeringStrategy, opponentModel, parameters);
@@ -38,7 +38,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 		};
 	}
 
-	public SmartAcceptanceStrategy() {
+	public CarlosAcceptanceStrategy() {
 		;
 	}
 
@@ -58,7 +58,6 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 
 	public Actions determineAcceptabilityBid(BidDetails opponentBid, BidDetails agentNextBid) {
 		if(IS_VERBOSE) System.out.println("START DETERMINE ACCEPTABILITY: ");
-		final Boolean isSmartOffering = offeringStrategy instanceof SmartOfferingStrategy;
 		final BidHistory opponentHistory = negotiationSession.getOpponentBidHistory();
 		// opponentHistory.getHistory().removeIf(bid -> bestBidProposals.contains(bid));
 		// <= Leads to permanent history change!!!
@@ -77,7 +76,6 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 			System.out.println("END REACHED");
 			return Actions.Reject;
 		}
-		if(IS_VERBOSE) System.out.println("Checking availability of SmartOfferingStrategy... " + isSmartOffering);
 		// Possibly temporary addition of extra requirement to proceed. Until
 		// smartOfferingStrategy is done, accepts way too easily
 		double utilityAgentBid = negotiationSession.getUtilitySpace().getUtility(agentNextBid.getBid());
@@ -123,7 +121,7 @@ public class SmartAcceptanceStrategy extends AcceptanceStrategy {
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return SmartComponentNames.SMART_ACCEPTANCE_STRATEGY.toString();
+		return CarlosComponentNames.SMART_ACCEPTANCE_STRATEGY.toString();
 	}
 
 }
