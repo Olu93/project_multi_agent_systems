@@ -14,7 +14,7 @@
 				<party classPath="../main/bin/main/CarlosBoaParty.class">
 					<properties />
 				</party>
-				<party classPath="../main/bin/main/CarlosBoaParty.class" strategyParameters="">
+				<party classPath="../main/bin/main/SmartAgent.class" strategyParameters="">
 					<properties/>
 				</party>
 			</partyRepItems>
