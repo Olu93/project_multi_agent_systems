@@ -21,7 +21,7 @@ import genius.core.misc.Range;
 import main.mcts.GameTree;
 import main.mcts.Node;
 
-public class Group10_BS extends OfferingStrategy {
+public class Group10_BS2 extends OfferingStrategy {
 	/**
 	 *
 	 */
@@ -136,11 +136,9 @@ public class Group10_BS extends OfferingStrategy {
 		Double x = negotiationSession.getTime() * 100;
 		Double substract = 1 / (1 + Math.pow(Math.E, -0.1 * (x - 90)));
 		if (true)
-			if (IS_VERBOSE)
-				System.out.println("Substracts: " + substract + " after "
-						+ Math.round(negotiationSession.getTime() * 100) + "% of the time");
-		if (IS_VERBOSE)
-			System.out.println("Current lower bound: " + (1 - substract));
+			if (IS_VERBOSE) System.out.println("Substracts: " + substract + " after " + Math.round(negotiationSession.getTime() * 100)
+					+ "% of the time");
+		if (IS_VERBOSE) System.out.println("Current lower bound: " + (1 - substract));
 		return 1 - substract;
 	}
 
@@ -215,7 +213,9 @@ public class Group10_BS extends OfferingStrategy {
 			oppHistory.add(nextOpponentBid);
 			agentHistory.add(agentCurrentBid);
 			double opponentUtility = negotiationSession.getUtilitySpace().getUtility(nextOpponentBid.getBid());
-			scores.add(opponentUtility * Math.pow(DISCOUNT_FACTOR, count));
+			scores.add((opponentUtility
+					- this.negotiationSession.getOpponentBidHistory().getBestBidDetails().getMyUndiscountedUtil())
+					* Math.pow(DISCOUNT_FACTOR, count));
 			count++;
 			double agentUtility = this.negotiationSession.getUtilitySpace()
 					.getUtility(this.negotiationSession.getOwnBidHistory().getLastBidDetails().getBid());

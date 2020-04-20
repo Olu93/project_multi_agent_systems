@@ -36,10 +36,10 @@ public class SmartAgent extends BoaParty {
 	public void init(NegotiationInfo info) {
 		// The choice for each component is made here
 		// AcceptanceStrategy 	ac  = new AC_HardHeaded();
-		AcceptanceStrategy 	ac  = new CarlosAcceptanceStrategy();
-		OpponentModel 		om  = new CarlosOpponentModel();
-		OMStrategy			oms = new CarlosOpponentBiddingStrategy();
-		OfferingStrategy 	os  = new CarlosBiddingStrategy();
+		AcceptanceStrategy ac = new Group10_AS();
+		OpponentModel om = new Group10_OM();
+		OMStrategy oms = new Group10_OMS();
+		OfferingStrategy os = new Group10_BS2();
 		
 		// All component parameters can be set below.
 		Map<String, Double> noparams = Collections.emptyMap();
@@ -58,15 +58,6 @@ public class SmartAgent extends BoaParty {
 		this.info = info;
 		super.init(info);
 
-	}
-
-	@Override
-	public HashMap<String, String> negotiationEnded(Bid acceptedBid) {
-		HashMap<String, String> result = super.negotiationEnded(acceptedBid);
-		if (omStrategy instanceof CarlosOpponentBiddingStrategy) {
-			((CarlosOpponentBiddingStrategy) omStrategy).getMSE();
-		}
-		return result;
 	}
 
 	 @Override
