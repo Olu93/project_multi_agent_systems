@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import genius.core.Bid;
 import genius.core.boaframework.AcceptanceStrategy;
 import genius.core.boaframework.BoaParty;
 import genius.core.boaframework.OMStrategy;
@@ -57,6 +58,15 @@ public class SmartAgent extends BoaParty {
 		this.info = info;
 		super.init(info);
 
+	}
+
+	@Override
+	public HashMap<String, String> negotiationEnded(Bid acceptedBid) {
+		HashMap<String, String> result = super.negotiationEnded(acceptedBid);
+		if (omStrategy instanceof CarlosOpponentBiddingStrategy) {
+			((CarlosOpponentBiddingStrategy) omStrategy).getMSE();
+		}
+		return result;
 	}
 
 	 @Override

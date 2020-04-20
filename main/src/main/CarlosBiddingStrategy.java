@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import genius.core.NegotiationResult;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.Actions;
 import genius.core.boaframework.NegotiationSession;
@@ -73,14 +74,17 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		return previousOpponentBestBid;
 	}
 
-	// Central method in which multiple iterations of the MCTS algorithms are performed.
+	// Central method in which multiple iterations of the MCTS algorithms are
+	// performed.
 	public BidDetails enhanceTree(final Node node) {
-		if (IS_VERBOSE) System.out.println("Starting Simulation");
+		if (IS_VERBOSE)
+			System.out.println("Starting Simulation");
 		for (int i = 0; i < SIMULATION_FREQUENCY; i++) {
 			// The selection step of the algorithm
 			final Node selectedNode = selectNode(node);
 
-			// If the number of visits of the node is greater than or equal to the number of children
+			// If the number of visits of the node is greater than or equal to the number of
+			// children
 			// expand the node.
 			if (selectedNode.getNoVisits() >= selectedNode.getChildren().size()) {
 				expandNode(selectedNode);
@@ -95,19 +99,20 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 			rolloutSimBackprop(explorationCandidate);
 
 		}
-		
+
 		// Select the child of the root with the maximum score.
 		final Node bestChoiceNode = node.getBestChild();
 		tree.setRoot(bestChoiceNode);
-		if (IS_VERBOSE) System.out.println("===========> Best choice: " + bestChoiceNode.getId());
+		if (IS_VERBOSE)
+			System.out.println("===========> Best choice: " + bestChoiceNode.getId());
 
 		// Update the lower bound.
-		if(this.negotiationSession.getUserModel() == null){
+		if (this.negotiationSession.getUserModel() == null) {
 			lowerBound = didConcede() ? updateLowerBound() : lowerBound;
-		}else{
+		} else {
 			lowerBound = updateLowerBound();
 		}
-		
+
 		return bestChoiceNode.getBid();
 	}
 
@@ -208,7 +213,9 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 			oppHistory.add(nextOpponentBid);
 			agentHistory.add(agentCurrentBid);
 			double opponentUtility = negotiationSession.getUtilitySpace().getUtility(nextOpponentBid.getBid());
-			scores.add(opponentUtility * Math.pow(DISCOUNT_FACTOR, count));
+			scores.add((opponentUtility
+					- this.negotiationSession.getOpponentBidHistory().getBestBidDetails().getMyUndiscountedUtil())
+					* Math.pow(DISCOUNT_FACTOR, count));
 			count++;
 			double agentUtility = this.negotiationSession.getUtilitySpace()
 					.getUtility(this.negotiationSession.getOwnBidHistory().getLastBidDetails().getBid());
@@ -226,7 +233,6 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		}
 	}
 
-
 	public BidDetails chooseBid() {
 		return getBidInRange(lowerBound, UPPER_BOUND);
 	}
@@ -242,8 +248,7 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 	public BidDetails getBestMutualBidInRange(Double lowerBound, Double upperBound) {
 		Random rand = new Random();
 		List<BidDetails> candidateBids = outcomeSpace.getBidsinRange(new Range(lowerBound, 1.0)).stream()
-				.sorted((a, b) -> compareBids(a, b))
-				.collect(Collectors.toList());
+				.sorted((a, b) -> compareBids(a, b)).collect(Collectors.toList());
 
 		Integer size = candidateBids.size() > 5 ? 5 : candidateBids.size();
 		BidDetails result = candidateBids.size() > 0 ? candidateBids.subList(0, size).get(rand.nextInt(size))
@@ -260,6 +265,5 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 	public String getName() {
 		return CarlosComponentNames.SMART_BIDDING_STRATEGY.toString();
 	}
-
 
 }
