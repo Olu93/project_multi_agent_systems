@@ -1,13 +1,17 @@
 package main;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalDouble;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import agents.anac.y2011.TheNegotiator.Pair;
 import genius.core.Bid;
 import genius.core.BidHistory;
+import genius.core.NegotiationResult;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.OMStrategy;
@@ -37,6 +41,7 @@ public class Group10_OMS extends OMStrategy {
     private final Integer UPDATE_PERIOD = 11;
     private int updCnt;
     private boolean wasRecentlyUpdated = false;
+    private HashMap<double[], double[]> statContainer = new HashMap<>();
 
     @Override
     public void init(final NegotiationSession negotiationSession, final OpponentModel model,
@@ -65,7 +70,13 @@ public class Group10_OMS extends OMStrategy {
             Matrix K_stable = K.plus(Matrix.identity(K.getRowDimension(), K.getColumnDimension()).times(0.00001));
             this.K_stable = K_stable;
             this.K_inv = this.K_stable.inverse();
+
         } else {
+            if ((this.opponentBiddingHistory.size() + 1) % (UPDATE_PERIOD+5) == 0) {
+                evaluatePrediction();
+            }
+                
+            
             this.wasRecentlyUpdated = false;
         }
     }
@@ -79,10 +90,35 @@ public class Group10_OMS extends OMStrategy {
         return getBidbyHistory(this.opponentBiddingHistory, this.myBiddingHistory);
     }
 
+    public void evaluatePrediction() {
+        Matrix observedX = ds.getX();
+        Matrix observedY = ds.getY().transpose(); // TODO: Consider gaussian regression per issue.
+        Integer unObservedStart = observedX.getRowDimension() + 1;
+        Integer unObservedEnd = this.opponentBiddingHistory.size() - 1;
+        List<BidDetails> unObservedBids = this.opponentBiddingHistory.subList(unObservedStart, unObservedEnd);
+        Matrix unObservedX = getMatrixRepresentation(unObservedBids,
+                this.myBiddingHistory.subList(unObservedStart, unObservedEnd)).getFirst();
+
+        // Using the Gaussian process regression method to generate the prediction.
+        Matrix[] prediction = predictGaussianProcess(observedX, observedY, unObservedX);
+        double[] predictedUtilities = prediction[0].getRowPackedCopy();
+        double[] actualUtilities = unObservedBids.stream().mapToDouble(bid -> bid.getMyUndiscountedUtil()).toArray();
+        this.statContainer.put(actualUtilities, predictedUtilities);
+    }
+
     @Override
     public BidDetails getBid(OutcomeSpace space, Range range) {
         BidDetails tmp = super.getBid(space, range);
         return tmp == null ? this.getBid() : tmp;
+    }
+
+    public Double getMSE() {
+        Double MSE = this.statContainer.entrySet().parallelStream()
+                .flatMapToDouble(entry -> IntStream.range(0, entry.getKey().length - 1)
+                        .mapToDouble(myInt -> Math.abs(entry.getKey()[myInt] - entry.getValue()[myInt])))
+                .average().getAsDouble();
+        System.out.println("MSE of the prediction: "+ MSE);
+        return MSE;
     }
 
     @Override
@@ -91,7 +127,8 @@ public class Group10_OMS extends OMStrategy {
         return tmp == null ? this.getBid() : tmp;
     }
 
-    // Predict the next opponent bid from the opponent bid history and the agent bid history.
+    // Predict the next opponent bid from the opponent bid history and the agent bid
+    // history.
     public BidDetails getBidbyHistory(List<BidDetails> oppBidList, List<BidDetails> agBidList) {
         updateModel();
         int currentSize = this.opponentBiddingHistory.size();
@@ -154,34 +191,6 @@ public class Group10_OMS extends OMStrategy {
     @Override
     public String getName() {
         return CarlosComponentNames.SMART_OPPONENT_BIDDING_STRATEGY.toString();
-    }
-
-    private Matrix getClosestOneHotRow(Matrix prediction) {
-        double[] row = prediction.getRowPackedCopy();
-        HashMap<IssueDiscrete, Integer> highestIdx = new HashMap<>();
-        HashMap<IssueDiscrete, Double> highestVal = new HashMap<>();
-        List<Integer> currIndices = null;
-        Double currentValue = null;
-        IssueDiscrete tmpIssueDiscrete = null;
-        Matrix oneHotRow = new Matrix(1, row.length);
-
-        for (IssueDiscrete issue : this.encoder.getDomainIssues()) {
-            highestIdx.put(issue, this.encoder.getIndicesByIssue(issue).get(0));
-            highestVal.put(issue, 0.0);
-            currIndices = this.encoder.getIndicesByIssue(issue);
-            for (Integer i : currIndices) {
-                currentValue = row[i];
-                tmpIssueDiscrete = this.encoder.getIssueByIndex(i);
-                if (highestVal.get(tmpIssueDiscrete).compareTo(currentValue) <= 0) {
-                    highestIdx.put(tmpIssueDiscrete, i);
-                    highestVal.put(tmpIssueDiscrete, currentValue);
-                }
-            }
-            if (highestIdx == null || oneHotRow == null || highestIdx.get(issue) == null)
-                System.out.println("Something");
-            oneHotRow.set(0, highestIdx.get(issue), 1);
-        }
-        return oneHotRow;
     }
 
     private Matrix[] predictGaussianProcess(Matrix observedX, Matrix observedY, Matrix unObservedX) {
