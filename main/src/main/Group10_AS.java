@@ -14,7 +14,7 @@ import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
 
-public class CarlosAcceptanceStrategy extends AcceptanceStrategy {
+public class Group10_AS extends AcceptanceStrategy {
 	// NOTE: Does very poor if the own bid is weak.
 	private final ArrayList<BidDetails> prevBestBidProposals = new ArrayList<BidDetails>();
 	private OMStrategy omStrategy;
@@ -26,10 +26,10 @@ public class CarlosAcceptanceStrategy extends AcceptanceStrategy {
 		super.init(negotiationSession, offeringStrategy, opponentModel, parameters);
 	}
 
-	public CarlosAcceptanceStrategy(NegotiationSession session, OfferingStrategy offeringStrategy,
+	public Group10_AS(NegotiationSession session, OfferingStrategy offeringStrategy,
 	OpponentModel opponentModel, Map<String, Double> parameters) {
 		this.negotiationSession = session;
-		this.omStrategy = offeringStrategy instanceof CarlosBiddingStrategy ? ((CarlosBiddingStrategy) offeringStrategy).om : null;
+		this.omStrategy = offeringStrategy instanceof Group10_BS ? ((Group10_BS) offeringStrategy).om : null;
 
 		try {
 			this.init(negotiationSession, offeringStrategy, opponentModel, parameters);
@@ -38,7 +38,7 @@ public class CarlosAcceptanceStrategy extends AcceptanceStrategy {
 		};
 	}
 
-	public CarlosAcceptanceStrategy() {
+	public Group10_AS() {
 		;
 	}
 

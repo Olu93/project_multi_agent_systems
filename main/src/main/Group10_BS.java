@@ -20,14 +20,14 @@ import genius.core.misc.Range;
 import main.mcts.GameTree;
 import main.mcts.Node;
 
-public class CarlosBiddingStrategy extends OfferingStrategy {
+public class Group10_BS extends OfferingStrategy {
 	/**
 	 *
 	 */
 	// private Bid opponentBestBid;
 
 	private static final double UPPER_BOUND = 1.0;
-	CarlosAcceptanceStrategy ac;
+	Group10_AS ac;
 	OMStrategy om;
 	GameTree tree = new GameTree();
 	OutcomeSpace outcomeSpace;
@@ -47,7 +47,7 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		super.init(negotiationSession, opponentModel, omStrategy, parameters);
 		outcomeSpace = new SortedOutcomeSpace(negotiationSession.getUtilitySpace());
 		negotiationSession.setOutcomeSpace(outcomeSpace);
-		ac = new CarlosAcceptanceStrategy(negotiationSession, this, opponentModel, parameters);
+		ac = new Group10_AS(negotiationSession, this, opponentModel, parameters);
 	}
 
 	@Override
@@ -131,9 +131,9 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		Double x = negotiationSession.getTime() * 100;
 		Double substract = 1 / (1 + Math.pow(Math.E, -0.1 * (x - 90)));
 		if (true)
-			System.out.println("Substracts: " + substract + " after " + Math.round(negotiationSession.getTime() * 100)
+			if (IS_VERBOSE) System.out.println("Substracts: " + substract + " after " + Math.round(negotiationSession.getTime() * 100)
 					+ "% of the time");
-		System.out.println("Current lower bound: " + (1 - substract));
+		if (IS_VERBOSE) System.out.println("Current lower bound: " + (1 - substract));
 		return 1 - substract;
 	}
 
@@ -144,7 +144,7 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		if (IS_VERBOSE)
 			System.out.println(currNode);
 		while (currNode.getChildren().size() != 0) {
-			currNode = CarlosBiddingStrategy.getBestNode(currNode);
+			currNode = Group10_BS.getBestNode(currNode);
 		}
 
 		return currNode;
@@ -200,8 +200,8 @@ public class CarlosBiddingStrategy extends OfferingStrategy {
 		BidDetails agentNextBid;
 		// Simulate several negotiation steps.
 		do {
-			nextOpponentBid = this.omStrategy instanceof CarlosOpponentBiddingStrategy
-					? ((CarlosOpponentBiddingStrategy) this.omStrategy).getBidbyHistory(oppHistory, agentHistory)
+			nextOpponentBid = this.omStrategy instanceof Group10_OMS
+					? ((Group10_OMS) this.omStrategy).getBidbyHistory(oppHistory, agentHistory)
 					: this.omStrategy.getBid(oppHistory);
 
 			agentCurrentBid = chooseBid();

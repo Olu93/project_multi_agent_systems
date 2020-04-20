@@ -22,7 +22,7 @@ import agents.Jama.Matrix;
 /**
  * SmartOpponentOfferingModel
  */
-public class CarlosOpponentBiddingStrategy extends OMStrategy {
+public class Group10_OMS extends OMStrategy {
 
     private List<BidDetails> opponentBiddingHistory;
     private List<BidDetails> myBiddingHistory;

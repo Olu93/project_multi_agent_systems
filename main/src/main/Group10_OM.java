@@ -14,7 +14,7 @@ import genius.core.issue.IssueDiscrete;
 import main.helper.IssueValuePair;
 import main.helper.UncertaintyUtilitySpace;
 
-public class CarlosOpponentModel extends OpponentModel {
+public class Group10_OM extends OpponentModel {
 	private HashMap<IssueValuePair, Double> frequencies = new HashMap<IssueValuePair, Double>();
 	private HashMap<IssueDiscrete, Double> invEntropies = new HashMap<IssueDiscrete, Double>();
 	private NegotiationSession session;
