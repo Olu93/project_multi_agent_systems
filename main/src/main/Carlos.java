@@ -16,7 +16,7 @@ import main.helper.UncertaintyUtilitySpace;
 /**
  * SmartAgent
  */
-public class CarlosBoaParty extends BoaParty {
+public class Carlos extends BoaParty {
 
 	private NegotiationInfo info;
 
@@ -28,10 +28,10 @@ public class CarlosBoaParty extends BoaParty {
 	@Override
 	public void init(NegotiationInfo info) {
 		// The choice for each component is made here
-		AcceptanceStrategy ac = new CarlosAcceptanceStrategy();
-		OpponentModel om = new CarlosOpponentModel();
-		OMStrategy oms = new CarlosOpponentBiddingStrategy();
-		OfferingStrategy os = new CarlosBiddingStrategy(); // TODO remove params
+		AcceptanceStrategy ac = new Group10_AS();
+		OpponentModel om = new Group10_OM();
+		OMStrategy oms = new Group10_OMS();
+		OfferingStrategy os = new Group10_BS(); // TODO remove params
 
 		// All component parameters can be set below.
 		Map<String, Double> noparams = Collections.emptyMap();
