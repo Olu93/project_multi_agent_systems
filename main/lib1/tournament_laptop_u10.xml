@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<multilateralTournamentsConfiguration>
+	<tournaments>
+		<tournament>
+			<deadline>
+				<value>60</value>
+				<type>ROUND</type>
+			</deadline>
+			<protocolItem hasMediatorProfile="false" hasMediator="false"
+				description="Each agents makes offer, counter-offer, or accepts"
+				classPath="genius.core.protocol.StackedAlternatingOffersProtocol"
+				protocolName="Stacked Alternating Offers Protocol for Multi-Lateral Negotiation (SAOPMN)" />
+			<partyRepItems>
+				<party classPath="../main/bin/main/Carlos.class">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2011.Nice_Tit_for_Tat.NiceTitForTat">
+					<properties />
+                </party>
+				<party classPath="agents.anac.y2015.RandomDance.RandomDance" strategyParameters="">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2011.HardHeaded.KLH">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2012.IAMhaggler2012.IAMhaggler2012">
+					<properties />
+				</party>
+				<party classPath="agents.anac.y2011.TheNegotiator.TheNegotiator" strategyParameters="">
+					<properties/>
+				</party>
+			</partyRepItems>
+			<partyProfileItems>
+				<item url="file:etc/templates/anac/y2011/Laptop/laptop_seller_utility.xml" />
+				<item url="file:etc/templates/anac/y2011/Laptop/laptop_buyer_utility_u20.xml" />
+			</partyProfileItems>
+			<repeats>1</repeats>
+			<numberOfPartiesPerSession>2</numberOfPartiesPerSession>
+			<repetitionAllowed>false</repetitionAllowed>
+			<persistentDataType>DISABLED</persistentDataType>
+		</tournament>
+
+
+	</tournaments>
+</multilateralTournamentsConfiguration>

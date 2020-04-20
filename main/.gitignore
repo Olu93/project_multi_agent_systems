@@ -2,6 +2,10 @@
 /etc/
 /log/
 /logs/
+/logs1/
+/logs2/
 /sourcepath/
 settings.json
 !/lib/*.xml
+!/lib1/*.xml
+!/lib2/*.xml

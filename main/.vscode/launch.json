@@ -162,7 +162,7 @@
             "name": "2_TOURNAMENT_tournament_u20",
             "request": "launch",
             "mainClass": "misc.RunTournament",
-            "projectName": "main",
+            "projectName": "main_91ca4e0",
             "console": "externalTerminal",
             "args": "lib2\\tournament_u20.xml logs2\\tournament_u20"
         },
